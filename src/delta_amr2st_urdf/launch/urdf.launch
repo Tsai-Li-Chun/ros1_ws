@@ -1,0 +1,17 @@
+<!--
+DESCRITPION
+-->
+
+<launch>
+  
+  <!--Robot description-->
+  <!-- <param name="robot_description" textfile="$(find delta_amr2st_urdf)/urdf/DG_T.urdf" />  -->
+  <param name="robot_description" textfile="$(find delta_amr2st_urdf)/urdf/deltarobot.urdf"/>
+  
+  <!-- <param name="robot_description" command="$(find xacro)/xacro inorder '$(find delta_robot_agv)/urdf/DG_T.urdf.xacro' use_nominal_extrinsics:=true" /> -->
+  
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+    <!--param name = "publish_frequency" value="50"/-->
+  </node>
+
+</launch>
