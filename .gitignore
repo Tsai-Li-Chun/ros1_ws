@@ -1,4 +1,4 @@
-build/*.*
-devel/*.*
+build/**
+devel/**
 .catkin_workspace
 .includePath_bak

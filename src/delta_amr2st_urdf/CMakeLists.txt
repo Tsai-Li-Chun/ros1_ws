@@ -8,8 +8,8 @@ project(delta_amr2st_urdf)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
+	roscpp
+	std_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -116,7 +116,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+	${catkin_INCLUDE_DIRS}
+	./include/${PROJECT_NAME}
 )
 
 ## Declare a C++ library
@@ -204,7 +205,12 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(basic_simple_talker   src/basic_simple_talker.cpp)
-add_executable(basic_simple_listener src/basic_simple_listener.cpp)
-target_link_libraries(basic_simple_talker ${catkin_LIBRARIES})
-target_link_libraries(basic_simple_listener ${catkin_LIBRARIES})
+add_executable(listener
+			src/01_listener.cpp
+			include/${PROJECT_NAME}/classAPI_01listener.cpp)
+target_link_libraries(listener ${catkin_LIBRARIES})
+
+add_executable(talker
+			src/01_talker.cpp
+			include/${PROJECT_NAME}/classAPI_01talker.cpp)
+target_link_libraries(talker ${catkin_LIBRARIES})
