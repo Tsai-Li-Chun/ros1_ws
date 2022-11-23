@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+		 Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+		 For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+	name="TY2_SW">
+	<link
+		name="base_link">
+		<inertial>
+			<origin
+				xyz="-0.00104540926439706 9.99200722162641E-16 -0.057460391135864"
+				rpy="0 0 0" />
+			<mass
+				value="1.82224394008984" />
+			<inertia
+				ixx="0.00525630228932049"
+				ixy="1.84460691770691E-16"
+				ixz="1.81945482375734E-07"
+				iyy="0.0662351103789961"
+				iyz="1.33003500983617E-18"
+				izz="0.07142317595822" />
+		</inertial>
+	</link>
+	<link
+		name="Lwheel_link">
+		<inertial>
+			<origin
+				xyz="6.5440788013682E-05 0.000141108562996175 -7.99776911364347E-14"
+				rpy="0 0 0" />
+			<mass
+				value="0.672830928354001" />
+			<inertia
+				ixx="0.00204779861084573"
+				ixy="-1.52297017405679E-07"
+				ixz="-3.85960098018596E-18"
+				iyy="0.00391336033730733"
+				iyz="8.29761029235896E-18"
+				izz="0.00204662231056171" />
+		</inertial>
+	</link>
+	<joint
+		name="Lwheel_to_base"
+		type="continuous">
+		<origin
+			xyz="0 0.273800000000001 0"
+			rpy="0 0 0" />
+		<parent
+			link="base_link" />
+		<child
+			link="Lwheel_link" />
+		<axis
+			xyz="0 1 0" />
+	</joint>
+	<link
+		name="Rwheel_link">
+		<inertial>
+			<origin
+				xyz="0.000141108562996095 -6.54407880136265E-05 -7.99360577730113E-14"
+				rpy="0 0 0" />
+			<mass
+				value="0.672830928354001" />
+			<inertia
+				ixx="0.00391336033730733"
+				ixy="1.52297017411272E-07"
+				ixz="1.02323548522514E-17"
+				iyy="0.00204779861084573"
+				iyz="3.81208714470583E-18"
+				izz="0.00204662231056171" />
+		</inertial>
+	</link>
+	<joint
+		name="Rwheel_to_base"
+		type="fixed">
+		<origin
+			xyz="0 -0.273799999999999 0"
+			rpy="3.14159265358979 0 -1.5707963267949" />
+		<parent
+			link="base_link" />
+		<child
+			link="Rwheel_link" />
+		<axis
+			xyz="0 0 0" />
+	</joint>
+</robot>

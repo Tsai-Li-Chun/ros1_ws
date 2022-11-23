@@ -52,6 +52,12 @@
 talker::talker()
 {
 	pub = this->advertise<std_msgs::String>("chatter", 10);
+	hparam = this->hasParam("/pub/content");
+	if(hparam)
+	{
+		ROS_INFO("param is have");
+	}
+	else ROS_WARN("param is not have");
 }
 talker::~talker()
 {

@@ -35,6 +35,7 @@
 class talker : public ros::NodeHandle
 {
 private:
+	bool hparam=false;
 	ros::Publisher pub;
 public:
 	talker();

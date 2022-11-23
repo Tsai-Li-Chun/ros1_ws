@@ -67,7 +67,7 @@ int main(int argc, char **argv)
 	{
 		std_msgs::String msg;
 		msg.data = "hello world!";
-		ROS_INFO("publish: %s", msg.data.c_str());
+		// ROS_INFO("publish: %s", msg.data.c_str());
 		tk->publish(msg);
 		ros::spinOnce();
 		loop_rate.sleep();
