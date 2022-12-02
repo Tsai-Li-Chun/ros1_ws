@@ -15,7 +15,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include <ros/ros.h>
-#include <std_msgs/String.h>
+#include "delta_amr2st_urdf/delta_RICHIE_test.h"
 /* User Includes End */
 
 
@@ -40,7 +40,8 @@ private:
 public:
 	talker();
 	~talker();
-	void publish(std_msgs::String);
+	void publish(delta_amr2st_urdf::delta_RICHIE_test);
+	void delta_RICHIE_msg_setdata(delta_amr2st_urdf::delta_RICHIE_test);
 };
 
 /* Extern Class End */

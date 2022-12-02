@@ -10,6 +10,7 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
+#include "ros/time.h"
 #include "classAPI_01talker.hpp"
 /* User Includes End */
 
@@ -51,7 +52,7 @@
 
 talker::talker()
 {
-	pub = this->advertise<std_msgs::String>("chatter", 10);
+	pub = this->advertise<delta_amr2st_urdf::delta_RICHIE_test>("chatter", 1);
 	hparam = this->hasParam("/pub/content");
 	if(hparam)
 	{
@@ -64,9 +65,14 @@ talker::~talker()
 	this->shutdown();
 }
 
-void talker::publish(std_msgs::String msg)
+void talker::publish(delta_amr2st_urdf::delta_RICHIE_test dRt)
 {
-	pub.publish(msg);
+	pub.publish(dRt);
+}
+
+void talker::delta_RICHIE_msg_setdata(delta_amr2st_urdf::delta_RICHIE_test dRt)
+{
+	dRt.header.seq = dRt.num;
 }
 
 /* Program End */

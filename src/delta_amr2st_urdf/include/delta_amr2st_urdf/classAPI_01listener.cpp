@@ -59,9 +59,9 @@ listener::~listener()
 	ros::shutdown();
 }
 
-void listener::chatterCallback(const std_msgs::String& msg)
+void listener::chatterCallback(const delta_amr2st_urdf::delta_RICHIE_test& dRt)
 {
-	ROS_INFO("subscribe: %s", msg.data.c_str());
+	ROS_INFO("subscribe: %ld", dRt.num);
 }
 
 /* Program End */

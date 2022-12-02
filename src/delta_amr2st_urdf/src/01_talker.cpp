@@ -7,6 +7,7 @@
 
 /* System Includes ------------------------------------------*/
 /* System Includes Begin */
+#include <iostream>
 #include <memory>
 /* System Includes End */
 /* User Includes --------------------------------------------*/
@@ -14,6 +15,7 @@
 #include <ros/ros.h>
 #include <std_msgs/String.h>
 #include "classAPI_01talker.hpp"
+#include "delta_amr2st_urdf/delta_RICHIE_test.h"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -59,18 +61,25 @@
 **	**/
 int main(int argc, char **argv)
 {
+	int64_t count = 0;
+	std_msgs::String msg;
+	delta_amr2st_urdf::delta_RICHIE_test dRt;
+
 	ros::init(argc, argv, "talker");
 	std::shared_ptr<talker> tk = std::make_shared<talker>();
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(1);
 
 	while (ros::ok())
 	{
-		std_msgs::String msg;
-		msg.data = "hello world!";
+		msg.data = std::to_string(count);
 		// ROS_INFO("publish: %s", msg.data.c_str());
-		tk->publish(msg);
+		dRt.num = count;
+		dRt.child_frame_id = msg.data.c_str();;
+		tk->delta_RICHIE_msg_setdata(dRt);
+		tk->publish(dRt);
 		ros::spinOnce();
 		loop_rate.sleep();
+		count++;
 	}
 
 	/* main quit */

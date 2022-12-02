@@ -9,7 +9,8 @@
         "/opt/ros/melodic/include/**",
         "/usr/include/**",
         "/usr/local/include/modbus/**",
-        "${workspaceFolder}/src/delta_amr2st_urdf/include/delta_amr2st_urdf"
+        "${workspaceFolder}/src/delta_amr2st_urdf/include/delta_amr2st_urdf",
+        "${workspaceFolder}/devel/include/"
       ],
       "name": "ROS",
       "intelliSenseMode": "gcc-x64",
