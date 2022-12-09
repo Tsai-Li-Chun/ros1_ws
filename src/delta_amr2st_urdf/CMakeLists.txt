@@ -217,3 +217,7 @@ add_executable(talker
 			include/${PROJECT_NAME}/classAPI_01talker.cpp)
 # add_dependencies(talker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(talker ${catkin_LIBRARIES})
+
+add_executable(node_handle_namespace
+			src/node_handle_namespace.cpp)
+target_link_libraries(node_handle_namespace ${catkin_LIBRARIES})
