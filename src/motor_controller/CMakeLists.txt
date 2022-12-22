@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(modbus_api)
+project(motor_controller)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES modbus_api
+#  LIBRARIES motor_controller
 #  CATKIN_DEPENDS roscpp std_msgs tf
 #  DEPENDS system_lib
 )
@@ -124,7 +124,7 @@ include_directories(
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/modbus_api.cpp
+#   src/${PROJECT_NAME}/motor_controller.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -135,7 +135,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/modbus_api_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/motor_controller_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -199,7 +199,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_modbus_api.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_motor_controller.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -212,6 +212,7 @@ include_directories(
 # find_library(libmodbus_LIB modbus)
 # message(${libmodbus_LIB})
 
-add_executable(modbus_test
-					src/modbus_test.cpp)
-target_link_libraries(modbus_test ${catkin_LIBRARIES} modbus )
+add_executable(main_motorController
+					src/main_motorController.cpp
+					include/${PROJECT_NAME}/Oriental_BLVD_KRD.cpp)
+target_link_libraries(main_motorController ${catkin_LIBRARIES} modbus )

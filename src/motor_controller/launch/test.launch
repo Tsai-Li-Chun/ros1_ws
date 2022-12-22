@@ -1,0 +1,13 @@
+<!--
+	@file name : test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+	<node name="main_motorController" 
+		  pkg="motor_controller"
+		  type="main_motorController"
+		  output="screen" >
+	</node>
+</launch>
