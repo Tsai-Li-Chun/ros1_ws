@@ -63,6 +63,7 @@ typedef BLVD_KRD_Alarm AlarmCode;
 /* 建立Register Address表,並創建專有DataType */
 enum class BLVD_KRD_RegAdr_Table : uint16_t
 {
+	/* 一般暫存器位址 */
 	ADR_ALARM_H = 0x0080,
 	ADR_ALARM_L = 0x0081,
 	ADR_COMMAND_SPEED_H = 0x00c8,
@@ -88,7 +89,7 @@ enum class BLVD_KRD_RegAdr_Table : uint16_t
 	ADR_ActualPosition_L = 0x00cd,
 	ADR_CONFIG_H = 0x018c,
 	ADR_CONFIG_L = 0x018d,
-
+	/* 共享ID模式 讀取暫存器位址 */
 	ADRS_r_DemandVelocity  = 0x0000,
 	ADRS_r_ActualVelocity = 0x0002,
 	ADRS_r_ActualPosition = 0x0004,
@@ -99,7 +100,7 @@ enum class BLVD_KRD_RegAdr_Table : uint16_t
 	ADRS_r_MotorTemperature = 0x000e,
 	ADRS_r_PowerConsumption = 0x0010,
 	ADRS_r_DriverOutputStatus = 0x0012,
-
+	/* 共享ID模式 寫入暫存器位址 */
 	ADRS_w_SetupType = 0x0000,
 	ADRS_w_Velocity = 0x0002,
 	ADRS_w_Acc = 0x0004,
@@ -109,6 +110,27 @@ enum class BLVD_KRD_RegAdr_Table : uint16_t
 	ADRS_w_DriverInputCommand = 0x000c
 };
 typedef BLVD_KRD_RegAdr_Table BLVD_KRD_RegAdr_Table;
+
+/* 建立Driver Input Command Table表,並創建專有DataType */
+enum class DriverInputCommand_Table : uint32_t
+{
+	DriverInputCommand_AllOff	= 0x00000000,
+	DriverInputCommand_SON 		= 0x00000001,
+	DriverInputCommand_STOP		= 0x00000020,
+	DriverInputCommand_ALM_RST	= 0x00000080
+};
+typedef DriverInputCommand_Table DriverInputCommand_Table;
+
+/* 建立Driver Output Command Table表,並創建專有DataType */
+enum class DriverOutputCommand_Table : uint32_t
+{
+	DriverOutputCommand_AllOff	= 0x00000000,
+	DriverOutputCommand_SON 	= 0x00000001,
+	DriverOutputCommand_RDY_DD 	= 0x00000008,
+	DriverOutputCommand_STOP	= 0x00000020,
+	DriverOutputCommand_ALM		= 0x00000080
+};
+typedef DriverOutputCommand_Table DriverOutputCommand_Table;
 
 /* Extern Typedef End */
 

@@ -37,6 +37,7 @@
 /* Variables ------------------------------------------------*/
 /* Variables Begin */
 
+/* enc to mm parameter */
 const double enc_to_mm = 0.000561414233148148;
 
 /* Variables End */
@@ -45,13 +46,6 @@ const double enc_to_mm = 0.000561414233148148;
 /* Function -------------------------------------------------*/
 /* Function Begin */
 /* Function End */
-
-
-union modbus_32Format
-{
-    int f;	//float-4byte, u16-2byte, ch[2]
-    int16_t ch[ (sizeof(f))/sizeof(int16_t) ];
-};
 
 
 /* ---------------------------------------------------------*/
@@ -67,34 +61,33 @@ union modbus_32Format
 int main(int argc, char **argv)
 {
 	int rc;
-	int32_t p[2];
-	double p_mm[2];
 
     ros::init(argc,argv,"main_motorController");
 
+	/* 建立 BLVD-KRD Control物件*/
     BLVD_KRD_Control BKC("/dev/ttyUSB0",0x0F);
     // BLVD_KRD_Control BKC("/dev/ttyS0",0x0F);
 	sleep(1);
-
-	rc = BKC.motorSON();
-	printf("%d\n",rc);
-	sleep(5);
-	BKC.motorSOFF();
-	printf("%d\n",rc);
+	/* motor Init - 事先將觸發方式(-4)等參數set,後續更新速度即可即時變化 */
+	rc = BKC.motorInit(48,1000,1000,(-4));
 	sleep(1);
 
+		rc = BKC.motorForward(100);
+		printf("Forward1 : %d\n",rc);
+		sleep(5);
+		rc = BKC.motorForward(0);
+		printf("Forward0 : %d\n",rc);
+		sleep(5);
+		rc = BKC.motorReverse(100);
+		printf("Reverse1 : %d\n",rc);
+		sleep(5);
+		rc = BKC.motorReverse(0);
+		printf("Reverse0 : %d\n",rc);
+		sleep(5);
 
-	// while(1)
-	// {
-	// 	// printf("aaa\n");
-	// 	rc = BKC.readDriverTemperature(p);
-	// 	printf("%d, %d, %d\n",rc,p[1],p[0]);
-	// 	// p_mm[0] = ((double)p[0])*enc_to_mm;
-	// 	// p_mm[1] = ((double)p[1])*enc_to_mm;
-	// 	// printf("%d, %lf, %lf\n",rc,p_mm[1],p_mm[0]);
-	// 	sleep(1);
-	// }
-
+	rc = BKC.motorSOFF();
+	printf("%d\n",rc);
+	sleep(1);
 
 	ros::spin();
 	ros::shutdown();

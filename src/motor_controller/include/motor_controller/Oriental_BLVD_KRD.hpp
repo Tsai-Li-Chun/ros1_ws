@@ -29,6 +29,14 @@
 
 /* Extern Typedef -------------------------------------------*/
 /* Extern Typedef Begin */
+
+/* 32Format to 16Format transform union type */
+union modbus_32FormatTo16Format
+{
+    int32_t d32;
+    uint16_t d16[ (sizeof(d32))/sizeof(uint16_t) ];
+};
+
 /* Extern Typedef End */
 
 
@@ -47,93 +55,107 @@ public:
 	/* 解建構函數 */
 	~BLVD_KRD_Control();
 
-	/* 直接資料傳輸設定輸出化 */
-	uint8_t BLVD_KRD_DirectDataOperation_setup(uint8_t OpType, uint16_t Acc, uint16_t Dec, uint8_t Trigger);
+	/* motor initialize */
+	int motorInit(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger);
+	/* 直接資料傳輸設定初始化 */
+	int BLVD_KRD_DirectDataOperation_setup(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger);
+	/* 確認輸出狀態 */
+	bool BLVD_KRD_DriverOutputStatus_check(void);
 
 	/* 馬達停止函數 */
-	uint8_t motorStop();
+	int motorStop();
 	/* 馬達激磁函數 */
-	uint8_t motorSON();
+	int motorSON();
 	/* 馬達解磁函數 */
-	uint8_t motorSOFF();
+	int motorSOFF();
 	/* 前進函數 */
-	uint8_t motorForward(int);
+	int motorForward(int32_t);
 	/* 後退函數 */
-	uint8_t motorReverse(int);
+	int motorReverse(int32_t);
 	/* 左轉函數 */
-	uint8_t motorLturn(int);
+	int motorLturn(int32_t);
 	/* 右轉函數 */
-	uint8_t motorRturn(int);
+	int motorRturn(int32_t);
 
 	/* 讀取速度設定值 */
-	uint8_t readDemandVelocity(int32_t *speed);
+	int readDemandVelocity(int32_t *speed);
 	/* 讀取實際速度 */	  
-	uint8_t readActualVelocity(int32_t *speed);
+	int readActualVelocity(int32_t *speed);
 	/* 讀取目前運轉位置(累計) */
-	uint8_t readActualPosition(int32_t *position);
+	int readActualPosition(int32_t *position);
 	/* 讀取馬達轉矩負載率 */
-	uint8_t readLoadTorque(int32_t *torque);
+	int readLoadTorque(int32_t *torque);
 	/* 讀取Driver溫度 */
-	uint8_t readDriverTemperature(int32_t *temperature);
+	int readDriverTemperature(int32_t *temperature);
 	/* 讀取Motor溫度 */
-	uint8_t readMotorTemperature(int32_t *temperature);
+	int readMotorTemperature(int32_t *temperature);
 	/* 讀取Driver耗能 */
-	uint8_t readPowerConsumption(int32_t *consumption);
+	int readPowerConsumption(int32_t *consumption);
 	/* 讀取Driver輸出狀態 */
-	uint8_t readDriverOutputStatus(int32_t *status);
+	int readDriverOutputStatus(void);
 
 	/* 寫入工作模式 */
-	uint8_t writeSetupType(int32_t mode);
+	int writeSetupType(int32_t mode);
 	/* 寫入速度設定值 */
-	uint8_t writeVelocity(int32_t velocity);
+	int writeVelocity(int32_t Lvelocity, int32_t Rvelocity);
 	/* 寫入加速度設定值 */
-	uint8_t writeAcceleration(int32_t acc);
+	int writeAcceleration(int32_t acc);
 	/* 寫入減速度設定值 */
-	uint8_t writeDecelerate(int32_t dec);
+	int writeDecelerate(int32_t dec);
 	/* 寫入力矩 */
-	uint8_t writeTorque(int32_t torque);
+	int writeTorque(int32_t torque);
 	/* 寫入觸發方式 */
-	uint8_t writeTrigger(int32_t trigger);
+	int writeTrigger(int32_t trigger);
 	/* 寫入Driver輸入狀態 */
-	uint8_t writeDriverInputCommand(int32_t status);
+	int writeDriverInputCommand(int32_t status);
 
 	/* 診斷測試 */
-	uint8_t writeDiagnosis(void);
+	int writeDiagnosis(void);
 
 	/* 讀取目前AlarmCode */
-	uint8_t readAlarm(int32_t* alarm);
+	int readAlarm(int32_t* alarm);
 	/* 讀取目前CommunicationError */
-	uint8_t readCommunicationError(int32_t *err);
+	int readCommunicationError(int32_t *err);
 	/* reset目前Alarm */
-	uint8_t ResetAlarm(void);
+	int ResetAlarm(void);
 	/* AlarmCode轉string */
 	std::string getStrOfAlarm(uint8_t alarm);
 
 private:
+	/* 宣告libmodbus-API的Return用變數 */
+	int rc;
 	/* 建立modbus通訊結構體 */
 	modbus_t* mb;
+	/* 建立AlarmCode結構體 */
+	BLVD_KRD_RegAdr_Table RegAdr_T;
+	/* uint16 temp buffer */
+	uint16_t uint16Buffer[20];
+	/* uint8 temp buffer */
+	uint8_t uint8Buffer[20];
+	/*  */
+	int32_t motorStatus[2];
+	// /* 32bit to 16bit[2] 轉換結構體  */
+	// modbus_32FormatTo16Format buffer_32to16;
+
+
 	/* Setup SlaveID & Connect */
 	int Modbus_slave_connect(int);
 
-	BLVD_KRD_RegAdr_Table RegAdr_T;
-
 	/* 讀取Int32t資料 */
-	uint8_t readInt32t(uint16_t Adr, int32_t *v);
+	int readInt32t(uint16_t Adr, int32_t *v);
 	/* 讀取n筆暫存器資料 */
 	int readRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data);
 
 	/* 寫入Int32t資料 */
-	uint8_t writeInt32t(uint16_t Adr, int32_t *Data);
+	int writeInt32t(uint16_t Adr, int32_t *Data);
 	/* 寫入n筆暫存器資料 */
-	uint8_t writeRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data);
+	int writeRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data);
 	/* 寫入Query */
-	uint8_t writeQuery(uint8_t FC, uint16_t L, uint8_t *Data);
-	uint8_t writeQuery(void);
+	int writeQuery(uint16_t L, uint8_t *Data);
 
-	/* uint16 temp buffer */
-	uint16_t uint16Buffer[40];
-	/* uint8 temp buffer */
-	uint8_t uint8Buffer[20];
+	/* int32轉uint16[2] function */
+	uint16_t* int32_to_2uint16(int32_t data32, uint16_t *data16);
+
 };
 
 /* Extern Class End */

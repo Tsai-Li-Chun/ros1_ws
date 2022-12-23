@@ -75,8 +75,6 @@ BLVD_KRD_Control::BLVD_KRD_Control(const char* device,int slave,
 **	**/
 int BLVD_KRD_Control::Modbus_slave_connect(int slave)
 {
-	/* 宣告libmodbus-API的ReturnCode變數 */
-	int rc;
 	/* 初始化是否成功判斷 */
 	if( mb == NULL )
 	{	/* 若初始化失敗,打印訊息,退出程序 */
@@ -133,101 +131,151 @@ BLVD_KRD_Control::~BLVD_KRD_Control()
 #endif /* system setup */
 
 #if 1 /* setup configuration and simple test */
+/** * @brief motor initialize
+	* @param None
+ 	* @return (int)
+**	**/
+int BLVD_KRD_Control::motorInit(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger)
+{
+	rc = BLVD_KRD_DirectDataOperation_setup(OpType, Acc, Dec, Trigger);
+	if(rc>0) printf("BLVD KRD direct data operation setup Success!\n");
+	else 	{printf("BLVD KRD direct data operation setup Failure!\n");return 0;}
+	sleep(5);
+
+	if( BLVD_KRD_DriverOutputStatus_check() )
+	{
+		printf("BLVD KRD driver output status check Success!\n");
+		return rc;
+	}
+	else
+	{
+		printf("BLVD KRD driver output status check Failure!\n");
+		return 0;
+	}
+}
+
 /** * @brief Direct data operation setup,
              事先將工作模式,加減速,觸發方式(-4)設定好,後續更新速度即可即時變化
-	* @param OpType(uint8_t) Operation type
-	* @param Acc(uint16_t) Acceleration rate
-	* @param Dec(uint16_t) Deceleration rate
-	* @param Trigger(uint8_t) Trigger
- 	* @return (uint8_t)
+	* @param OpType(uint32_t) Operation type
+	* @param Acc(uint32_t) Acceleration rate
+	* @param Dec(uint32_t) Deceleration rate
+	* @param Trigger(uint32_t) Trigger
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_DirectDataOperation_setup(uint8_t OpType, uint16_t Acc, uint16_t Dec, uint8_t Trigger)
+int BLVD_KRD_Control::BLVD_KRD_DirectDataOperation_setup(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger)
 {
+	int set_count=5;
+	if( writeSetupType(OpType)<=0 ) {printf("BLVD-KRD set Operation type Failure!\n");set_count--;}
+	if( writeAcceleration(Acc)<=0 ) {printf("BLVD-KRD set Acceleration Failure!\n");set_count--;}
+	if( writeDecelerate(Dec)<=0 ) 	{printf("BLVD-KRD set Decelerate Failure!\n");set_count--;}
+	if( writeTorque(1000)<=0 ) 		{printf("BLVD-KRD set Torque Failure!\n");set_count--;}
+	if( writeTrigger(Trigger)<=0 ) 	{printf("BLVD-KRD set Trigger Failure!\n");set_count--;}
+	if(set_count<5)
+	{ 
+		printf("%d, BLVD-KRD direct data operation setup Failure\n",set_count); 
+		return 0;
+	}
+	rc = motorSON();
+	return rc;
+}
 
+/** * @brief check driver output status
+	* @param None
+ 	* @return (bool)
+**	**/
+bool BLVD_KRD_Control::BLVD_KRD_DriverOutputStatus_check(void)
+{
+	bool success[2] = {false,false};
+	int32_t flag_rdy,flag_err;
+	readDriverOutputStatus();
+	// printf("motorStatus : %016x %016x\n",motorStatus[0],motorStatus[1]);
+	flag_err = (int32_t)DriverOutputCommand_Table::DriverOutputCommand_ALM;
+	flag_err |= (int32_t)DriverOutputCommand_Table::DriverOutputCommand_STOP;
+	flag_rdy = (int32_t)DriverOutputCommand_Table::DriverOutputCommand_RDY_DD;
+	flag_rdy |= (int32_t)DriverOutputCommand_Table::DriverOutputCommand_SON;
+	if( (motorStatus[0]&flag_err) == 0 )
+		if( (motorStatus[0]&flag_rdy) == flag_rdy )
+		{
+			// printf("success[0] = true\n");
+			success[0] = true;
+		}
+	if( (motorStatus[1]&flag_err) == 0 )
+		if( (motorStatus[1]&flag_rdy) == flag_rdy )
+		{
+			// printf("success[1] = true\n");
+			success[1] = true;
+		}
+	// printf("%d %d\n",success[0], success[1]);
+	return (success[0]&success[1]);
 }
 
 /** * @brief Motor Stop
 	* @param None
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorStop(void)
+int BLVD_KRD_Control::motorStop(void)
 {
-
+	DriverInputCommand_Table DIC_T = DriverInputCommand_Table::DriverInputCommand_STOP;
+	rc = writeDriverInputCommand((uint32_t)DIC_T);
+	return rc;
 }
 
 /** * @brief Put the motor into an excitation state
 	* @param None
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorSON(void)
+int BLVD_KRD_Control::motorSON(void)
 {
-	int rc;
-	// BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_DriverInputCommand;
-	// uint16Buffer[0]=0x00;
-	// uint16Buffer[1]=0x00;
-	// uint16Buffer[2]=0x00;
-	// uint16Buffer[3]=0x01;
-	// uint16Buffer[4]=0x00;
-	// uint16Buffer[5]=0x00;
-	// uint16Buffer[6]=0x00;
-	// uint16Buffer[7]=0x01;
-	// rc = writeRegisters(RAT,4,uint16Buffer);
-	rc = writeQuery();
+	DriverInputCommand_Table DIC_T = DriverInputCommand_Table::DriverInputCommand_SON;
+	rc = writeDriverInputCommand((uint32_t)DIC_T);
 	return rc;
 }
 
 /** * @brief Put the motor into an non-excitation state
 	* @param None
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorSOFF(void)
+int BLVD_KRD_Control::motorSOFF(void)
 {
-	int rc;
-	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_DriverInputCommand;
-	uint16Buffer[0]=0x00;
-	uint16Buffer[1]=0x00;
-	uint16Buffer[2]=0x00;
-	uint16Buffer[3]=0x00;
-	uint16Buffer[4]=0x00;
-	uint16Buffer[5]=0x00;
-	uint16Buffer[6]=0x00;
-	uint16Buffer[7]=0x00;
-	rc = writeRegisters(RAT,4,uint16Buffer);
+	DriverInputCommand_Table DIC_T = DriverInputCommand_Table::DriverInputCommand_AllOff;
+	rc = writeDriverInputCommand((uint32_t)DIC_T);
 	return rc;
 }
 
 /** * @brief motor forward test
-	* @param v(int) motor forward velocity
- 	* @return (uint8_t)
+	* @param v(int32_t) motor forward velocity
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorForward(int v)
+int BLVD_KRD_Control::motorForward(int32_t v)
 {
-
+	rc = writeVelocity(v,v);
+	return rc;
 }
 
 /** * @brief motor reverse test
-	* @param v(int) motor reverse velocity
- 	* @return (uint8_t)
+	* @param v(int32_t) motor reverse velocity
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorReverse(int v)
+int BLVD_KRD_Control::motorReverse(int32_t v)
 {
-
+	rc = writeVelocity(-v,-v);
+	return rc;
 }
 
 /** * @brief motor L-turn test
-	* @param w(int) motor L-turn velocity
- 	* @return (uint8_t)
+	* @param w(int32_t) motor L-turn velocity
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorLturn(int w)
+int BLVD_KRD_Control::motorLturn(int32_t w)
 {
 
 }
 
 /** * @brief motor R-turn test
-	* @param w(int) motor R-turn velocity
- 	* @return (uint8_t)
+	* @param w(int32_t) motor R-turn velocity
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::motorRturn(int w)
+int BLVD_KRD_Control::motorRturn(int32_t w)
 {
 
 }
@@ -236,11 +284,10 @@ uint8_t BLVD_KRD_Control::motorRturn(int w)
 #if 1 /* read simple parameter */
 /** * @brief 讀取速度設定值
 	* @param speed(int32_t*) Demand speed
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readDemandVelocity(int32_t *speed)
+int BLVD_KRD_Control::readDemandVelocity(int32_t *speed)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_DemandVelocity;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -256,11 +303,10 @@ uint8_t BLVD_KRD_Control::readDemandVelocity(int32_t *speed)
 
 /** * @brief 讀取實際速度
 	* @param speed(int32_t*) feedback speed
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readActualVelocity(int32_t *speed)
+int BLVD_KRD_Control::readActualVelocity(int32_t *speed)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_ActualVelocity;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -276,11 +322,10 @@ uint8_t BLVD_KRD_Control::readActualVelocity(int32_t *speed)
 
 /** * @brief 讀取目前運轉位置(累計)
 	* @param position(int32_t*) Actual position
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readActualPosition(int32_t *position)
+int BLVD_KRD_Control::readActualPosition(int32_t *position)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_ActualPosition;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -296,11 +341,10 @@ uint8_t BLVD_KRD_Control::readActualPosition(int32_t *position)
 
 /** * @brief 讀取馬達轉矩負載率
 	* @param torque(int32_t*) Load Torque
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readLoadTorque(int32_t *torque)
+int BLVD_KRD_Control::readLoadTorque(int32_t *torque)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_PresentTorque;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -316,11 +360,10 @@ uint8_t BLVD_KRD_Control::readLoadTorque(int32_t *torque)
 
 /** * @brief 讀取Driver溫度
 	* @param temperature(int32_t*) Driver temperature
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readDriverTemperature(int32_t *temperature)
+int BLVD_KRD_Control::readDriverTemperature(int32_t *temperature)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_DriverTemperature;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -336,11 +379,10 @@ uint8_t BLVD_KRD_Control::readDriverTemperature(int32_t *temperature)
 
 /** * @brief 讀取Motor溫度
 	* @param temperature(int32_t*) Motor temperature
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readMotorTemperature(int32_t *temperature)
+int BLVD_KRD_Control::readMotorTemperature(int32_t *temperature)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_MotorTemperature;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -356,11 +398,10 @@ uint8_t BLVD_KRD_Control::readMotorTemperature(int32_t *temperature)
 
 /** * @brief 讀取Driver耗能
 	* @param consumption(int32_t*) Power Consumption
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readPowerConsumption(int32_t *consumption)
+int BLVD_KRD_Control::readPowerConsumption(int32_t *consumption)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_PowerConsumption;
 	rc = readRegisters(RAT,6,uint16Buffer);
 	// motor L
@@ -376,21 +417,21 @@ uint8_t BLVD_KRD_Control::readPowerConsumption(int32_t *consumption)
 
 /** * @brief 讀取Driver輸出狀態
 	* @param status(int32_t*) Driver Output Status
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readDriverOutputStatus(int32_t *status)
+int BLVD_KRD_Control::readDriverOutputStatus(void)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_DriverOutputStatus;
 	rc = readRegisters(RAT,6,uint16Buffer);
-	// motor L
-	status[1] = 0;
-	status[1] = (status[1]|uint16Buffer[0])<<16;
-	status[1] |= uint16Buffer[1];
 	// motor R
-	status[0] = 0;
-	status[0] = (status[0]|uint16Buffer[3])<<16;
-	status[0] |= uint16Buffer[4];
+	motorStatus[1] = 0;
+	motorStatus[1] = (motorStatus[1]|uint16Buffer[0])<<16;
+	motorStatus[1] |= uint16Buffer[1];
+	// motor L
+	motorStatus[0] = 0;
+	motorStatus[0] = (motorStatus[0]|uint16Buffer[3])<<16;
+	motorStatus[0] |= uint16Buffer[4];
+	// printf("motorStatus : %016x %016x\n",motorStatus[1],motorStatus[0]);
 	return rc;
 }
 #endif /* read simple parameter */
@@ -398,159 +439,122 @@ uint8_t BLVD_KRD_Control::readDriverOutputStatus(int32_t *status)
 #if 1 /* write(set) simple parameter */
 /** * @brief 寫入工作模式
 	* @param mode(int32_t) operation type
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeSetupType(int32_t mode)
+int BLVD_KRD_Control::writeSetupType(int32_t mode)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_SetupType;
-	uint16Buffer[0]=0x00;
-	uint16Buffer[1]=0x00;
-	uint16Buffer[2]=0x00;
-	uint16Buffer[3]=0x30;
-	uint16Buffer[4]=0x00;
-	uint16Buffer[5]=0x00;
-	uint16Buffer[6]=0x00;
-	uint16Buffer[7]=0x30;
+	int32_to_2uint16(mode,uint16Buffer);
+	int32_to_2uint16(mode,(uint16Buffer+2));
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
 
 /** * @brief 寫入速度設定值
-	* @param velocity(int32_t) Set the operating velocity
- 	* @return (uint8_t)
+	* @param Lvelocity(int32_t) Set the operating Lmotor velocity
+	* @param Rvelocity(int32_t) Set the operating Rmotor velocity
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeVelocity(int32_t velocity)
+int BLVD_KRD_Control::writeVelocity(int32_t Lvelocity,int32_t Rvelocity)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Velocity;
-	uint16Buffer[0]=0x00;
-	uint16Buffer[1]=0x00;
-	uint16Buffer[2]=0x00;
-	uint16Buffer[3]=0x00;
-	uint16Buffer[4]=0x00;
-	uint16Buffer[5]=0x00;
-	uint16Buffer[6]=0x00;
-	uint16Buffer[7]=0x00;
+	int32_to_2uint16(Rvelocity,uint16Buffer);
+	int32_to_2uint16(Lvelocity,(uint16Buffer+2));
+	printf("%016x , %016x\n",Lvelocity ,Rvelocity);
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
 
 /** * @brief 寫入加速度設定值
 	* @param acc(int32_t) Set the operating acceleration
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeAcceleration(int32_t acc)
+int BLVD_KRD_Control::writeAcceleration(int32_t acc)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Acc;
-	uint16Buffer[0]=0x00;
-	uint16Buffer[1]=0x00;
-	uint16Buffer[2]=0x03;
-	uint16Buffer[3]=0xe8;
-	uint16Buffer[4]=0x00;
-	uint16Buffer[5]=0x00;
-	uint16Buffer[6]=0x03;
-	uint16Buffer[7]=0xe8;
+	int32_to_2uint16(acc,uint16Buffer);
+	int32_to_2uint16(acc,(uint16Buffer+2));
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
 
 /** * @brief 寫入減速度設定值
 	* @param dec(int32_t) Set the operating decelerate
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeDecelerate(int32_t dec)
+int BLVD_KRD_Control::writeDecelerate(int32_t dec)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Dec;
-	uint16Buffer[0]=0x00;
-	uint16Buffer[1]=0x00;
-	uint16Buffer[2]=0x03;
-	uint16Buffer[3]=0xe8;
-	uint16Buffer[4]=0x00;
-	uint16Buffer[5]=0x00;
-	uint16Buffer[6]=0x03;
-	uint16Buffer[7]=0xe8;
+	int32_to_2uint16(dec,uint16Buffer);
+	int32_to_2uint16(dec,(uint16Buffer+2));
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
 
 /** * @brief 寫入力矩
 	* @param torque(int32_t) Set the operating torque
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeTorque(int32_t torque)
+int BLVD_KRD_Control::writeTorque(int32_t torque)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Torque;
-	uint16Buffer[0]=0x00;
-	uint16Buffer[1]=0x00;
-	uint16Buffer[2]=0x03;
-	uint16Buffer[3]=0xe8;
-	uint16Buffer[4]=0x00;
-	uint16Buffer[5]=0x00;
-	uint16Buffer[6]=0x03;
-	uint16Buffer[7]=0xe8;
+	int32_to_2uint16(torque,uint16Buffer);
+	int32_to_2uint16(torque,(uint16Buffer+2));
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
 
 /** * @brief 寫入觸發方式
 	* @param trigger(int32_t) Set the operating trigger
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeTrigger(int32_t trigger)
+int BLVD_KRD_Control::writeTrigger(int32_t trigger)
 {
-	int rc;
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Trigger;
-	uint16Buffer[0]=0xff;
-	uint16Buffer[1]=0xff;
-	uint16Buffer[2]=0xff;
-	uint16Buffer[3]=0xfc;
-	uint16Buffer[4]=0xff;
-	uint16Buffer[5]=0xff;
-	uint16Buffer[6]=0xff;
-	uint16Buffer[7]=0xfc;
+	int32_to_2uint16(trigger,uint16Buffer);
+	int32_to_2uint16(trigger,(uint16Buffer+2));
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
 
 /** * @brief 寫入Driver輸入狀態
 	* @param status(int32_t) Set the operating status
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeDriverInputCommand(int32_t status)
+int BLVD_KRD_Control::writeDriverInputCommand(int32_t status)
 {
-
+	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_DriverInputCommand;
+	int32_to_2uint16(status,uint16Buffer);
+	int32_to_2uint16(status,(uint16Buffer+2));
+	rc = writeRegisters(RAT,4,uint16Buffer);
+	return rc;
 }
 
 /** * @brief diagnose the communication between a master and a slave.
 	* @param None
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeDiagnosis(void)
+int BLVD_KRD_Control::writeDiagnosis(void)
 {
 
 }
-
 #endif /* write(set) simple parameter END */
 
 #if 1 /* Alarm relevant */
 /** * @brief Read Present Alarm.
 	* @param alarm(int32_t*)
- 	* @return uint8_t
+ 	* @return int
 **	**/
-uint8_t BLVD_KRD_Control::readAlarm(int32_t *alarm)
+int BLVD_KRD_Control::readAlarm(int32_t *alarm)
 {
 
 }
 
 /** * @brief Read Communication Error.
 	* @param err(int32_t*)
- 	* @return uint8_t
+ 	* @return int
 **	**/
-uint8_t BLVD_KRD_Control::readCommunicationError(int32_t *err)
+int BLVD_KRD_Control::readCommunicationError(int32_t *err)
 {
 
 }
@@ -559,7 +563,7 @@ uint8_t BLVD_KRD_Control::readCommunicationError(int32_t *err)
 	* @param None
  	* @return none
 **	**/
-uint8_t BLVD_KRD_Control::ResetAlarm(void)
+int BLVD_KRD_Control::ResetAlarm(void)
 {
 
 }
@@ -617,9 +621,9 @@ std::string BLVD_KRD_Control::getStrOfAlarm(uint8_t alarm)
 /** * @brief Read Int32t data(single register data)
 	* @param Adr(uint16_t) Register start Address
 	* @param v(int32_t*) Response Data Address
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::readInt32t(uint16_t Adr, int32_t *v)
+int BLVD_KRD_Control::readInt32t(uint16_t Adr, int32_t *v)
 {
 
 }
@@ -632,7 +636,6 @@ uint8_t BLVD_KRD_Control::readInt32t(uint16_t Adr, int32_t *v)
 **	**/
 int BLVD_KRD_Control::readRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data)
 {
-	int rc;
 	rc = modbus_read_registers(mb, (int)Adr, L, uint16Buffer);
 	return rc;
 }
@@ -642,9 +645,9 @@ int BLVD_KRD_Control::readRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16
 /** * @brief Write Int32t data(single register data)
 	* @param Adr(uint16_t) Register start Address
 	* @param Data(int32_t*) Value written to the register address
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeInt32t(uint16_t Adr, int32_t *Data)
+int BLVD_KRD_Control::writeInt32t(uint16_t Adr, int32_t *Data)
 {
 
 }
@@ -653,11 +656,10 @@ uint8_t BLVD_KRD_Control::writeInt32t(uint16_t Adr, int32_t *Data)
 	* @param Adr(uint16_t) Register start Address
 	* @param L(uint16_t) Number of registers
 	* @param Data(int32_t*) Value written to the registers address
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data)
+int BLVD_KRD_Control::writeRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data)
 {
-	int rc;
 	rc = modbus_write_registers(mb, (int)Adr, L, uint16Buffer);
 	return rc;
 }
@@ -666,55 +668,30 @@ uint8_t BLVD_KRD_Control::writeRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, u
 	* @param FC(uint8_t) modbus FunctionCode
 	* @param L(uint16_t) Number of registers
 	* @param Data(int32_t*) Value written to the registers address
- 	* @return (uint8_t)
+ 	* @return (int)
 **	**/
-uint8_t BLVD_KRD_Control::writeQuery(uint8_t FC, uint16_t L, uint8_t *Data)
+int BLVD_KRD_Control::writeQuery(uint16_t L, uint8_t *Data)
 {
-	int rc;
-	uint8Buffer[0] = 0x0f;
-	uint8Buffer[1] = MODBUS_FC_WRITE_MULTIPLE_REGISTERS;
-	uint8Buffer[2] = 0x00;
-	uint8Buffer[3] = 0x0c;
-	uint8Buffer[4] = 0x00;
-	uint8Buffer[5] = 0x04;
-	uint8Buffer[6] = 0x08;
-	uint8Buffer[7] = 0x00;
-	uint8Buffer[8] = 0x00;
-	uint8Buffer[9] = 0x00;
-	uint8Buffer[10]= 0x01;
-	uint8Buffer[11]= 0x00;
-	uint8Buffer[12]= 0x00;
-	uint8Buffer[13]= 0x00;
-	uint8Buffer[14]= 0x01;
-	rc = modbus_send_raw_request(mb, uint8Buffer, 15*sizeof(uint8_t));
-	return rc;
-}
-/** * @brief Send modbus raw request
-	* @param None
- 	* @return (uint8_t)
-**	**/
-uint8_t BLVD_KRD_Control::writeQuery(void)
-{
-	int rc;
-	uint8Buffer[0] = 0x0f;
-	uint8Buffer[1] = MODBUS_FC_WRITE_MULTIPLE_REGISTERS;
-	uint8Buffer[2] = 0x00;
-	uint8Buffer[3] = 0x0c;
-	uint8Buffer[4] = 0x00;
-	uint8Buffer[5] = 0x04;
-	uint8Buffer[6] = 0x08;
-	uint8Buffer[7] = 0x00;
-	uint8Buffer[8] = 0x00;
-	uint8Buffer[9] = 0x00;
-	uint8Buffer[10]= 0x01;
-	uint8Buffer[11]= 0x00;
-	uint8Buffer[12]= 0x00;
-	uint8Buffer[13]= 0x00;
-	uint8Buffer[14]= 0x01;
-	rc = modbus_send_raw_request(mb, uint8Buffer, 15*sizeof(uint8_t));
+	rc = modbus_send_raw_request(mb, uint8Buffer, L*sizeof(uint8_t));
 	return rc;
 }
 #endif /* Write data relevant END */
+
+#if 1 /* Type Cast relevant */
+/** * @brief int32轉uint16[2] function
+	* @param data32(int32_t) 
+	* @param data16(int16_t*) 
+ 	* @return (uint16_t*)
+**	**/
+uint16_t* BLVD_KRD_Control::int32_to_2uint16(int32_t data32, uint16_t *data16)
+{
+	modbus_32FormatTo16Format buffer_32to16;
+	buffer_32to16.d32 = data32;
+	*data16 = buffer_32to16.d16[1];
+	*(data16+1) = buffer_32to16.d16[0];
+	return (data16+2);
+}
+#endif /* Type Cast relevant */
 
 /* Program End */
 /* ---------------------------------------------------------*/
