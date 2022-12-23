@@ -10,4 +10,8 @@
 		  type="main_motorController"
 		  output="screen" >
 	</node>
+	<node name="keyboard_node" 
+		  pkg="keyboard"
+		  type="keyboard_node" >
+	</node>
 </launch>

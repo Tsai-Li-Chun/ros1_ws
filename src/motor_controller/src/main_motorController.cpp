@@ -11,6 +11,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include <ros/ros.h>
+#include <geometry_msgs/Twist.h>
 #include "Oriental_BLVD_KRD.hpp"
 /* User Includes End */
 
@@ -39,12 +40,17 @@
 
 /* enc to mm parameter */
 const double enc_to_mm = 0.000561414233148148;
+/*  */
+geometry_msgs::Twist twist_last;
 
 /* Variables End */
 
 
 /* Function -------------------------------------------------*/
 /* Function Begin */
+
+void twist_callback(const geometry_msgs::Twist& twist_msg);
+
 /* Function End */
 
 
@@ -60,9 +66,19 @@ const double enc_to_mm = 0.000561414233148148;
 **	**/
 int main(int argc, char **argv)
 {
+	/* 宣告libmodbus-API的Return用變數 */
 	int rc;
-
+	/* 宣告左右輪速度 */
+	int32_t velL=0,velR=0;
+	/* ros init */
     ros::init(argc,argv,"main_motorController");
+
+	/* 建立NodeHandle物件 */
+	ros::NodeHandle nh;
+	/* 建立topic-Subscriber物件 */
+	ros::Subscriber twist_sub = nh.subscribe("/cmd_vel", 100, twist_callback);
+	/* 建立delay用物件 */
+	ros::Rate loop_rate(10);
 
 	/* 建立 BLVD-KRD Control物件*/
     BLVD_KRD_Control BKC("/dev/ttyUSB0",0x0F);
@@ -72,27 +88,28 @@ int main(int argc, char **argv)
 	rc = BKC.motorInit(48,1000,1000,(-4));
 	sleep(1);
 
-		rc = BKC.motorForward(100);
-		printf("Forward1 : %d\n",rc);
-		sleep(5);
-		rc = BKC.motorForward(0);
-		printf("Forward0 : %d\n",rc);
-		sleep(5);
-		rc = BKC.motorReverse(100);
-		printf("Reverse1 : %d\n",rc);
-		sleep(5);
-		rc = BKC.motorReverse(0);
-		printf("Reverse0 : %d\n",rc);
-		sleep(5);
+	while (ros::ok())
+	{
+		velL = twist_last.linear.x - twist_last.angular.z ;
+		velR = twist_last.linear.x + twist_last.angular.z ;
+		printf("%d , %d\n",velL,velR);
+		BKC.writeVelocity(velL,velR);
+		ros::spinOnce();
+		loop_rate.sleep();
+	}
 
 	rc = BKC.motorSOFF();
 	printf("%d\n",rc);
 	sleep(1);
 
-	ros::spin();
 	ros::shutdown();
 	/* main quit */
 	return 0;
+}
+
+void twist_callback(const geometry_msgs::Twist& twist_msg)
+{
+	twist_last = twist_msg;
 }
 
 /* Program End */

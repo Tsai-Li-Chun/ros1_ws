@@ -460,7 +460,7 @@ int BLVD_KRD_Control::writeVelocity(int32_t Lvelocity,int32_t Rvelocity)
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Velocity;
 	int32_to_2uint16(Rvelocity,uint16Buffer);
 	int32_to_2uint16(Lvelocity,(uint16Buffer+2));
-	printf("%016x , %016x\n",Lvelocity ,Rvelocity);
+	// printf("%016x , %016x\n",Lvelocity ,Rvelocity);
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
