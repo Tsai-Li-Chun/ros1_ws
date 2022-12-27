@@ -221,3 +221,7 @@ target_link_libraries(talker ${catkin_LIBRARIES})
 add_executable(node_handle_namespace
 			src/node_handle_namespace.cpp)
 target_link_libraries(node_handle_namespace ${catkin_LIBRARIES})
+
+add_executable(node_handle_test
+			src/node_handle_test.cpp)
+target_link_libraries(node_handle_test ${catkin_LIBRARIES})
