@@ -1,6 +1,6 @@
 <launch>
 
-	<arg name="model" default="$(find delta_amr2st_urdf)/urdf/test.urdf"/>
+	<arg name="model" default="$(find delta_amr2st_urdf)/urdf/TY2_SW.urdf"/>
 	<arg name="gui" default="true" />
 	<arg name="rvizconfig" default="$(find delta_amr2st_urdf)/rviz/test.rviz" />
 
