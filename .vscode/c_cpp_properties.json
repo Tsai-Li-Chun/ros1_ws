@@ -7,7 +7,7 @@
       },
       "includePath": [
         "/opt/ros/noetic/include/**",
-        // "/opt/ros/melodic/include/**",
+        "/opt/ros/melodic/include/**",
         "/usr/include/**",
         "/usr/local/include/modbus/**",
         "${workspaceFolder}/src/delta_amr2st_urdf/include/delta_amr2st_urdf",

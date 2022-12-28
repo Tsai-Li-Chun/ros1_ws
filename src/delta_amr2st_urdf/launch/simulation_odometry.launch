@@ -1,0 +1,21 @@
+<!--
+	@file name : simulation_odometry.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<arg name="model" default="$(find delta_amr2st_urdf)/urdf/TY2_SW.urdf"/>
+	<arg name="gui" default="true" />
+	<arg name="rvizconfig" default="$(find delta_amr2st_urdf)/rviz/test.rviz" />
+
+	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+    <node name="simulation_odometry" pkg="delta_amr2st_urdf" type="simulation_odometry"/>
+
+</launch>

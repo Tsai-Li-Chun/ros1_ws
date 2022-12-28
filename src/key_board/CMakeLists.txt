@@ -33,5 +33,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME}_node src/keyboard.cpp)
-target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_executable(keyboard_node src/keyboard.cpp)
+target_link_libraries(keyboard_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(joy_control_node src/joy_control.cpp)
+target_link_libraries(joy_control_node ${catkin_LIBRARIES})

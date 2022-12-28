@@ -1,0 +1,13 @@
+<!--
+	@file name : joy_control.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+	<node name="joy_node" pkg="joy" type="joy_node" />
+	<node name="joy_control_node" pkg="keyboard" type="joy_turtle">
+		<remap from="cmd_vel" to="turtle1/cmd_vel"/>
+	</node>
+	<node name="turtlesim_node" pkg="turtlesim" type="turtlesim_node" />
+</launch>

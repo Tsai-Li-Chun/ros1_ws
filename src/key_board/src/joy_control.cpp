@@ -1,5 +1,5 @@
 /** ******************************************************
-	* @file		node_handle_namespace.cpp
+	* @file		joy_control.cpp
 	* @author	Tsai,Li-chun
 	******************************************************
 **	**/
@@ -7,10 +7,13 @@
 
 /* System Includes ------------------------------------------*/
 /* System Includes Begin */
+#include "stdio.h"
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
-#include <ros/ros.h>
+#include "ros/ros.h"
+#include "geometry_msgs/Twist.h"
+#include "sensor_msgs/Joy.h"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -35,11 +38,17 @@
 
 /* Variables ------------------------------------------------*/
 /* Variables Begin */
+
+geometry_msgs::Twist cmd_vel;
+
 /* Variables End */
 
 
 /* Function -------------------------------------------------*/
 /* Function Begin */
+
+void joy_callback(const sensor_msgs::Joy&);
+
 /* Function End */
 
 
@@ -54,18 +63,41 @@
  	* @param argv(int) input parameters
  	* @return (int) Program Error.
 **	**/
-int main(int argc, char **argv)
+int main(int argc,char **argv)
 {
-	ros::init(argc, argv, "node_handle_namespace");
-	ros::NodeHandle nh0;
-	ros::NodeHandle nh1("LJ_namespace1");
-	ros::NodeHandle nh2("LJ_namespace2");
-	ros::NodeHandle nh3("~");
-	// ros::Subscriber sub = nh0.subscribe("topic0", 10, inline{});
-	ros::spin();
 
-	/* main quit */
-	return 0;
+    ros::init(argc,argv,"joy_control_node");
+    ros::NodeHandle n;
+
+    ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>("cmd_vel",1);
+
+    ros::Subscriber sub_joy    = n.subscribe("joy",1,joy_callback);
+
+    ros::Rate loop_rate(10);
+
+    while( ros::ok() )
+    {
+        pub_cmd_vel.publish(cmd_vel);
+        // char vcx_chptr[10],vcr_chptr[10],chptr[20];
+        // //float vcx = 0,vcr = 0;
+        // sprintf( vcr_chptr , "VCX%4.2lf", cmd_vel.linear.x/2.0 );
+        // sprintf( vcr_chptr , "VCR%4.2lf", cmd_vel.angular.z/2.0 );
+        // sprintf( chptr , "VCX%4.2lf\tVCR%4.2lf\n", cmd_vel.linear.x/2.0, cmd_vel.angular.z/2.0);
+        // ROS_INFO("%s",chptr);
+        // //ROS_INFO("VCX%4.2lf\tVCR%4.2lf\n", cmd_vel.linear.x/2.0, cmd_vel.angular.z/2.0);
+
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
+
+    return 0;
+}
+
+void joy_callback( const sensor_msgs::Joy &joy_msg )
+{
+    cmd_vel.linear.x = joy_msg.axes[1];
+    cmd_vel.linear.y = joy_msg.axes[0];
+    cmd_vel.angular.z= joy_msg.axes[2];
 }
 
 /* Program End */
@@ -74,4 +106,4 @@ int main(int argc, char **argv)
 /* ---------------------------------------------------------*/
 
 
-/* ***** END OF node_handle_namespace.cpp ***** */
+/* ***** END OF joy_control.cpp ***** */

@@ -19,6 +19,10 @@
 #define KEYCODE_S_CAP 0x53
 #define KEYCODE_W_CAP 0x57
 
+int kfd = 0;
+struct termios cooked, raw;
+bool done;
+
 class SmartCarKeyboardTeleopNode
 {
     private:
@@ -43,7 +47,7 @@ class SmartCarKeyboardTeleopNode
             n_private.param("yaw_rate_run", yaw_rate_run_, 1.5);
         }
 
-        ~SmartCarKeyboardTeleopNode() { }
+        ~SmartCarKeyboardTeleopNode() {  }
         void keyboardLoop();
 
         void stopRobot()
@@ -53,11 +57,7 @@ class SmartCarKeyboardTeleopNode
             pub_.publish(cmdvel_);
         }
 };
-
 SmartCarKeyboardTeleopNode* tbk;
-int kfd = 0;
-struct termios cooked, raw;
-bool done;
 
 int main(int argc, char** argv)
 {
@@ -67,7 +67,6 @@ int main(int argc, char** argv)
     boost::thread t = boost::thread(boost::bind(&SmartCarKeyboardTeleopNode::keyboardLoop, &tbk));
 
     ros::spin();
-
     t.interrupt();
     t.join();
     tbk.stopRobot();
@@ -93,9 +92,9 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
     raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
 
-    puts("Reading from keyboard");
-    puts("Use WASD keys to control the robot");
-    puts("Press Shift to move faster");
+    ROS_INFO("Reading from keyboard");
+    ROS_INFO("Use WASD keys to control the robot");
+    ROS_INFO("Press Shift to move faster");
 
     struct pollfd ufd;
     ufd.fd = kfd;

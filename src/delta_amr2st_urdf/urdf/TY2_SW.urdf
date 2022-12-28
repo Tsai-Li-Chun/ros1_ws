@@ -13,32 +13,39 @@
 	<material name="white">
 		<color rgba="1 1 1 1"/>
 	</material>
+	<material name="black">
+		<color rgba="0 0 0 1"/>
+	</material>
 
+	<link name="map_link">
+	</link>
+	<link name="odom_link">
+	</link>
 	<link name="base_link">
 	</link>
 	<link name="body_link">
 		<visual>
 			<geometry>
-				<box size="0.7 0.4 0.3" />
+				<box size="0.8 0.48 0.37" />
 			</geometry>
-			<origin xyz="0 0 0.08" rpy="0 0 0" />
+			<origin xyz="0 0 0.1" rpy="0 0 0" />
 			<material name="red" />
 		</visual>
 	</link>
 	<link name="Lwheel_link">
 		<visual>
 			<geometry>
-				<cylinder length="0.04" radius="0.11" />
+				<cylinder length="0.05" radius="0.11" />
 			</geometry>
-			<material name="red" />
+			<material name="black" />
 		</visual>
 	</link>
 	<link name="Rwheel_link">
 		<visual>
 			<geometry>
-				<cylinder length="0.04" radius="0.11" />
+				<cylinder length="0.05" radius="0.11" />
 			</geometry>
-			<material name="red" />
+			<material name="black" />
 		</visual>
 	</link>
 	<link name="scanF_link">
@@ -68,12 +75,21 @@
 		</visual>
 	</link>
 
-	<joint name="base_to_Lwheel_joint" type="fixed">
+	<joint name="map_to_odom_joint" type="fixed">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+		<parent link="map_link" />
+		<child link="odom_link" />
+	</joint>
+	<joint name="odom_to_base_joint" type="fixed">
 		<origin xyz="0 0 0.11" rpy="0 0 0" />
+		<parent link="odom_link" />
+		<child link="base_link" />
+	</joint>
+	<joint name="base_to_body_joint" type="fixed">
+		<origin xyz="0 0 0" rpy="0 0 0" />
 		<parent link="base_link" />
 		<child link="body_link" />
 	</joint>
-
 	<joint name="body_to_Lwheel_joint" type="continuous">
 		<origin xyz="0 0.2738 0" rpy="-1.5707 0 0" />
 		<parent link="body_link" />
@@ -87,12 +103,12 @@
 		<axis xyz="0 1 0" />
 	</joint>
 	<joint name="body_to_scanF_joint" type="fixed">>
-		<origin xyz="0.33142 0.22887 0.23138" rpy="0 0 0" />
+		<origin xyz="0.33142 -0.22887 0.23138" rpy="0 0 -0.7853981634" />
 		<parent link="body_link" />
 		<child link="scanF_link" />
 	</joint>
 	<joint name="body_to_scanB_joint" type="fixed">>
-		<origin xyz="-0.33142 -0.22887 0.23138" rpy="0 0 3.1415926" />
+		<origin xyz="-0.33142 0.22887 0.23138" rpy="0 0 2.3561944902" />
 		<parent link="body_link" />
 		<child link="scanB_link" />
 	</joint>
@@ -101,4 +117,5 @@
 		<parent link="body_link" />
 		<child link="realsensor_link" />
 	</joint>
+
 </robot>

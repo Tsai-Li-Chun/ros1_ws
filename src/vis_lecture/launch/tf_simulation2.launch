@@ -1,0 +1,16 @@
+
+<launch>
+    <arg name="model" default="$(find vis_lecture)/urdf/tf_simulation2.urdf" />
+    <arg name="rvizconfig"  default="$(find vis_lecture)/rviz/tf_simulation2.rviz" />
+
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
+    <param name="use_gui" value="false" />
+
+    <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" /> -->
+    <!-- <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+    <node name="tf_simulation3" pkg="vis_lecture" type="tf_simulation3" output="screen"/>
+    <!-- <node name="slam_gmapping" pkg="gmapping" type="slam_gmapping" /> -->
+
+</launch>

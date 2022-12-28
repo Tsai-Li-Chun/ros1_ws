@@ -1,5 +1,7 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(delta_amr2st_urdf)
+cmake_minimum_required(VERSION 2.8.3)
+project(vis_lecture)
+
+add_compile_options(-std=c++11)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,12 +10,8 @@ project(delta_amr2st_urdf)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-	roscpp
-	tf
-	tf2
-	# std_msgs
-	# message_generation
-	# geometry_msgs
+  roscpp
+  tf
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,10 +47,11 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-# Generate messages in the 'msg' folder
+## Generate messages in the 'msg' folder
 # add_message_files(
-# 	FILES
-# 	delta_RICHIE_test.msg
+#   FILES
+#   Message1.msg
+#   Message2.msg
 # )
 
 ## Generate services in the 'srv' folder
@@ -69,11 +68,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-# Generate added messages and services with any dependencies listed here
+## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
-#   geometry_msgs
 # )
 
 ################################################
@@ -107,8 +105,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES delta_amr2st_urdf
-#  CATKIN_DEPENDS roscpp std_msg
+#  LIBRARIES vis_lecture
+#  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
 )
 
@@ -119,14 +117,12 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-	${catkin_INCLUDE_DIRS}
-	./include/${PROJECT_NAME}
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/delta_amr2st_urdf.cpp
+#   src/${PROJECT_NAME}/vis_lecture.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -137,7 +133,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/delta_amr2st_urdf_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/vis_lecture_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -163,23 +159,16 @@ include_directories(
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# catkin_install_python(PROGRAMS
+# install(PROGRAMS
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark executables for installation
-## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark libraries for installation
-## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-# install(TARGETS ${PROJECT_NAME}
+## Mark executables and/or libraries for installation
+# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
 ## Mark cpp header files for installation
@@ -201,7 +190,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_delta_amr2st_urdf.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_vis_lecture.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -209,17 +198,30 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-# add_executable(listener
-# 			src/01_listener.cpp
-# 			include/${PROJECT_NAME}/classAPI_01listener.cpp)
-# target_link_libraries(listener ${catkin_LIBRARIES})
+add_executable(laser1 src/laser1.cpp)
+target_link_libraries(laser1 ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)
 
-# add_executable(talker
-# 			src/01_talker.cpp
-# 			include/${PROJECT_NAME}/classAPI_01talker.cpp)
-# # add_dependencies(talker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-# target_link_libraries(talker ${catkin_LIBRARIES})
+add_executable(robot1_simulation_joint_publisher src/robot1_simulation.cpp)
+target_link_libraries(robot1_simulation_joint_publisher ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)
 
-add_executable(simulation_odometry
-			src/simulation_odometry.cpp)
-target_link_libraries(simulation_odometry ${catkin_LIBRARIES})
+add_executable(robot3_simulation_tf_publisher src/robot3_simulation_tf_publisher.cpp)
+target_link_libraries(robot3_simulation_tf_publisher ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)
+
+add_executable(tf_simulation1 src/tf_simulation1.cpp)
+target_link_libraries(tf_simulation1 ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)
+
+add_executable(tf_simulation2 src/tf_simulation2.cpp)
+target_link_libraries(tf_simulation2 ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)
+
+add_executable(tf_simulation3 src/tf_simulation3.cpp)
+target_link_libraries(tf_simulation3 ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)
+
+add_executable(tf_odometry1 src/tf_odometry1.cpp)
+target_link_libraries(tf_odometry1 ${catkin_LIBRARIES})
+# add_dependencies(tf_listen vis_lecture)

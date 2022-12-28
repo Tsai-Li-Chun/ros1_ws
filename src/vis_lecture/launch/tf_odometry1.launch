@@ -1,0 +1,14 @@
+<launch>
+    <arg name="model" default="$(find vis_lecture)/urdf/tf_simulation2.urdf" />
+    <arg name="rvizconfig"  default="$(find vis_lecture)/rviz/tf_odometry1.rviz" />
+
+    <param name="robot_description" command="$(find xacro)/xacro $(arg model)"/>
+
+    <!-- <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+
+    <!-- <node name="pub_text" pkg="tsailichun_pkg" type="pub_text"/> -->
+    <node name="tf_odometry1" pkg="vis_lecture" type="tf_odometry1"/>
+
+</launch>
