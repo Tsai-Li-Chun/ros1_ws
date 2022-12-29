@@ -37,6 +37,10 @@
 
 /* Variables ------------------------------------------------*/
 /* Variables Begin */
+
+/* enc to mm parameter */
+const double enc_to_mm = 0.000561414233148148;
+
 /* Variables End */
 
 
@@ -68,7 +72,7 @@ int main(int argc, char** argv)
     double y = 0.0;
     double th = 0.0;
     
-    double vx = 0.5;
+    double vx = 0.2;
     double vy = 0;
     double vth = 0.1;   //單位 rad/s m/s
     
