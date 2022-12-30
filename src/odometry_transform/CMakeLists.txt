@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(delta_amr2st_urdf)
+project(odometry_transform)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,12 +8,10 @@ project(delta_amr2st_urdf)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-	roscpp
-	tf
-	tf2
-	message_generation
-	std_msgs
-	geometry_msgs
+  roscpp
+  std_msgs
+  tf
+  tf2
 )
 
 ## System dependencies are found with CMake's conventions
@@ -49,11 +47,12 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-# Generate messages in the 'msg' folder
-add_message_files(
-	FILES
-	delta_RICHIE_test.msg
-)
+## Generate messages in the 'msg' folder
+# add_message_files(
+#   FILES
+#   Message1.msg
+#   Message2.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -69,12 +68,11 @@ add_message_files(
 #   Action2.action
 # )
 
-# Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-)
+## Generate added messages and services with any dependencies listed here
+# generate_messages(
+#   DEPENDENCIES
+#   geometry_msgs#   std_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -107,8 +105,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES delta_amr2st_urdf
- CATKIN_DEPENDS roscpp std_msgs message_generation
+#  LIBRARIES odometry_transform
+ CATKIN_DEPENDS roscpp std_msgs tf tf2
 #  DEPENDS system_lib
 )
 
@@ -120,13 +118,12 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-	${catkin_INCLUDE_DIRS}
-	./include/${PROJECT_NAME}
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/delta_amr2st_urdf.cpp
+#   src/${PROJECT_NAME}/odometry_transform.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -137,7 +134,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/delta_amr2st_urdf_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/odometry_transform_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -201,7 +198,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_delta_amr2st_urdf.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_odometry_transform.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
@@ -209,18 +206,6 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(listener_node
-			src/01_listener.cpp
-			include/${PROJECT_NAME}/classAPI_01listener.cpp)
-add_dependencies(listener_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(listener_node ${catkin_LIBRARIES})
-
-add_executable(talker_node
-			src/01_talker.cpp
-			include/${PROJECT_NAME}/classAPI_01talker.cpp)
-add_dependencies(talker_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(talker_node ${catkin_LIBRARIES})
-
-add_executable(simulation_odometry
-			src/simulation_odometry.cpp)
-target_link_libraries(simulation_odometry ${catkin_LIBRARIES})
+add_executable(main_tf_odometry
+					src/main_tf_odometry.cpp )
+target_link_libraries(main_tf_odometry ${catkin_LIBRARIES} )
