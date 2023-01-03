@@ -52,7 +52,7 @@
 
 talker::talker()
 {
-	pub = this->advertise<delta_amr2st_urdf::delta_RICHIE_test>("chatter", 1);
+	pub = this->advertise<motor_feedback_msgs::motor_feedback>("chatter", 1);
 	hparam = this->hasParam("/pub/content");
 	if(hparam)
 	{
@@ -65,14 +65,14 @@ talker::~talker()
 	this->shutdown();
 }
 
-void talker::publish(delta_amr2st_urdf::delta_RICHIE_test dRt)
+void talker::publish(void)
 {
-	pub.publish(dRt);
+	pub.publish(mfm);
 }
 
-void talker::delta_RICHIE_msg_setdata(delta_amr2st_urdf::delta_RICHIE_test dRt)
+void talker::motor_feedback_setdata(int32_t i)
 {
-	dRt.header.seq = dRt.num;
+	mfm.positionL = i;
 }
 
 /* Program End */

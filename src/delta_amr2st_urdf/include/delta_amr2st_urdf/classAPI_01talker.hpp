@@ -15,7 +15,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include <ros/ros.h>
-#include "delta_amr2st_urdf/delta_RICHIE_test.h"
+#include "motor_feedback_msgs/motor_feedback.h"
 /* User Includes End */
 
 
@@ -37,11 +37,12 @@ class talker : public ros::NodeHandle
 private:
 	bool hparam=false;
 	ros::Publisher pub;
+	motor_feedback_msgs::motor_feedback mfm;
 public:
 	talker();
 	~talker();
-	void publish(delta_amr2st_urdf::delta_RICHIE_test);
-	void delta_RICHIE_msg_setdata(delta_amr2st_urdf::delta_RICHIE_test);
+	void publish(void);
+	void motor_feedback_setdata(int32_t);
 };
 
 /* Extern Class End */

@@ -16,7 +16,7 @@
 /* User Includes Begin */
 #include <ros/ros.h>
 #include <std_msgs/String.h>
-#include "delta_amr2st_urdf/delta_RICHIE_test.h"
+#include "motor_feedback_msgs/motor_feedback.h"
 /* User Includes End */
 
 
@@ -37,7 +37,7 @@ class listener : public ros::NodeHandle
 {
 private:
 	ros::Subscriber sub;
-	void chatterCallback(const delta_amr2st_urdf::delta_RICHIE_test&);
+	void chatterCallback(const motor_feedback_msgs::motor_feedback&);
 
 public:
 	listener();

@@ -12,8 +12,8 @@
 /* User Includes Begin */
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
-#include <geometry_msgs/Inertia.h>
 #include "Oriental_BLVD_KRD.hpp"
+#include "motor_feedback_msgs/motor_feedback.h"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -42,7 +42,7 @@
 /* 建立 BLVD-KRD Control物件*/
 BLVD_KRD_Control BKC("/dev/ttyUSB0",0x0F);
 /* 建立topic-Publisher物件 */
-ros::Publisher enc_pub;
+ros::Publisher motor_fb;
 /* 建立message Twist物件 */
 geometry_msgs::Twist twist_last;
 /* 宣告存放左右兩輪累計距離用變數 */
@@ -52,7 +52,7 @@ int32_t velocity_A[2]={0};
 /* 宣告存放左右兩輪理論速度用變數 */
 int32_t velocity_D[2]={0};
 /* 建立message Inertia物件 */
-geometry_msgs::Inertia enc;
+motor_feedback_msgs::motor_feedback mf;
 
 /* Variables End */
 
@@ -91,8 +91,8 @@ int main(int argc, char **argv)
 	ros::Subscriber twist_sub = nh.subscribe("/cmd_vel", 100, twist_callback);
 	/* 建立計時物件並初始化計時中斷 */
 	ros::Timer timer = nh.createTimer(ros::Duration(0.01), timer_callback);
-	/* 初始化enc_pub物件 */
-	enc_pub = nh.advertise<geometry_msgs::Inertia>("/motor_encoder",100);
+	/* 初始化motor_fb物件 */
+	motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
 	/* 建立delay用物件 */
 	ros::Rate loop_rate(10);
 
@@ -130,13 +130,13 @@ void timer_callback(const ros::TimerEvent& e)
 	BKC.readActualPosition(position);
 	BKC.readActualVelocity(velocity_A);
 	BKC.readDemandVelocity(velocity_D);
-	enc.ixx = position[0];
-	enc.ixy = position[1];
-	enc.ixz = velocity_A[0];
-	enc.iyy = velocity_A[1];
-	enc.iyz = velocity_D[0];
-	enc.izz = velocity_D[1];
-	enc_pub.publish(enc);
+	mf.positionL = position[0];
+	mf.positionR = position[1];
+	mf.AvelocityL = velocity_A[0];
+	mf.AvelocityR = velocity_A[1];
+	mf.DvelocityL = velocity_D[0];
+	mf.DvelocityR = velocity_D[1];
+	motor_fb.publish(mf);
 }
 
 /* Program End */

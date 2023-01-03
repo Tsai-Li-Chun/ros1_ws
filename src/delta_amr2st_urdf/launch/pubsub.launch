@@ -8,22 +8,22 @@
 	<param name="gobel" value="Tsailichun"/>
 	<arg name="mode" default="zero"/>
 	<group if="$(eval mode=='one')">
-		<node name="pub"   pkg="delta_amr2st_urdf" type="talker">
+		<node name="pub"   pkg="delta_amr2st_urdf" type="talker_node">
 			<remap from="chatter" to="content" />
 		</node>
-		<node name="sub1" pkg="delta_amr2st_urdf" type="listener">
+		<node name="sub1" pkg="delta_amr2st_urdf" type="listener_node">
 			<remap from="chatter" to="content" />
 		</node>
 	</group>
 
 	<group if="$(eval mode=='two')">
-		<node name="pub"   pkg="delta_amr2st_urdf" type="talker" output="screen">
+		<node name="pub"   pkg="delta_amr2st_urdf" type="talker_node" output="screen">
 			<param name="content" value="alternative hello"/>
 		</node>
-		<node name="sub1" pkg="delta_amr2st_urdf" type="listener">
+		<node name="sub1" pkg="delta_amr2st_urdf" type="listener_node">
 		</node>
 	</group>
 
-	<node name="sub2" pkg="delta_amr2st_urdf" type="listener" />
+	<node name="sub2" pkg="delta_amr2st_urdf" type="listener_node" />
 
 </launch>

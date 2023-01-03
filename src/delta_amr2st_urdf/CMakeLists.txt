@@ -11,9 +11,10 @@ find_package(catkin REQUIRED COMPONENTS
 	roscpp
 	tf
 	tf2
-	message_generation
-	std_msgs
-	geometry_msgs
+	motor_feedback_msgs
+	# std_msgs
+	# message_generation
+	# geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,10 +51,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 # Generate messages in the 'msg' folder
-add_message_files(
-	FILES
-	delta_RICHIE_test.msg
-)
+# add_message_files(
+# 	FILES
+# 	delta_RICHIE_test.msg
+# )
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -70,11 +71,11 @@ add_message_files(
 # )
 
 # Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  geometry_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+#   geometry_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -108,7 +109,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES delta_amr2st_urdf
- CATKIN_DEPENDS roscpp std_msgs message_generation
+ CATKIN_DEPENDS roscpp motor_feedback_msgs
 #  DEPENDS system_lib
 )
 
