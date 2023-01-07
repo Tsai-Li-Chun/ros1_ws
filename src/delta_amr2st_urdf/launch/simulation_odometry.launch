@@ -16,6 +16,6 @@
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 
-    <node name="simulation_odometry" pkg="delta_amr2st_urdf" type="simulation_odometry"/>
+    <node name="simulation_odometry" pkg="delta_amr2st_urdf" type="simulation_odometry"  output="screen"/>
 
 </launch>

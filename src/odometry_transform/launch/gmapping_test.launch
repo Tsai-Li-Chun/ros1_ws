@@ -1,0 +1,22 @@
+<!--
+	@file name : gmapping_test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+	<!-- laser的topic名，與自己激光雷達topic相對應 -->
+	<arg name="scan_topic"  default="/sick_safetyscanners/scan" />
+	<!-- 機器人坐標系 -->
+	<arg name="base_frame"  default="base_link"/>
+	<!-- 世界坐標系 -->
+	<arg name="odom_frame"  default="odom"/>
+
+	<!-- 啟動slam gmapping節點, 內部含節點參數設定 -->
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+		<param name="base_frame" value="$(arg base_frame)"/>
+		<param name="odom_frame" value="$(arg odom_frame)"/>
+		<remap from="scan" to="$(arg scan_topic)"/>
+	</node>
+
+</launch>

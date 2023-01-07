@@ -38,7 +38,7 @@ class SmartCarKeyboardTeleopNode
     public:
         SmartCarKeyboardTeleopNode()
         {
-            pub_ = n_.advertise<geometry_msgs::Twist>("cmd_vel", 1);
+            pub_ = n_.advertise<geometry_msgs::Twist>("cmd_vel", 100);
 
             ros::NodeHandle n_private("~");
             n_private.param("walk_vel", walk_vel_, 0.5);
@@ -87,7 +87,8 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
     // get the console in raw mode
     tcgetattr(kfd, &cooked);
     memcpy(&raw, &cooked, sizeof(struct termios));
-    raw.c_lflag &=~ (ICANON | ECHO);
+    // raw.c_lflag &=~ (ICANON | ECHO);
+    raw.c_lflag &=~ (ICANON);
     raw.c_cc[VEOL] = 1;
     raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
@@ -189,8 +190,8 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
                 turn = 0;
                 dirty = false;
         }
-        cmdvel_.linear.x = speed * max_tv;
-        cmdvel_.angular.z = turn * max_rv;
+        cmdvel_.linear.x = (speed*max_tv)*800;
+        cmdvel_.angular.z = (turn*max_rv)*400;
         pub_.publish(cmdvel_);
     }
 }

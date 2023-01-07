@@ -66,7 +66,8 @@ BLVD_KRD_Control::BLVD_KRD_Control(const char* device,int slave,
 	/* 初始化modbus通訊設定 */
 	mb = modbus_new_rtu(device,BR,parity,data_bit,stop_bit);
 	if( Modbus_slave_connect(slave) != 0 )
-		printf("BLVD-KRD Modbus RTU Mode Setup Failure!\n");
+		ROS_INFO("BLVD-KRD Modbus RTU Mode Setup Failure!");
+		// printf("BLVD-KRD Modbus RTU Mode Setup Failure!\n");
 }
 
 /** * @brief Setup SlaveID & Connect
@@ -78,36 +79,42 @@ int BLVD_KRD_Control::Modbus_slave_connect(int slave)
 	/* 初始化是否成功判斷 */
 	if( mb == NULL )
 	{	/* 若初始化失敗,打印訊息,退出程序 */
-		printf("%s\n",modbus_strerror(errno));
+		ROS_INFO("%s",modbus_strerror(errno));
+		// printf("%s\n",modbus_strerror(errno));
 		exit(EXIT_FAILURE);
 	}
 	else
 	{	/* 若初始化成功,打印訊息 */
-		printf("Initialize BLVD-KRD modbus_t Structure Success\n");
+		ROS_INFO("Initialize BLVD-KRD modbus_t Structure Success!");
+		// printf("Initialize BLVD-KRD modbus_t Structure Success\n");
 	}
 
 	/* 設定欲通訊的modbus-slaveID */
 	rc = modbus_set_slave(mb,slave);
 	if( rc != 0 )
 	{	/* 若設定失敗,打印訊息,退出建構函數 */
-		printf("BLVD-KRD modbus set slave Failure!\n");
+		ROS_INFO("BLVD-KRD modbus set slave Failure!");
+		// printf("BLVD-KRD modbus set slave Failure!\n");
 		return rc;
 	}
 	else
 	{	/* 若slaveID設定成功,打印訊息 */
-		printf("BLVD-KRD Setup Slave ID \"%d\" Success\n", slave);
+		ROS_INFO("BLVD-KRD Setup Slave ID \"%d\" Success!",slave);
+		// printf("BLVD-KRD Setup Slave ID \"%d\" Success\n", slave);
 	}
 
 	/* 建立連結 */
 	rc = modbus_connect(mb);
 	if( rc != 0 )
 	{	/* 若設定失敗,打印訊息,退出建構函數 */
-		printf("BLVD-KRD modbus connect Failure!\n");
+		ROS_INFO("BLVD-KRD modbus connect Failure!");
+		// printf("BLVD-KRD modbus connect Failure!\n");
 		return rc;
 	}
 	else
 	{	/* 若連結成功,打印訊息 */
-		printf("BLVD-KRD Slave ID \"%d\" Connect Success\n", slave);
+		ROS_INFO("BLVD-KRD Slave ID \"%d\" Connect Success!",slave);
+		// printf("BLVD-KRD Slave ID \"%d\" Connect Success\n", slave);
 		// printf("%s\n",modbus_strerror(errno));
 	}
 
@@ -126,7 +133,8 @@ BLVD_KRD_Control::~BLVD_KRD_Control()
 	/* 釋放modbus通訊結構體的位址 */
 	modbus_free(mb);
 	/* 打印關閉訊息 */
-	printf("BLVD-KRD modbus connect close\n");
+	ROS_INFO("BLVD-KRD modbus connect close!");
+	// printf("BLVD-KRD modbus connect close\n");
 }
 #endif /* system setup */
 
@@ -138,18 +146,29 @@ BLVD_KRD_Control::~BLVD_KRD_Control()
 int BLVD_KRD_Control::motorInit(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger)
 {
 	rc = BLVD_KRD_DirectDataOperation_setup(OpType, Acc, Dec, Trigger);
-	if(rc>0) printf("BLVD KRD direct data operation setup Success!\n");
-	else 	{printf("BLVD KRD direct data operation setup Failure!\n");return 0;}
+	if(rc>0) 
+	{
+		ROS_INFO("BLVD KRD direct data operation setup Success!");
+		// printf("BLVD KRD direct data operation setup Success!\n");
+	}
+	else 	
+	{
+		ROS_INFO("BLVD KRD direct data operation setup Failure!");
+		// printf("BLVD KRD direct data operation setup Failure!\n");
+		return 0;
+	}
 	sleep(5);
 
 	if( BLVD_KRD_DriverOutputStatus_check() )
 	{
-		printf("BLVD KRD driver output status check Success!\n");
+		ROS_INFO("BLVD KRD driver output status check Success!");
+		// printf("BLVD KRD driver output status check Success!\n");
 		return rc;
 	}
 	else
 	{
-		printf("BLVD KRD driver output status check Failure!\n");
+		ROS_INFO("BLVD KRD driver output status check Failur!");
+		// printf("BLVD KRD driver output status check Failure!\n");
 		return 0;
 	}
 }
@@ -165,14 +184,40 @@ int BLVD_KRD_Control::motorInit(uint32_t OpType, uint32_t Acc, uint32_t Dec, int
 int BLVD_KRD_Control::BLVD_KRD_DirectDataOperation_setup(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger)
 {
 	int set_count=5;
-	if( writeSetupType(OpType)<=0 ) {printf("BLVD-KRD set Operation type Failure!\n");set_count--;}
-	if( writeAcceleration(Acc)<=0 ) {printf("BLVD-KRD set Acceleration Failure!\n");set_count--;}
-	if( writeDecelerate(Dec)<=0 ) 	{printf("BLVD-KRD set Decelerate Failure!\n");set_count--;}
-	if( writeTorque(1000)<=0 ) 		{printf("BLVD-KRD set Torque Failure!\n");set_count--;}
-	if( writeTrigger(Trigger)<=0 ) 	{printf("BLVD-KRD set Trigger Failure!\n");set_count--;}
+	if( writeSetupType(OpType)<=0 )
+	{
+		ROS_INFO("BLVD-KRD set Operation type Failure!");
+		// printf("BLVD-KRD set Operation type Failure!\n");
+		set_count--;
+	}
+	if( writeAcceleration(Acc)<=0 )
+	{
+		ROS_INFO("BLVD-KRD set Acceleration Failure!");
+		// printf("BLVD-KRD set Acceleration Failure!\n");
+		set_count--;
+	}
+	if( writeDecelerate(Dec)<=0 )
+	{
+		ROS_INFO("BLVD-KRD set Decelerate Failure!");
+		// printf("BLVD-KRD set Decelerate Failure!\n");
+		set_count--;
+	}
+	if( writeTorque(1000)<=0 )
+	{
+		ROS_INFO("BLVD-KRD set Torque Failure!");
+		// printf("BLVD-KRD set Torque Failure!\n");
+		set_count--;
+	}
+	if( writeTrigger(Trigger)<=0 )
+	{
+		ROS_INFO("BLVD-KRD set Trigger Failure!");
+		// printf("BLVD-KRD set Trigger Failure!\n");
+		set_count--;
+	}
 	if(set_count<5)
 	{ 
-		printf("%d, BLVD-KRD direct data operation setup Failure\n",set_count); 
+		ROS_INFO("%d, BLVD-KRD direct data operation setup Failure!",set_count); 
+		// printf("%d, BLVD-KRD direct data operation setup Failure\n",set_count); 
 		return 0;
 	}
 	rc = motorSON();

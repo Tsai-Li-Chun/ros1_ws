@@ -17,9 +17,9 @@
 		<color rgba="0 0 0 1"/>
 	</material>
 
-	<link name="map_link">
+	<link name="map">
 	</link>
-	<link name="odom_link">
+	<link name="odom">
 	</link>
 	<link name="base_link">
 	</link>
@@ -77,12 +77,12 @@
 
 	<joint name="map_to_odom_joint" type="fixed">
 		<origin xyz="0 0 0" rpy="0 0 0" />
-		<parent link="map_link" />
-		<child link="odom_link" />
+		<parent link="map" />
+		<child link="odom" />
 	</joint>
 	<joint name="odom_to_base_joint" type="fixed">
 		<origin xyz="0 0 0.11" rpy="0 0 0" />
-		<parent link="odom_link" />
+		<parent link="odom" />
 		<child link="base_link" />
 	</joint>
 	<joint name="base_to_body_joint" type="fixed">

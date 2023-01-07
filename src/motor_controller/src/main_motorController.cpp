@@ -53,6 +53,8 @@ int32_t velocity_A[2]={0};
 int32_t velocity_D[2]={0};
 /* 建立message Inertia物件 */
 motor_feedback_msgs::motor_feedback mf;
+/* 宣告左右輪速度 */
+int32_t velL=0,velR=0;
 
 /* Variables End */
 
@@ -80,8 +82,10 @@ int main(int argc, char **argv)
 {
 	/* 宣告libmodbus-API的Return用變數 */
 	int rc;
-	/* 宣告左右輪速度 */
-	int32_t velL=0,velR=0;
+	/* 建立ROS time物件 */
+	ros::Time current_time, last_time;
+	/* delta time(s) */
+	double dt;
 	/* ros init */
     ros::init(argc,argv,"main_motorController");
 
@@ -94,25 +98,43 @@ int main(int argc, char **argv)
 	/* 初始化motor_fb物件 */
 	motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
 	/* 建立delay用物件 */
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(100);
 
 	sleep(1);
 	/* motor Init - 事先將觸發方式(-4)等參數set,後續更新速度即可即時變化 */
-	// rc = BKC.motorInit(48,1000,1000,(-4));
+	rc = BKC.motorInit(48,1000,1000,(-4));
 	sleep(1);
+
+	current_time = ros::Time::now();
+	last_time = current_time;
 
 	while (ros::ok())
 	{
-		// velL = twist_last.linear.x - twist_last.angular.z ;
-		// velR = twist_last.linear.x + twist_last.angular.z ;
-		// // printf("%d , %d\n",velL,velR);
-		// BKC.writeVelocity(velL,velR);
+		current_time = ros::Time::now();
+		dt = (current_time - last_time).toSec();
+		// ROS_INFO("%lf\n",dt);
+		BKC.readActualPosition(position);
+		BKC.readActualVelocity(velocity_A);
+		BKC.readDemandVelocity(velocity_D);
+		// mf.header.frame_id = "motor_feedback";
+		// mf.header.seq = 0;
+		// mf.header.stamp = ros::Time::now();
+		mf.positionL = position[0];
+		mf.positionR = position[1];
+		mf.AvelocityL = velocity_A[0];
+		mf.AvelocityR = velocity_A[1];
+		mf.DvelocityL = velocity_D[0];
+		mf.DvelocityR = velocity_D[1];
+		motor_fb.publish(mf);
+		last_time = current_time;
+
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
+	// ros::spin();
 
 	rc = BKC.motorSOFF();
-	printf("%d\n",rc);
+	ROS_INFO("rc = %d , motor SOFF",rc);
 	sleep(1);
 
 	ros::shutdown();
@@ -123,20 +145,15 @@ int main(int argc, char **argv)
 void twist_callback(const geometry_msgs::Twist& twist_msg)
 {
 	twist_last = twist_msg;
+	velL = twist_last.linear.x - twist_last.angular.z ;
+	velR = twist_last.linear.x + twist_last.angular.z ;
+	// printf("%d , %d\n",velL,velR);
+	BKC.writeVelocity(velL,velR);
 }
 
 void timer_callback(const ros::TimerEvent& e)
 {
-	BKC.readActualPosition(position);
-	BKC.readActualVelocity(velocity_A);
-	BKC.readDemandVelocity(velocity_D);
-	mf.positionL = position[0];
-	mf.positionR = position[1];
-	mf.AvelocityL = velocity_A[0];
-	mf.AvelocityR = velocity_A[1];
-	mf.DvelocityL = velocity_D[0];
-	mf.DvelocityR = velocity_D[1];
-	motor_fb.publish(mf);
+
 }
 
 /* Program End */

@@ -73,6 +73,7 @@ void talker::publish(void)
 void talker::motor_feedback_setdata(int32_t i)
 {
 	mfm.positionL = i;
+	mfm.positionR = i;
 }
 
 /* Program End */

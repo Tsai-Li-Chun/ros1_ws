@@ -1,7 +1,7 @@
 <launch>
 
 	<arg name="model" default="$(find delta_amr2st_urdf)/urdf/TY2_SW.urdf"/>
-	<arg name="gui" default="true" />
+	<arg name="gui" default="false" />
 	<arg name="rvizconfig" default="$(find delta_amr2st_urdf)/rviz/test.rviz" />
 
 	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />

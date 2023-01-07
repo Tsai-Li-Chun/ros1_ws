@@ -66,6 +66,8 @@
   <build_export_depend>tf2</build_export_depend>
   <exec_depend>tf2</exec_depend>
 
+	<build_depend>motor_feedback_msgs</build_depend>
+
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
