@@ -7,8 +7,9 @@
 <launch>
 
 	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
-	<include file="$(find odometry_transform)/launch/gmapping_test.launch" />
 	<include file="$(find sick_safetyscanners)/launch/sick_safetyscanners.launch" />
+	<include file="$(find odometry_transform)/launch/gmapping_test.launch" />
+	<!-- <include file="$(find odometry_transform)/launch/hector_mapping_test.launch" /> -->
 
 	<node name="keyboard_node" pkg="keyboard" type="keyboard_node" args="">
 	</node>
