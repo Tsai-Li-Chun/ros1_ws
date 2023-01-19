@@ -40,7 +40,7 @@
 /* Variables Begin */
 
 /* enc to mm to M parameter */
-const double enc_to_mm = 0.000561414233148148;
+const double enc_to_mm = 0.0005599597921296297;
 const double mm_to_M = 0.001;
 const double AMR_width = 0.5476;
 /* motor feedback message object */
@@ -127,10 +127,10 @@ int main(int argc, char **argv)
 		odom_quat = tf::createQuaternionMsgFromYaw(th);
 		odom_trans.header.stamp = current_time;
 		odom_trans.header.frame_id = "odom";
-		odom_trans.child_frame_id = "base_link";
+		odom_trans.child_frame_id = "base_footprint";
 		odom_trans.transform.translation.x = x;
 		odom_trans.transform.translation.y = y;
-		odom_trans.transform.translation.z = 0.11;
+		odom_trans.transform.translation.z = 0;
 		odom_trans.transform.rotation = odom_quat;
 		/* send the transform */
 		odom_broadcaster.sendTransform(odom_trans);
@@ -142,10 +142,10 @@ int main(int argc, char **argv)
 		/* set the position */
 		odom.pose.pose.position.x = x;
 		odom.pose.pose.position.y = y;
-		odom.pose.pose.position.z = 0.11;
+		odom.pose.pose.position.z = 0;
 		odom.pose.pose.orientation = odom_quat;
 		/* set the velocity */
-		odom.child_frame_id = "base_link";
+		odom.child_frame_id = "base_footprint";
 		odom.twist.twist.linear.x = vx;
 		odom.twist.twist.linear.y = vy;
 		odom.twist.twist.angular.z = vth;

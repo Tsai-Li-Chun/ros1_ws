@@ -23,7 +23,7 @@ extern "C"{
 
 #include "ch_serial.h"
 
-#define IMU_SERIAL   "/dev/ttyUSB1"
+#define IMU_SERIAL   "/dev/USBport-imuCH110"
 #define BAUD         (115200)
 #define GRA_ACC      (9.8)
 #define DEG_TO_RAD   (0.01745329)

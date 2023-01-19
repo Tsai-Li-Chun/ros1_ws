@@ -5,13 +5,20 @@
 -->
 
 <launch>
+
+	<arg name="control_mode" default="keyborad"/>
+	<group if="$(eval control_mode=='keyborad')">
+		<node name="keyboard_node" pkg="keyboard" type="keyboard_node" />
+	</group>
+	<group if="$(eval control_mode=='joy')">
+		<node name="joy_node" pkg="joy" type="joy_node" />
+		<node name="joy_control_node" pkg="keyboard" type="joy_control_node" />
+	</group>
+
 	<node name="main_motorController" 
 		  pkg="motor_controller"
 		  type="main_motorController"
 		  output="screen" >
 	</node>
-	<node name="keyboard_node" 
-		  pkg="keyboard"
-		  type="keyboard_node" >
-	</node>
+	
 </launch>

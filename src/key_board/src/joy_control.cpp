@@ -39,6 +39,7 @@
 /* Variables ------------------------------------------------*/
 /* Variables Begin */
 
+double enlarge=0;
 geometry_msgs::Twist cmd_vel;
 
 /* Variables End */
@@ -95,9 +96,11 @@ int main(int argc,char **argv)
 
 void joy_callback( const sensor_msgs::Joy &joy_msg )
 {
-    cmd_vel.linear.x = joy_msg.axes[1];
-    cmd_vel.linear.y = joy_msg.axes[0];
-    cmd_vel.angular.z= joy_msg.axes[2];
+    enlarge = 0.5;
+    if(joy_msg.buttons[4]==1) enlarge = 1;
+    cmd_vel.linear.x = (joy_msg.axes[4])*enlarge;
+    // cmd_vel.linear.y = joy_msg.axes[0];
+    cmd_vel.angular.z= (joy_msg.axes[0])*(enlarge*0.8);
 }
 
 /* Program End */

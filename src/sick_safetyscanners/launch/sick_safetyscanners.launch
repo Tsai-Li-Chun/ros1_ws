@@ -5,10 +5,10 @@
   <arg name="host_udp_port"         default="0" />
   <arg name="frame_id"              default="scanF_link" />
   <arg name="skip"                  default="0" />
-  <arg name="angle_start"           default="0" />
-  <arg name="angle_end"             default="0" />
+  <arg name="angle_start"           default="-2.2" />
+  <arg name="angle_end"             default="2.32" />
   <arg name="time_offset"           default="0.0" />
-  <arg name="min_intensities"       default="0.0" doc="minimal intensity for a laserscan point" />
+  <arg name="min_intensities"       default="0.0" />
   <arg name="channel"               default="0" />
   <arg name="channel_enabled"       default="True" />
   <arg name="general_system_state"  default="True" />

@@ -2,3 +2,4 @@ build/**
 devel/**
 .catkin_workspace
 .includePath_bak
+src/slam_navigation/map/**

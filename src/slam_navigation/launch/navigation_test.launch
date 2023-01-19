@@ -1,0 +1,27 @@
+<!--
+	@file name : navigation_test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<arg name="map_file" default="trainingArea_2F_gmapping" />
+	<!-- <param name="use_sim_time" value="true"/> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="link_to_footprint" args="0 0 0 0 0 0 /base_footprint /base_link 50"/> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="robot_to_laser" args="0.2 0 0.4 0 0 0 /base_link /laser 50"/> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /odom /map 50" /> -->
+
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find slam_navigation)/map/$(arg map_file).yaml"/>
+	<node name="keyboard_node" pkg="keyboard" type="keyboard_node" />
+	<node name="main_motorController" pkg="motor_controller" type="main_motorController" output="screen" />
+	<node name="main_tf_odometry"  pkg="odometry_transform" type="main_tf_odometry" output="screen" />
+	<include file="$(find sick_safetyscanners)/launch/sick_safetyscanners.launch" />
+
+	<!-- <include file="$(find slam_navigation)/launch/gmapping_test.launch" /> -->
+	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
+	<include file="$(find slam_navigation)/launch/amcl_test.launch" />
+	<include file="$(find slam_navigation)/launch/move_base_test2.launch" />
+
+
+</launch>

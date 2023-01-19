@@ -43,8 +43,8 @@ class SmartCarKeyboardTeleopNode
             ros::NodeHandle n_private("~");
             n_private.param("walk_vel", walk_vel_, 0.5);
             n_private.param("run_vel", run_vel_, 1.0);
-            n_private.param("yaw_rate", yaw_rate_, 1.0);
-            n_private.param("yaw_rate_run", yaw_rate_run_, 1.5);
+            n_private.param("yaw_rate", yaw_rate_, 0.4);
+            n_private.param("yaw_rate_run", yaw_rate_run_, 0.8);
         }
 
         ~SmartCarKeyboardTeleopNode() {  }
@@ -190,8 +190,8 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
                 turn = 0;
                 dirty = false;
         }
-        cmdvel_.linear.x = (speed*max_tv)*800;
-        cmdvel_.angular.z = (turn*max_rv)*400;
+        cmdvel_.linear.x = (speed*max_tv);
+        cmdvel_.angular.z = (turn*max_rv);
         pub_.publish(cmdvel_);
     }
 }

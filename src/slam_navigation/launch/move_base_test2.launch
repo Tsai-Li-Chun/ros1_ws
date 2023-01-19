@@ -1,0 +1,18 @@
+<!--
+	@file name : move_base_test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<node pkg="move_base" type="move_base" name="move_base">
+	<rosparam file="$(find slam_navigation)/param2/costmap_common_params.yaml" command="load" ns="global_costmap" />
+	<rosparam file="$(find slam_navigation)/param2/costmap_common_params.yaml" command="load" ns="local_costmap" />
+	<rosparam file="$(find slam_navigation)/param2/move_base_params.yaml" command="load" />
+	<rosparam file="$(find slam_navigation)/param2/base_local_planner_params.yaml" command="load" />
+	<rosparam file="$(find slam_navigation)/param2/local_costmap_params.yaml" command="load" />
+	<rosparam file="$(find slam_navigation)/param2/global_costmap_params.yaml" command="load" />
+	</node>
+
+</launch>

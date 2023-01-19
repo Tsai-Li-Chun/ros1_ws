@@ -1,0 +1,21 @@
+<!--
+	@file name : move_base_test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<node pkg="move_base" type="move_base" name="move_base">
+		<!-- <param name="controller_frequency" value="10.0"/> -->
+		<rosparam file="$(find slam_navigation)/param1/move_base.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param1/costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find slam_navigation)/param1/costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find slam_navigation)/param1/local_costmap_params.yaml"  command="load" />
+		<rosparam file="$(find slam_navigation)/param1/global_costmap_params.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param1/local_planner.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param1/global_planner.yaml" command="load" />
+
+	</node>
+
+</launch>

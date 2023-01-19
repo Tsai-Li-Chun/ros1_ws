@@ -40,7 +40,7 @@
 /* Variables Begin */
 
 /* 建立 BLVD-KRD Control物件*/
-BLVD_KRD_Control BKC("/dev/ttyUSB0",0x0F);
+BLVD_KRD_Control BKC("/dev/USBport-motor",0x0F);
 /* 建立topic-Publisher物件 */
 ros::Publisher motor_fb;
 /* 建立message Twist物件 */
@@ -55,6 +55,8 @@ int32_t velocity_D[2]={0};
 motor_feedback_msgs::motor_feedback mf;
 /* 宣告左右輪速度 */
 int32_t velL=0,velR=0;
+
+const double ms_to_rpm = 2976.40418132187;
 
 /* Variables End */
 
@@ -145,8 +147,11 @@ int main(int argc, char **argv)
 void twist_callback(const geometry_msgs::Twist& twist_msg)
 {
 	twist_last = twist_msg;
-	velL = twist_last.linear.x - twist_last.angular.z ;
-	velR = twist_last.linear.x + twist_last.angular.z ;
+	double velLtmp,velRtmp;
+	velLtmp = twist_last.linear.x - twist_last.angular.z ;
+	velRtmp = twist_last.linear.x + twist_last.angular.z ;
+	velL = (int32_t)(velLtmp*ms_to_rpm);
+	velR = (int32_t)(velRtmp*ms_to_rpm);
 	// printf("%d , %d\n",velL,velR);
 	BKC.writeVelocity(velL,velR);
 }
