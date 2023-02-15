@@ -1,0 +1,4 @@
+amcl:
+initial_pose_x: 100.0
+initial_pose_y: 10.0
+initial_pose_a: 0.0

@@ -210,4 +210,5 @@ include_directories(
 
 add_executable(main_tf_odometry
 					src/main_tf_odometry.cpp )
+add_dependencies(main_tf_odometry ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(main_tf_odometry ${catkin_LIBRARIES} )

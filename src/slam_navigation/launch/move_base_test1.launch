@@ -6,7 +6,7 @@
 
 <launch>
 
-	<node pkg="move_base" type="move_base" name="move_base">
+	<node pkg="move_base" type="move_base" name="move_base" output="screen" >
 		<!-- <param name="controller_frequency" value="10.0"/> -->
 		<rosparam file="$(find slam_navigation)/param1/move_base.yaml" command="load" />
 		<rosparam file="$(find slam_navigation)/param1/costmap_common_params.yaml" command="load" ns="global_costmap" />

@@ -152,6 +152,10 @@ void twist_callback(const geometry_msgs::Twist& twist_msg)
 	velRtmp = twist_last.linear.x + twist_last.angular.z ;
 	velL = (int32_t)(velLtmp*ms_to_rpm);
 	velR = (int32_t)(velRtmp*ms_to_rpm);
+	if(velL>890) velL=890;
+	else if(velL<(-890)) velL=(-890);
+	if(velR>890) velR=890;
+	else if(velR<(-890)) velR=(-890);
 	// printf("%d , %d\n",velL,velR);
 	BKC.writeVelocity(velL,velR);
 }

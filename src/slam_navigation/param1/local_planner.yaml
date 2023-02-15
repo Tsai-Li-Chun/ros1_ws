@@ -11,9 +11,9 @@ DWAPlannerROS:
  max_vel_theta: 0.1
  min_vel_theta: -0.1
 
- yaw_goal_tolerance: 0.2
- xy_goal_tolerance: 0.3
- latch_xy_goal_tolerance: true
+ yaw_goal_tolerance: 0.5
+ xy_goal_tolerance: 0.5
+ latch_xy_goal_tolerance: false
 
  sim_time: 1.2
  sim_granularity: 0.2

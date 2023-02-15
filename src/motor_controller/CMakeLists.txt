@@ -106,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES motor_controller
-#  CATKIN_DEPENDS roscpp std_msgs tf
+ CATKIN_DEPENDS roscpp std_msgs tf motor_feedback_msgs
 #  DEPENDS system_lib
 )
 
@@ -216,4 +216,5 @@ include_directories(
 add_executable(main_motorController
 					src/main_motorController.cpp
 					include/${PROJECT_NAME}/Oriental_BLVD_KRD.cpp)
+add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(main_motorController ${catkin_LIBRARIES} modbus )

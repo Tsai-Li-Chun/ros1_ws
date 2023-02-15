@@ -1,0 +1,33 @@
+<!--
+	@file name : move_base_test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_teb_local_planner_tutorials/costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_teb_local_planner_tutorials/costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_teb_local_planner_tutorials/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_teb_local_planner_tutorials/global_costmap_params.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_teb_local_planner_tutorials/teb_local_planner_params.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_teb_local_planner_tutorials/prohibition_areas.yaml" command="load" ns="global_costmap/costmap_prohibition_layer" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_delta/global_planner_params.yaml" command="load" />
+		<rosparam file="$(find slam_navigation)/param3/diff_drive_delta/recovery_behaviors.yaml" command="load" />
+
+		<param name="base_global_planner" value="global_planner/GlobalPlanner" /> 
+		<param name="planner_frequency" value="0.0" />
+		<param name="planner_patience" value="3.0" /> <!--2-->
+
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<param name="controller_frequency" value="30.0" /> <!--25 30 20 15-->
+		<param name="controller_patience" value="5.0" /> <!--3-->
+
+		<param name="recovery_behavior_enabled" value="true"/>
+		<param name="clearing_rotation_allowed" value="false"/>
+		<param name="oscillation_timeout" value="0.0"/> 
+		<!-- <remap from="/cmd_vel"    to="$(arg raw_cmd_vel_topic)"/> -->
+	</node>
+
+</launch>

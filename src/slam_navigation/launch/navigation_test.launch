@@ -8,9 +8,13 @@
 
 	<arg name="map_file" default="trainingArea_2F_gmapping" />
 	<!-- <param name="use_sim_time" value="true"/> -->
-	<!-- <node pkg="tf" type="static_transform_publisher" name="link_to_footprint" args="0 0 0 0 0 0 /base_footprint /base_link 50"/> -->
-	<!-- <node pkg="tf" type="static_transform_publisher" name="robot_to_laser" args="0.2 0 0.4 0 0 0 /base_link /laser 50"/> -->
-	<!-- <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /odom /map 50" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster" args="0 0 0 0 0 0 /map /odom 50" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="link_to_footprint" args="0 0 0.11 0 0 0 /base_footprint /base_link 50"/> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="base_to_body" args="0 0 0 0 0 0 /base_link /body_link 50"/> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="robot_to_laser" args="0.33142 -0.22887 0.23138 -0.7853981634 0 0 /body_link /scanF_link 50"/> -->
+	<!-- <arg name="rvizconfig" default="$(find delta_amr2st_urdf)/rviz/test.rviz" /> -->
+	<!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" /> -->
+
 
 	<node name="map_server" pkg="map_server" type="map_server" args="$(find slam_navigation)/map/$(arg map_file).yaml"/>
 	<node name="keyboard_node" pkg="keyboard" type="keyboard_node" />
