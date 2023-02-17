@@ -75,5 +75,6 @@
         "codecvt": "cpp",
         "random": "cpp",
         "future": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "${workspaceFolder}/src/hipnuc_imu_ch110/serial_imu"
 }
