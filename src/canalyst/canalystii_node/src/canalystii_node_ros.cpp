@@ -4,6 +4,7 @@
 int main(int argc, char **argv){
     ros::init(argc, argv, "canalystii_node");
     CANalystii_node can_node;
+    ros::Rate loop_rate(100);
     
     if(!can_node.start_device()){
         ROS_WARN("device starts error");
@@ -19,22 +20,44 @@ int main(int argc, char **argv){
     vci_conf.Mode = 0;//normal mode
     unsigned int can_idx = 0;
     if(!can_node.init_can_interface(can_idx,vci_conf)){
-        ROS_WARN("device port init error");
+        ROS_WARN("device port(%d) init error",can_idx);
         return -1;
     }
+    else ROS_INFO("device port(%d) init Success",can_idx);
 
-    ROS_INFO("listening to can bus");
-    VCI_CAN_OBJ can_obj;
-    while(ros::ok()){
+    can_idx = 1;
+    if(!can_node.init_can_interface(can_idx,vci_conf)){
+        ROS_WARN("device port(%d) init error",can_idx);
+        return -1;
+    }
+    else ROS_INFO("device port(%d) init Success",can_idx);
+
+    // ROS_INFO("listening to can bus");
+    VCI_CAN_OBJ can_obj_Rx;
+    VCI_CAN_OBJ can_obj_Tx;
+    can_obj_Tx.ID=0;
+    can_obj_Tx.SendType=1;
+    can_obj_Tx.RemoteFlag=0;
+    can_obj_Tx.ExternFlag=0;
+    can_obj_Tx.DataLen=8;
+	for(int i=0; i<can_obj_Tx.DataLen; i++) can_obj_Tx.Data[i]=(i+1);
+
+    while(ros::ok())
+    {
         unsigned int recv_len = 1;
-        
-        //int len = can_node.receive_can_frame(can_idx,can_obj,recv_len,0);
-        if(can_node.receive_can_frame(can_idx,can_obj,recv_len,20)){
-            //ROS_INFO("received:%u",can_obj.ID);
-            canalystii_node_msg::can msg = CANalystii_node::can_obj2msg(can_obj);
-            can_node.can_msg_pub_.publish(msg);
+        if(can_node.send_can_frame(0,can_obj_Tx,recv_len))
+        {   
+            // ROS_INFO("device port0 send Success");
+            //int len = can_node.receive_can_frame(can_idx,can_obj,recv_len,0);
+            if(can_node.receive_can_frame(1,can_obj_Rx,recv_len,0)){
+                //ROS_INFO("received:%u",can_obj.ID);
+                canalystii_node_msg::can msg = CANalystii_node::can_obj2msg(can_obj_Rx);
+                can_node.can_msg_pub_.publish(msg);
+            }
         }
-        //ros::spinOnce();
+        can_obj_Tx.ID++;
+        ros::spinOnce();
+		loop_rate.sleep();
     }
     //ros::spin();
     return 0;

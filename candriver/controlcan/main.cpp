@@ -210,7 +210,7 @@ main()
 	//需要发送的帧，结构体设置
 	VCI_CAN_OBJ send[1];
 	send[0].ID=0;
-	send[0].SendType=0;
+	send[0].SendType=1;
 	send[0].RemoteFlag=0;
 	send[0].ExternFlag=1;
 	send[0].DataLen=8;

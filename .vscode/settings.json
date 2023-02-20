@@ -74,7 +74,11 @@
         "any": "cpp",
         "codecvt": "cpp",
         "random": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "controlcan.h": "c",
+        "bit": "cpp",
+        "regex": "cpp",
+        "shared_mutex": "cpp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/src/hipnuc_imu_ch110/serial_imu"
 }
