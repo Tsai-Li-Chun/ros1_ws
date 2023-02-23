@@ -16,7 +16,9 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
-#include <ros/ros.h>
+#include "ros/ros.h"
+#include "canalystii_node.h"
+#include "AGVPOC_CANopen_ODtable.hpp"
 /* User Includes End */
 
 
@@ -42,39 +44,38 @@ union modbus_32FormatTo8Format
 /* Extern Class Begin */
 
 /*  */
-class Delta_IMS_Motor_Control 
+class Delta_IMS_Motor_Control
 {
 public:
 	/* 建構函數 */
-	Delta_IMS_Motor_Control(const char* device, int slave,
-						   int BR=115200,
-						   char parity='E',
-						   int data_bit=8,
-						   int stop_bit=1	);
+	Delta_IMS_Motor_Control();
 	/* 解建構函數 */
 	~Delta_IMS_Motor_Control();
 
-	/* motor initialize */
-	int motorInit(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger);
-	/* 直接資料傳輸設定初始化 */
-	int BLVD_KRD_DirectDataOperation_setup(uint32_t OpType, uint32_t Acc, uint32_t Dec, int32_t Trigger);
-	/* 確認輸出狀態 */
-	bool BLVD_KRD_DriverOutputStatus_check(void);
+	/* CANalystii 初始化函數 */
+	int CANalystii_SetUp(void);
+	/* CANalystii 設備開啟函數 */
+	int CANalystii_open(void);
+	/* CANalystii 設備關閉函數 */
+	int CANalystii_close(void);
 
-	/* 馬達停止函數 */
-	int motorStop();
+	/* 設定工作模式 */
+	int set_OperationMode(uint8_t mode);
+	/* SDO發送函式 */
+	int SDO_transmit(VCI_CAN_OBJ data);
 	/* 馬達激磁函數 */
 	int motorSON();
 	/* 馬達解磁函數 */
 	int motorSOFF();
-	/* 前進函數 */
-	int motorForward(int32_t);
-	/* 後退函數 */
-	int motorReverse(int32_t);
-	/* 左轉函數 */
-	int motorLturn(int32_t);
-	/* 右轉函數 */
-	int motorRturn(int32_t);
+
+	/* 寫入加速度設定值 */
+	int writeAcceleration(int32_t acc);
+	/* 寫入減速度設定值 */
+	int writeDecelerate(int32_t dec);
+	/* 寫入速度設定值 */
+	int writeVelocity(int32_t Lvelocity, int32_t Rvelocity);
+	/* 寫入狀態機切換值 */
+	int writeStateMachineChange(int32_t dec);
 
 	/* 讀取速度設定值 */
 	int readDemandVelocity(int32_t *speed);
@@ -84,76 +85,41 @@ public:
 	int readActualPosition(int32_t *position);
 	/* 讀取馬達轉矩負載率 */
 	int readLoadTorque(int32_t *torque);
-	/* 讀取Driver溫度 */
-	int readDriverTemperature(int32_t *temperature);
-	/* 讀取Motor溫度 */
-	int readMotorTemperature(int32_t *temperature);
 	/* 讀取Driver耗能 */
 	int readPowerConsumption(int32_t *consumption);
-	/* 讀取Driver輸出狀態 */
-	int readDriverOutputStatus(void);
-
-	/* 寫入工作模式 */
-	int writeSetupType(int32_t mode);
-	/* 寫入速度設定值 */
-	int writeVelocity(int32_t Lvelocity, int32_t Rvelocity);
-	/* 寫入加速度設定值 */
-	int writeAcceleration(int32_t acc);
-	/* 寫入減速度設定值 */
-	int writeDecelerate(int32_t dec);
-	/* 寫入力矩 */
-	int writeTorque(int32_t torque);
-	/* 寫入觸發方式 */
-	int writeTrigger(int32_t trigger);
-	/* 寫入Driver輸入狀態 */
-	int writeDriverInputCommand(int32_t status);
-
-	/* 診斷測試 */
-	int writeDiagnosis(void);
 
 	/* 讀取目前AlarmCode */
 	int readAlarm(int32_t* alarm);
-	/* 讀取目前CommunicationError */
-	int readCommunicationError(int32_t *err);
 	/* reset目前Alarm */
 	int ResetAlarm(void);
 	/* AlarmCode轉string */
 	std::string getStrOfAlarm(uint8_t alarm);
 
 private:
-	/* 宣告libmodbus-API的Return用變數 */
-	int rc;
-	/* 建立modbus通訊結構體 */
-	modbus_t* mb;
-	/* 建立AlarmCode結構體 */
-	BLVD_KRD_RegAdr_Table RegAdr_T;
+	/* 建立CANalystii通訊物件 */
+	CANalystii_node can_node;
+	/* 建立can設備初始化結構體 */
+	VCI_INIT_CONFIG vci_conf;
+	/* 建立can通訊資料結構體 */
+	VCI_CAN_OBJ can_obj_init,can_obj_Rx,can_obj_Tx;
+
 	/* uint16 temp buffer */
 	uint16_t uint16Buffer[20];
 	/* uint8 temp buffer */
 	uint8_t uint8Buffer[20];
-	/*  */
-	int32_t motorStatus[2];
-	// /* 32bit to 16bit[2] 轉換結構體  */
-	// modbus_32FormatTo16Format buffer_32to16;
 
+	/* 解析OD資訊用結構體function */
+	DeltaMotorOD_Analyze_Struct DeltaMotorOD_Analyze(bool RW, uint32_t);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 function */
+	VCI_CAN_OBJ ODAnalyzeToVCICANOBJ(uint16_t, DeltaMotorOD_Analyze_Struct, uint8_t*);
 
-	/* Setup SlaveID & Connect */
-	int Modbus_slave_connect(int);
-
-	/* 讀取Int32t資料 */
-	int readInt32t(uint16_t Adr, int32_t *v);
-	/* 讀取n筆暫存器資料 */
-	int readRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data);
-
-	/* 寫入Int32t資料 */
-	int writeInt32t(uint16_t Adr, int32_t *Data);
-	/* 寫入n筆暫存器資料 */
-	int writeRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16_t *Data);
-	/* 寫入Query */
-	int writeQuery(uint16_t L, uint8_t *Data);
+	/* 檢查SDOTx回覆函式 */
+	bool SDOTx_receive_check(void);
+	/* 檢查SDORx回覆函式 */
+	bool SDORx_receive_check(void);
 
 	/* int32轉uint16[2] function */
-	uint16_t* int32_to_2uint16(int32_t data32, uint16_t *data16);
+	uint16_t* int32_to_4uint8(int32_t data32, uint8_t *data8);
 
 };
 
