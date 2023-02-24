@@ -67,12 +67,13 @@ enum class SDO_CommandCodeTable : uint8_t
 typedef SDO_CommandCodeTable SDO_CommandCodeTable;
 
 /* 宣告Delya IMS馬達 解析OD資訊用結構體 */
-typedef struct _Delta_IMS_MOTOR_OD_Analyze{
+typedef struct _Delta_IMS_MOTOR_OD{
+	bool read_write;
 	uint16_t index_main;
 	uint8_t index_sub_amount;
 	uint8_t index_sub;
 	uint8_t dataLen;
-}DeltaMotorOD_Analyze_Struct;
+}DeltaMotorOD_Struct;
 
 /* 建立DeltaIMS_Motor ObjectDictionary Table表,並創建專有DataType */
 enum class ObjectDictionaryTable : uint32_t

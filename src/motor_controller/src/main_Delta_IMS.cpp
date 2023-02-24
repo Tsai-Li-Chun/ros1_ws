@@ -110,12 +110,22 @@ int main(int argc, char **argv)
 	sleep(1);
 	/*  Delta IMS AGV-Motor Operation Mode set > (VelocityMode) */
 	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileVelocityMode);
+	sleep(1);
+	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::HomingMoode);
+	sleep(1);
+	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::InterpolatedPositionMode);
+	sleep(1);
+	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfilePositionMode);
+	sleep(1);
+	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileTorqueMode);
+	sleep(1);
 
 	current_time = ros::Time::now();
 	last_time = current_time;
 
 	while (ros::ok())
 	{
+		rc = DIMC.SDO_receive();
 		// DIMC.SDO_transmit();
 
 		ros::spinOnce();

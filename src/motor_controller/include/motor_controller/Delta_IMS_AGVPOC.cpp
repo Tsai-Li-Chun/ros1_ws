@@ -59,6 +59,7 @@
 **	**/
 Delta_IMS_Motor_Control::Delta_IMS_Motor_Control()
 {
+	/* canalystii struct initialization */
 	can_obj_init.ID=0;
     can_obj_init.SendType=1;
     can_obj_init.RemoteFlag=0;
@@ -67,6 +68,14 @@ Delta_IMS_Motor_Control::Delta_IMS_Motor_Control()
 	for(int i=0; i<can_obj_init.DataLen; i++) can_obj_init.Data[i]=0;
 	can_obj_Tx = can_obj_init;
 	can_obj_Rx = can_obj_init;
+	/* Delta IMS Motor CANopen OD struct initialization */
+	OD_struct_init.index_main = 0;
+	OD_struct_init.index_sub_amount = 0;
+	OD_struct_init.index_sub = 0;
+	OD_struct_init.dataLen = 0;
+	OD_struct_init.read_write = 0;
+	OD_struct_Rx = OD_struct_init;
+	OD_struct_Tx = OD_struct_init;
 }
 /** * @brief Destructor
  	* @param None
@@ -157,34 +166,106 @@ int Delta_IMS_Motor_Control::CANalystii_close(void)
 #endif /* CANalystii_SetUp_Operation */
 
 
+#define Delta_IMS_Motor_Operation 
+/* Delta IMS AGV Motor operation and write command relevant */
+/* involve Operation Mode set, ServoON/OFF, write motion parameters, etc...  */
+#ifdef Delta_IMS_Motor_Operation
+
 /** * @brief Delta IMS AGV-Motor Operation setting function
  	* @param None
  	* @return (int) Program Error.
 **	**/
 int Delta_IMS_Motor_Control::set_OperationMode(uint8_t mode)
 {
-	/* 建立解析OD資訊用結構體 */
-	DeltaMotorOD_Analyze_Struct OD_analyze;
 	/* 取得對應的OD列表 */
 	uint32_t OD_tmp = (uint32_t)ObjectDictionaryTable::ModesOfOperation;
 	/* 解析OD資訊用結構體 */
-	OD_analyze = DeltaMotorOD_Analyze(true,OD_tmp);
+	set_DeltaMotorOD_Struct(true,OD_tmp);
 	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
-	can_obj_Tx = ODAnalyzeToVCICANOBJ((uint16_t)FunctionCodeTable::RxSDO, OD_analyze, &mode);
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, &mode);
 	/* send data */
 	can_obj_Tx.ID+=1;	// R-Motor
-	SDO_transmit(can_obj_Tx);
+	SDO_transmit();
 	can_obj_Tx.ID+=1;	// L-Motor
-	SDO_transmit(can_obj_Tx);
+	SDO_transmit();
 	return 0;
 }
+
+#endif	/* Delta_IMS_Motor_Operation */
+
+
+#define Delta_IMS_Motor_Information
+/* Get Delta IMS AGV Motor Information,read command relevant */
+/* involve read motion parameters, read AlarmCode, etc... */
+#ifdef Delta_IMS_Motor_Information
+
+/** * @brief 讀取速度設定值
+	* @param speed(int32_t*) Demand speed
+ 	* @return (int)
+**	**/
+int Delta_IMS_Motor_Control::readDemandVelocity(int32_t *speed)
+{
+	return 0;
+}
+
+/** * @brief 讀取實際速度
+	* @param speed(int32_t*) feedback speed
+ 	* @return (int)
+**	**/
+int Delta_IMS_Motor_Control::readActualVelocity(int32_t *speed)
+{
+		/* 建立解析OD資訊用結構體 */
+	DeltaMotorOD_Struct OD_analyze;
+	/* 取得對應的OD列表 VelocityActualValue */
+	uint32_t OD_tmp = (uint32_t)ObjectDictionaryTable::VelocityActualValue;
+	/* 解析OD資訊用結構體 */
+	set_DeltaMotorOD_Struct(false,OD_tmp);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, nullptr);
+	/* send data */
+	can_obj_Tx.ID+=1;	// R-Motor
+	SDO_transmit();
+
+	return 0;
+}
+
+/** * @brief 讀取目前運轉位置(累計)
+	* @param position(int32_t*) Actual position
+ 	* @return (int)
+**	**/
+int Delta_IMS_Motor_Control::readActualPosition(int32_t *position)
+{
+	return 0;
+}
+
+/** * @brief 讀取馬達轉矩負載率
+	* @param torque(int32_t*) Load Torque
+ 	* @return (int)
+**	**/
+int Delta_IMS_Motor_Control::readLoadTorque(int32_t *torque)
+{
+	return 0;
+}
+
+/** * @brief 讀取Driver耗能
+	* @param consumption(int32_t*) Power Consumption
+ 	* @return (int)
+**	**/
+int Delta_IMS_Motor_Control::readPowerConsumption(int32_t *consumption)
+{
+	return 0;
+}
+
+
+#endif	/* Delta_IMS_Motor_Information */
+
 
 
 /** * @brief CANalystii SendData SDO 函數
  	* @param RW(bool) R/W mode select, 0(read), 1(write)
  	* @return (int) Program Error.
 **	**/
-int Delta_IMS_Motor_Control::SDO_transmit(VCI_CAN_OBJ data)
+int Delta_IMS_Motor_Control::SDO_transmit(void)
 {
 	// ROS_INFO("ID    : 0x%02x",can_obj_Tx.ID);
 	// ROS_INFO("Len   : 0x%02x",can_obj_Tx.DataLen);
@@ -197,76 +278,122 @@ int Delta_IMS_Motor_Control::SDO_transmit(VCI_CAN_OBJ data)
 	// ROS_INFO("data2 : 0x%02x",can_obj_Tx.Data[6]);
 	// ROS_INFO("data3 : 0x%02x",can_obj_Tx.Data[7]);
 	// ROS_INFO("---------------------------");
-	if(can_node.send_can_frame(0,data,1))
+	if(can_node.send_can_frame(0,can_obj_Tx,1))
 	{
 		ROS_INFO("CANalystii channel(0) send Success");
+		SDO_receive();
+		CANalystiiOBJ_To_DeltaMotorOD(can_obj_Rx);
+
 	}
 	return 0;
 }
 
-/** * @brief 解析OD資訊用結構體function
- 	* @param od(uint32_t) define in ObjectDictionaryTable OD data
- 	* @return (DeltaMotorOD_Analyze_Struct) OD Analyze Struct
+/** * @brief CANalystii ReceiveData SDO 函數
+ 	* @param RW(bool) R/W mode select, 0(read), 1(write)
+ 	* @return (int) Program Error.
 **	**/
-DeltaMotorOD_Analyze_Struct Delta_IMS_Motor_Control::DeltaMotorOD_Analyze(bool RW, uint32_t od)
+int Delta_IMS_Motor_Control::SDO_receive(void)
 {
-	DeltaMotorOD_Analyze_Struct ODA;
+	can_obj_Rx = can_obj_init;
+	if(can_node.receive_can_frame(0,can_obj_Rx,1))
+	{	
+		ROS_INFO("CANalystii channel(0) Receive Success");
+		ROS_INFO("ID        : %03x",can_obj_Rx.ID);
+		ROS_INFO("Len       : %d",can_obj_Rx.DataLen);
+		ROS_INFO("TimeFlag  : %d",can_obj_Rx.TimeFlag);
+		ROS_INFO("TimeStamp : %d",can_obj_Rx.TimeStamp);
+		for(int i=0; i<8; i++)
+			ROS_INFO("Data[%d]   : %02x",i,can_obj_Rx.Data[i]);
+		ROS_INFO("----------------------------------------------");
+	}
+	else
+	{
+		ROS_ERROR("CANalystii channel(0) Receive Failure");
+		ROS_ERROR("----------------------------------------------");
+	}
+
+	return 0;
+}
+
+/** * @brief 解析OD資訊用結構體function
+ 	* @param RW(bool) read/write operation select
+ 	* @param od(uint32_t) Delta IMS Motor Object Dictionary buffer
+ 	* @return None
+**	**/
+void Delta_IMS_Motor_Control::set_DeltaMotorOD_Struct(bool RW, uint32_t od)
+{
+	OD_struct_Tx = OD_struct_init;
+	/* get r/w operation */
+	OD_struct_Tx.read_write = RW;
 	/* get index */
-	ODA.index_main = (uint16_t)(od>>16);
+	OD_struct_Tx.index_main = (uint16_t)(od>>16);
 	/* get sub index amount */
-	ODA.index_sub_amount = (uint8_t)((od&0x0000FF00)>>8);
+	OD_struct_Tx.index_sub_amount = (uint8_t)((od&0x0000FF00)>>8);
 	/* get sub index, get data type (data length) */
-	if(ODA.index_sub_amount==0)
+	if(OD_struct_Tx.index_sub_amount==0)
 	{	/* have no sub index */
-		ODA.index_sub = 0;
-		ODA.dataLen = (uint8_t)(od&0x000000FF);
+		OD_struct_Tx.index_sub = 0;
+		OD_struct_Tx.dataLen = (uint8_t)(od&0x000000FF);
 	}
 	else
 	{	/* have sub index */ /* undone */
-		ODA.index_sub = 1;
-		ODA.dataLen = (uint8_t)(od&0x000000FF);
+		OD_struct_Tx.index_sub = 1;
+		OD_struct_Tx.dataLen = (uint8_t)(od&0x000000FF);
 	}
-
-	return ODA;
 }
 
 /** * @brief OD資訊用結構體 to VCI_CAN_OBJ結構體 function
- 	* @param od(DeltaMotorOD_Analyze_Struct) Delta Motor OD_Analyze Struct
  	* @param fc(uint16_t) CANopen Function Code
+ 	* @param od(DeltaMotorOD_Struct) Delta Motor OD_Analyze Struct
+ 	* @param data(uint8_t*) CANopen 4byte data
  	* @return (VCI_CAN_OBJ) CANalystii Struct
 **	**/
-VCI_CAN_OBJ Delta_IMS_Motor_Control::ODAnalyzeToVCICANOBJ(uint16_t fc, DeltaMotorOD_Analyze_Struct od, uint8_t *data)
+void Delta_IMS_Motor_Control::DeltaMotorOD_To_CANalystiiOBJ(uint16_t fc, uint8_t *data)
 {
-	VCI_CAN_OBJ canalystii_obj = can_obj_init;
+	can_obj_Tx = can_obj_init;
 	uint16_t index_tmp;
 
 	/* set CANopen COB-ID : function code */
-	canalystii_obj.ID = fc;
+	can_obj_Tx.ID = fc;
 	/* set CANopen 8byte data : byte0 command code */
-	if(od.dataLen>4) od.dataLen=od.dataLen-4;
-	// canalystii_obj.DataLen = od.dataLen;
-	canalystii_obj.DataLen = 8;
-	switch (od.dataLen)
-	{
-		case 1:  canalystii_obj.Data[0] = (uint8_t)SDO_CommandCodeTable::writeT_1byte ; break;
-		case 2:  canalystii_obj.Data[0] = (uint8_t)SDO_CommandCodeTable::writeT_2byte ; break;
-		case 4:  canalystii_obj.Data[0] = (uint8_t)SDO_CommandCodeTable::writeT_4byte ; break;
-		default: ROS_ERROR("[ODAnalyzeToVCICANOBJ] data dength to command code Failure"); break;
-	}
+	if(OD_struct_Tx.dataLen>4) OD_struct_Tx.dataLen=OD_struct_Tx.dataLen-4;
+	// can_obj_Tx.DataLen = OD_struct_Tx.dataLen;
+	can_obj_Tx.DataLen = 8;
+	if(OD_struct_Tx.read_write == true)
+		switch (OD_struct_Tx.dataLen)
+		{	/* write operation */
+			case 1:  can_obj_Tx.Data[0] = (uint8_t)SDO_CommandCodeTable::writeT_1byte; break;
+			case 2:  can_obj_Tx.Data[0] = (uint8_t)SDO_CommandCodeTable::writeT_2byte; break;
+			case 4:  can_obj_Tx.Data[0] = (uint8_t)SDO_CommandCodeTable::writeT_4byte; break;
+			default: ROS_ERROR("[ODAnalyzeToVCICANOBJ] data dength to command code Failure"); break;
+		}
+	else	/* read operation */
+		can_obj_Tx.Data[0] = (uint8_t)SDO_CommandCodeTable::readT ;
 	/* set CANopen 8byte data : byte1-2 Index address */
-	index_tmp = __builtin_bswap16(od.index_main);
-	canalystii_obj.Data[1] = (uint8_t)((index_tmp&0xFF00)>>8);
-	canalystii_obj.Data[2] = (uint8_t)(index_tmp&0x00FF);
+	index_tmp = __builtin_bswap16(OD_struct_Tx.index_main);
+	can_obj_Tx.Data[1] = (uint8_t)((index_tmp&0xFF00)>>8);
+	can_obj_Tx.Data[2] = (uint8_t)(index_tmp&0x00FF);
 	/* set CANopen 8byte data : byte3 Sub Index address */
-	canalystii_obj.Data[3] = od.index_sub;
-	/* set CANopen 8byte data : byte4-7 data */
-	if( (od.dataLen<=4) && (od.dataLen>=0) )
-		for(int i=0; i<od.dataLen; i++)	
-			canalystii_obj.Data[i+4] = *data+i;
-
-	return canalystii_obj;
+	can_obj_Tx.Data[3] = OD_struct_Tx.index_sub;
+	/* if write mode, set CANopen 8byte data : byte4-7 data */
+	if(OD_struct_Tx.read_write == true)
+		if( (OD_struct_Tx.dataLen<=4) && (OD_struct_Tx.dataLen>=0) )
+			for(int i=0; i<OD_struct_Tx.dataLen; i++)	
+				can_obj_Tx.Data[i+4] = *data+i;
 }
 
+/** * @brief OD資訊用結構體 to VCI_CAN_OBJ結構體 function
+ 	* @param fc(uint16_t) CANopen Function Code
+ 	* @param od(DeltaMotorOD_Struct) Delta Motor OD_Analyze Struct
+ 	* @param data(uint8_t*) CANopen 4byte data
+ 	* @return (VCI_CAN_OBJ) CANalystii Struct
+**	**/
+DeltaMotorOD_Struct Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(VCI_CAN_OBJ can_obj_Tx)
+{
+	DeltaMotorOD_Struct DMOD_Struct;
+	
+	return DMOD_Struct;
+}
 
 /* Program End */
 /* ---------------------------------------------------------*/

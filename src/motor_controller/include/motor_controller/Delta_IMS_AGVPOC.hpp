@@ -61,8 +61,6 @@ public:
 
 	/* 設定工作模式 */
 	int set_OperationMode(uint8_t mode);
-	/* SDO發送函式 */
-	int SDO_transmit(VCI_CAN_OBJ data);
 	/* 馬達激磁函數 */
 	int motorSON();
 	/* 馬達解磁函數 */
@@ -94,6 +92,11 @@ public:
 	int ResetAlarm(void);
 	/* AlarmCode轉string */
 	std::string getStrOfAlarm(uint8_t alarm);
+	
+	/* SDO發送函式 */
+	int SDO_transmit(void);
+	/* SDO接收函式 */
+	int SDO_receive(void);
 
 private:
 	/* 建立CANalystii通訊物件 */
@@ -102,6 +105,8 @@ private:
 	VCI_INIT_CONFIG vci_conf;
 	/* 建立can通訊資料結構體 */
 	VCI_CAN_OBJ can_obj_init,can_obj_Rx,can_obj_Tx;
+	/* 建立解析OD資訊用結構體 */
+	DeltaMotorOD_Struct OD_struct_init,OD_struct_Rx,OD_struct_Tx;
 
 	/* uint16 temp buffer */
 	uint16_t uint16Buffer[20];
@@ -109,9 +114,11 @@ private:
 	uint8_t uint8Buffer[20];
 
 	/* 解析OD資訊用結構體function */
-	DeltaMotorOD_Analyze_Struct DeltaMotorOD_Analyze(bool RW, uint32_t);
+	void set_DeltaMotorOD_Struct(bool RW, uint32_t);
 	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 function */
-	VCI_CAN_OBJ ODAnalyzeToVCICANOBJ(uint16_t, DeltaMotorOD_Analyze_Struct, uint8_t*);
+	void DeltaMotorOD_To_CANalystiiOBJ(uint16_t, uint8_t*);
+	/* VCI_CAN_OBJ結構體 to OD資訊用結構體 function */
+	DeltaMotorOD_Struct CANalystiiOBJ_To_DeltaMotorOD(VCI_CAN_OBJ);
 
 	/* 檢查SDOTx回覆函式 */
 	bool SDOTx_receive_check(void);
