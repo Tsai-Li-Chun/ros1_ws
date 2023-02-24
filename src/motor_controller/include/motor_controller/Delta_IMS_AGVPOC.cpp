@@ -7,6 +7,7 @@
 
 /* System Includes ------------------------------------------*/
 /* System Includes Begin */
+#include <string.h>
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
@@ -59,6 +60,7 @@
 **	**/
 Delta_IMS_Motor_Control::Delta_IMS_Motor_Control()
 {
+	Waiting_Takeout_Data = 0;
 	/* canalystii struct initialization */
 	can_obj_init.ID=0;
     can_obj_init.SendType=1;
@@ -73,6 +75,7 @@ Delta_IMS_Motor_Control::Delta_IMS_Motor_Control()
 	OD_struct_init.index_sub_amount = 0;
 	OD_struct_init.index_sub = 0;
 	OD_struct_init.dataLen = 0;
+	OD_struct_init.data = 0;
 	OD_struct_init.read_write = 0;
 	OD_struct_Rx = OD_struct_init;
 	OD_struct_Tx = OD_struct_init;
@@ -184,10 +187,8 @@ int Delta_IMS_Motor_Control::set_OperationMode(uint8_t mode)
 	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
 	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, &mode);
 	/* send data */
-	can_obj_Tx.ID+=1;	// R-Motor
-	SDO_transmit();
-	can_obj_Tx.ID+=1;	// L-Motor
-	SDO_transmit();
+	SDO_transmit(true, R_MOTOR);
+	SDO_transmit(true, L_MOTOR);
 	return 0;
 }
 
@@ -223,9 +224,8 @@ int Delta_IMS_Motor_Control::readActualVelocity(int32_t *speed)
 	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
 	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, nullptr);
 	/* send data */
-	can_obj_Tx.ID+=1;	// R-Motor
-	SDO_transmit();
-
+	SDO_transmit(false, R_MOTOR);
+	SDO_transmit(false, L_MOTOR);
 	return 0;
 }
 
@@ -262,11 +262,14 @@ int Delta_IMS_Motor_Control::readPowerConsumption(int32_t *consumption)
 
 
 /** * @brief CANalystii SendData SDO 函數
- 	* @param RW(bool) R/W mode select, 0(read), 1(write)
+ 	* @param rw(bool) R/W mode select, 0(read), 1(write)
+ 	* @param id(uint8_t) Motor CANopen id
  	* @return (int) Program Error.
 **	**/
-int Delta_IMS_Motor_Control::SDO_transmit(void)
+int Delta_IMS_Motor_Control::SDO_transmit(bool rw, uint8_t id)
 {
+	uint16_t tmp = can_obj_Tx.ID;
+	can_obj_Tx.ID+=id; 
 	// ROS_INFO("ID    : 0x%02x",can_obj_Tx.ID);
 	// ROS_INFO("Len   : 0x%02x",can_obj_Tx.DataLen);
 	// ROS_INFO("CC    : 0x%02x",can_obj_Tx.Data[0]);
@@ -281,36 +284,44 @@ int Delta_IMS_Motor_Control::SDO_transmit(void)
 	if(can_node.send_can_frame(0,can_obj_Tx,1))
 	{
 		ROS_INFO("CANalystii channel(0) send Success");
-		SDO_receive();
-		CANalystiiOBJ_To_DeltaMotorOD(can_obj_Rx);
-
+		// SDO_receive(rw, id);
 	}
+	can_obj_Tx.ID = tmp;
 	return 0;
 }
 
 /** * @brief CANalystii ReceiveData SDO 函數
- 	* @param RW(bool) R/W mode select, 0(read), 1(write)
+ 	* @param rw(bool) R/W mode select, 0(read), 1(write)
+ 	* @param id(uint8_t) Motor CANopen id
  	* @return (int) Program Error.
 **	**/
-int Delta_IMS_Motor_Control::SDO_receive(void)
+int Delta_IMS_Motor_Control::SDO_receive(bool rw, uint8_t id)
 {
-	can_obj_Rx = can_obj_init;
-	if(can_node.receive_can_frame(0,can_obj_Rx,1))
-	{	
-		ROS_INFO("CANalystii channel(0) Receive Success");
-		ROS_INFO("ID        : %03x",can_obj_Rx.ID);
-		ROS_INFO("Len       : %d",can_obj_Rx.DataLen);
-		ROS_INFO("TimeFlag  : %d",can_obj_Rx.TimeFlag);
-		ROS_INFO("TimeStamp : %d",can_obj_Rx.TimeStamp);
-		for(int i=0; i<8; i++)
-			ROS_INFO("Data[%d]   : %02x",i,can_obj_Rx.Data[i]);
-		ROS_INFO("----------------------------------------------");
-	}
-	else
+	uint16_t tmp = can_obj_Tx.ID;
+	can_obj_Tx.ID+=id; 
+	// ROS_INFO("ID    : 0x%02x",can_obj_Tx.ID);
+	// ROS_INFO("Len   : 0x%02x",can_obj_Tx.DataLen);
+	// ROS_INFO("CC    : 0x%02x",can_obj_Tx.Data[0]);
+	// ROS_INFO("indexL: 0x%02x",can_obj_Tx.Data[1]);
+	// ROS_INFO("indexH: 0x%02x",can_obj_Tx.Data[2]);
+	// ROS_INFO("indexS: 0x%02x",can_obj_Tx.Data[3]);
+	// ROS_INFO("data0 : 0x%02x",can_obj_Tx.Data[4]);
+	// ROS_INFO("data1 : 0x%02x",can_obj_Tx.Data[5]);
+	// ROS_INFO("data2 : 0x%02x",can_obj_Tx.Data[6]);
+	// ROS_INFO("data3 : 0x%02x",can_obj_Tx.Data[7]);
+	// ROS_INFO("---------------------------");
+	if(can_node.send_can_frame(0,can_obj_Tx,1))
 	{
-		ROS_ERROR("CANalystii channel(0) Receive Failure");
-		ROS_ERROR("----------------------------------------------");
+		// ROS_INFO("CANalystii channel(0) send Success");
+		can_obj_Rx = can_obj_init;
+		if(can_node.receive_can_frame(0,can_obj_Rx,1))
+		{	
+			CANalystiiOBJ_To_DeltaMotorOD(rw, id);
+		}
 	}
+	can_obj_Tx.ID = tmp;
+
+
 
 	return 0;
 }
@@ -383,16 +394,66 @@ void Delta_IMS_Motor_Control::DeltaMotorOD_To_CANalystiiOBJ(uint16_t fc, uint8_t
 }
 
 /** * @brief OD資訊用結構體 to VCI_CAN_OBJ結構體 function
- 	* @param fc(uint16_t) CANopen Function Code
- 	* @param od(DeltaMotorOD_Struct) Delta Motor OD_Analyze Struct
- 	* @param data(uint8_t*) CANopen 4byte data
+ 	* @param rw(bool) R/W mode select, 0(read), 1(write)
+ 	* @param id(uint8_t) Motor CANopen id
  	* @return (VCI_CAN_OBJ) CANalystii Struct
 **	**/
-DeltaMotorOD_Struct Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(VCI_CAN_OBJ can_obj_Tx)
+void Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(bool rw, uint8_t id)
 {
-	DeltaMotorOD_Struct DMOD_Struct;
-	
-	return DMOD_Struct;
+	uint8_t read_cc_check = 0;	/* read CommandCode check */
+	uint8_t command_code = 0;
+	uint8_t source_id = (uint8_t)(can_obj_Rx.ID&0x007F);
+	uint16_t OD_index_main = 0;
+	uint32_t SDO_AbortCode = 0;
+	OD_struct_Rx = OD_struct_init;
+	if(can_obj_Rx.ExternFlag == 1)
+		ROS_ERROR("The SourceDevice-ExternFlag is Extern mode");
+	if(can_obj_Rx.RemoteFlag == 1)
+		ROS_ERROR("The SourceDevice-RemoteFlag is Remote frame");
+	command_code = can_obj_Rx.Data[0];
+
+	if(rw == true)
+	{	/* if write operation */
+		if( command_code == ((uint8_t)SDO_CommandCodeTable::writeR_Err) )
+		{	/* Display SDO AbortCode Message */
+			memcpy(&SDO_AbortCode, can_obj_Rx.Data+4, 4);
+			ROS_ERROR("CANopen SDO transmit Failure, SDO_AbortCode = 0x%08xh",SDO_AbortCode);
+		}
+		else if( command_code == ((uint8_t)SDO_CommandCodeTable::writeR_Pass) )
+		{	/* Display Success Message */
+			memcpy(&OD_index_main, can_obj_Rx.Data+1, 2);
+			ROS_INFO("CANopen SDO [transmit] OD(0x%02xh - 0x%02xh) Success",OD_index_main,can_obj_Rx.Data[3]);
+		}
+	}
+	else if(rw == false)
+	{	/* if read operation */
+		read_cc_check = 0;
+		if( command_code == ((uint8_t)SDO_CommandCodeTable::readR_1byte) ) {read_cc_check++;OD_struct_Rx.dataLen=1;}
+		if( command_code == ((uint8_t)SDO_CommandCodeTable::readR_2byte) ) {read_cc_check++;OD_struct_Rx.dataLen=2;}
+		if( command_code == ((uint8_t)SDO_CommandCodeTable::readR_4byte) ) {read_cc_check++;OD_struct_Rx.dataLen=4;}
+		if( command_code == ((uint8_t)SDO_CommandCodeTable::readR_Err) )
+		{	/* Display SDO AbortCode Message */
+			memcpy(&SDO_AbortCode, can_obj_Rx.Data+4, 4);
+			ROS_ERROR("CANopen SDO [receive] Failure, SDO_AbortCode = 0x%08xh",SDO_AbortCode);
+		}
+		else if( read_cc_check != 1 )
+			ROS_ERROR("CANopen SDO [receive] CommandCode does not meet the standard");
+		else if( read_cc_check == 1 )
+		{
+			Waiting_Takeout_Data = true;
+			OD_struct_Rx.index_sub = can_obj_Rx.Data[3];
+			memcpy(&OD_struct_Rx.index_main, can_obj_Rx.Data+1, 2);
+			// OD_struct_Rx.index_main = (((uint16_t)can_obj_Rx.Data[2])<<8);
+			// OD_struct_Rx.index_main |= (uint16_t)(can_obj_Rx.Data[1]);
+			memcpy(&OD_struct_Rx.data, can_obj_Rx.Data+4, 4);
+
+			ROS_INFO("COBID=0x%04xh, sourceID=0x%02xh",can_obj_Rx.ID ,source_id);
+			ROS_INFO("OD   =0x%04xh",OD_struct_Rx.index_main);
+			ROS_INFO("ODsub=0x%04xh",OD_struct_Rx.index_sub);
+			ROS_INFO("Len  =%d",OD_struct_Rx.dataLen);
+			ROS_INFO("data =%d",OD_struct_Rx.data);
+		}
+	}
 }
 
 /* Program End */

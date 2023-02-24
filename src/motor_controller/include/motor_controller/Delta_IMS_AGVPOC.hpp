@@ -31,10 +31,14 @@
 /* Extern Typedef Begin */
 
 /* 32Format to 8Format transform union type */
-union modbus_32FormatTo8Format
+union FormatTo_8_16_32
 {
-    int32_t d32;
-    uint16_t d8[ (sizeof(d32))/sizeof(uint8_t) ];
+    int32_t		d32;
+    uint32_t	ud32;
+    int16_t		d16[2];
+    uint16_t	ud16[2];
+    int8_t		d8[4];
+    uint8_t		ud8[4];
 };
 
 /* Extern Typedef End */
@@ -94,11 +98,13 @@ public:
 	std::string getStrOfAlarm(uint8_t alarm);
 	
 	/* SDO發送函式 */
-	int SDO_transmit(void);
+	int SDO_transmit(bool, uint8_t);
 	/* SDO接收函式 */
-	int SDO_receive(void);
+	int SDO_receive(bool, uint8_t);
 
 private:
+	/* 是否有資料要取用旗標 */
+	uint8_t Waiting_Takeout_Data;
 	/* 建立CANalystii通訊物件 */
 	CANalystii_node can_node;
 	/* 建立can設備初始化結構體 */
@@ -118,7 +124,7 @@ private:
 	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 function */
 	void DeltaMotorOD_To_CANalystiiOBJ(uint16_t, uint8_t*);
 	/* VCI_CAN_OBJ結構體 to OD資訊用結構體 function */
-	DeltaMotorOD_Struct CANalystiiOBJ_To_DeltaMotorOD(VCI_CAN_OBJ);
+	void CANalystiiOBJ_To_DeltaMotorOD(bool, uint8_t);
 
 	/* 檢查SDOTx回覆函式 */
 	bool SDOTx_receive_check(void);

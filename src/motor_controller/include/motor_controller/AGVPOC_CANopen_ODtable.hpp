@@ -73,6 +73,7 @@ typedef struct _Delta_IMS_MOTOR_OD{
 	uint8_t index_sub_amount;
 	uint8_t index_sub;
 	uint8_t dataLen;
+	int32_t data;
 }DeltaMotorOD_Struct;
 
 /* 建立DeltaIMS_Motor ObjectDictionary Table表,並創建專有DataType */
@@ -125,7 +126,7 @@ enum class ObjectDictionaryTable : uint32_t
 	ControlWord 						= 0x60400002,
 	StatusWord 							= 0x60410002,
 	ShutdownOptionCode					= 0x605B0006,
-	ModesOfOperation					= 0x12340005,
+	ModesOfOperation					= 0x60600005,
 	ModesOfOperationDisplay				= 0x60610005,
 	PositionDemandValue_PUU				= 0x60620008,
 	PositionActualInternalValue			= 0x60630008,

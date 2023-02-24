@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 	/* 初始化motor_fb物件 */
 	motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
 	/* 建立delay用物件 */
-	ros::Rate loop_rate(1);
+	ros::Rate loop_rate(10);
 
 	sleep(1);
 	/*  CANalystii drive start and channel open */
@@ -111,22 +111,21 @@ int main(int argc, char **argv)
 	/*  Delta IMS AGV-Motor Operation Mode set > (VelocityMode) */
 	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileVelocityMode);
 	sleep(1);
-	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::HomingMoode);
-	sleep(1);
-	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::InterpolatedPositionMode);
-	sleep(1);
-	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfilePositionMode);
-	sleep(1);
-	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileTorqueMode);
-	sleep(1);
+	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::HomingMoode);
+	// sleep(1);
+	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::InterpolatedPositionMode);
+	// sleep(1);
+	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfilePositionMode);
+	// sleep(1);
+	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileTorqueMode);
+	// sleep(1);
 
 	current_time = ros::Time::now();
 	last_time = current_time;
 
 	while (ros::ok())
 	{
-		rc = DIMC.SDO_receive();
-		// DIMC.SDO_transmit();
+		rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileVelocityMode);
 
 		ros::spinOnce();
 		loop_rate.sleep();
