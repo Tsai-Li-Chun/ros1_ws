@@ -175,7 +175,7 @@ enum class ObjectDictionaryTable : uint32_t
 	DigitalInputs						= 0x60FD0008,
 	DigitalOutput						= 0x60FE0204,
 		DigitalOutput_Sub					= 0x00000044,
-	TargetVelocity						= 0x60FE0008,
+	TargetVelocity						= 0x60FF0008,
 	SupportedDriveModes					= 0x65020004
 };
 typedef ObjectDictionaryTable ObjectDictionaryTable;

@@ -17,7 +17,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include "ros/ros.h"
-#include "canalystii_node.h"
+#include "canalystii.h"
 #include "AGVPOC_CANopen_ODtable.hpp"
 /* User Includes End */
 
@@ -69,15 +69,16 @@ public:
 	int motorSON();
 	/* 馬達解磁函數 */
 	int motorSOFF();
+	/* 寫入狀態機切換值 */
+	int writeStateMachineChange(uint8_t*);
 
 	/* 寫入加速度設定值 */
-	int writeAcceleration(int32_t acc);
+	int writeAcceleration(uint32_t acc);
 	/* 寫入減速度設定值 */
-	int writeDecelerate(int32_t dec);
+	int writeDecelerate(uint32_t dec);
 	/* 寫入速度設定值 */
 	int writeVelocity(int32_t Lvelocity, int32_t Rvelocity);
-	/* 寫入狀態機切換值 */
-	int writeStateMachineChange(int32_t dec);
+
 
 	/* 讀取速度設定值 */
 	int readDemandVelocity(int32_t *speed);
@@ -106,7 +107,7 @@ private:
 	/* 是否有資料要取用旗標 */
 	uint8_t Waiting_Takeout_Data;
 	/* 建立CANalystii通訊物件 */
-	CANalystii_node can_node;
+	CANalystii can_node;
 	/* 建立can設備初始化結構體 */
 	VCI_INIT_CONFIG vci_conf;
 	/* 建立can通訊資料結構體 */

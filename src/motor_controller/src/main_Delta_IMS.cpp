@@ -23,6 +23,9 @@
 
 /* Define ---------------------------------------------------*/
 /* Define Begin */
+
+#define acc_dec_time (uint32_t)1000
+
 /* Define End */
 
 
@@ -39,7 +42,8 @@
 /* Variables ------------------------------------------------*/
 /* Variables Begin */
 
-
+/* 建立 BLVD-KRD Control物件*/
+Delta_IMS_Motor_Control DIMC;
 /* 建立topic-Publisher物件 */
 ros::Publisher motor_fb;
 /* 建立message Twist物件 */
@@ -55,7 +59,7 @@ motor_feedback_msgs::motor_feedback mf;
 /* 宣告左右輪速度 */
 int32_t velL=0,velR=0;
 
-const double ms_to_rpm = 2976.40418132187;
+const double ms_to_rpm = 3183.09891613572;
 
 /* Variables End */
 
@@ -87,20 +91,18 @@ int main(int argc, char **argv)
 	/* 建立ROS time物件 */
 	ros::Time current_time, last_time;
 	/* delta time(s) */
-	double dt;
+	int dt=0;
 	/* ros init */
     ros::init(argc,argv,"main_Delta_IMS");
 
 	/* 建立NodeHandle物件 */
 	ros::NodeHandle nh;
-	/* 建立 BLVD-KRD Control物件*/
-	Delta_IMS_Motor_Control DIMC;
 	/* 建立topic-Subscriber物件並初始化 */
 	ros::Subscriber twist_sub = nh.subscribe("/cmd_vel", 100, twist_callback);
-	/* 建立計時物件並初始化計時中斷 */
-	ros::Timer timer = nh.createTimer(ros::Duration(0.01), timer_callback);
-	/* 初始化motor_fb物件 */
-	motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
+	// /* 建立計時物件並初始化計時中斷 */
+	// ros::Timer timer = nh.createTimer(ros::Duration(0.01), timer_callback);
+	// /* 初始化motor_fb物件 */
+	// motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
 	/* 建立delay用物件 */
 	ros::Rate loop_rate(10);
 
@@ -111,6 +113,15 @@ int main(int argc, char **argv)
 	/*  Delta IMS AGV-Motor Operation Mode set > (VelocityMode) */
 	rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileVelocityMode);
 	sleep(1);
+	rc = DIMC.writeAcceleration(acc_dec_time);
+	sleep(1);
+	rc = DIMC.writeDecelerate(acc_dec_time);
+	sleep(1);
+	rc = DIMC.writeVelocity(0,0);
+	sleep(1);
+	rc = DIMC.motorSON();
+	sleep(5);
+	ROS_INFO("Delta IMS AGV-Motor initialization Success");
 	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::HomingMoode);
 	// sleep(1);
 	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::InterpolatedPositionMode);
@@ -125,13 +136,13 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
-		rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::ProfileVelocityMode);
-
+		// rc = DIMC.writeVelocity(10000,10000);
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
 	// ros::spin();
-
+	rc = DIMC.motorSOFF();
+	sleep(1);
 	rc = DIMC.CANalystii_close();
 	ROS_INFO("rc = %d , CANalystii close",rc);
 	sleep(1);
@@ -143,18 +154,18 @@ int main(int argc, char **argv)
 
 void twist_callback(const geometry_msgs::Twist& twist_msg)
 {
-	// twist_last = twist_msg;
-	// double velLtmp,velRtmp;
-	// velLtmp = twist_last.linear.x - twist_last.angular.z ;
-	// velRtmp = twist_last.linear.x + twist_last.angular.z ;
-	// velL = (int32_t)(velLtmp*ms_to_rpm);
-	// velR = (int32_t)(velRtmp*ms_to_rpm);
-	// if(velL>890) velL=890;
-	// else if(velL<(-890)) velL=(-890);
-	// if(velR>890) velR=890;
-	// else if(velR<(-890)) velR=(-890);
-	// // printf("%d , %d\n",velL,velR);
-	// BKC.writeVelocity(velL,velR);
+	twist_last = twist_msg;
+	double velLtmp,velRtmp;
+	velLtmp = twist_last.linear.x - twist_last.angular.z ;
+	velRtmp = twist_last.linear.x + twist_last.angular.z ;
+	if(velLtmp>1) velLtmp=1;
+	else if(velLtmp<(-1)) velLtmp=(-1);
+	if(velRtmp>1) velRtmp=1;
+	else if(velRtmp<(-1)) velRtmp=(-1);
+	velL = (int32_t)(velLtmp*ms_to_rpm*10);
+	velR = (int32_t)(velRtmp*ms_to_rpm*10);
+	// printf("%d , %d\n",velL,velR);
+	DIMC.writeVelocity(velL,velR);
 }
 
 void timer_callback(const ros::TimerEvent& e)

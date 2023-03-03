@@ -192,6 +192,130 @@ int Delta_IMS_Motor_Control::set_OperationMode(uint8_t mode)
 	return 0;
 }
 
+/** * @brief Delta IMS AGV-Motor Servo ON function
+ 	* @param None
+ 	* @return (int) Program Error.
+**	**/
+int Delta_IMS_Motor_Control::motorSON(void)
+{
+	uint8_t StateMachine_value[2] = {0x06,0x00};
+	writeStateMachineChange(StateMachine_value);
+	usleep(100000);
+	StateMachine_value[0] = 0x07;
+	writeStateMachineChange(StateMachine_value);
+	usleep(100000);
+	StateMachine_value[0] = 0x0F;
+	writeStateMachineChange(StateMachine_value);
+	usleep(100000);
+	return 0;
+}
+
+/** * @brief Delta IMS AGV-Motor Servo OFF function
+ 	* @param None
+ 	* @return (int) Program Error.
+**	**/
+int Delta_IMS_Motor_Control::motorSOFF(void)
+{
+	uint8_t StateMachine_value[2] = {0x07,0x00};
+	writeStateMachineChange(StateMachine_value);
+	usleep(100000);
+	StateMachine_value[0] = 0x06;
+	writeStateMachineChange(StateMachine_value);
+	usleep(100000);
+	StateMachine_value[0] = 0x00;
+	writeStateMachineChange(StateMachine_value);
+	usleep(100000);
+	ROS_INFO("motorSOFF");
+	return 0;
+}
+
+/** * @brief Delta IMS AGV-Motor StateMachine Change function
+ 	* @param None
+ 	* @return (int) Program Error.
+**	**/
+int Delta_IMS_Motor_Control::writeStateMachineChange(uint8_t* value)
+{
+	/* 取得對應的OD列表 */
+	uint32_t OD_tmp = (uint32_t)ObjectDictionaryTable::ControlWord;
+	/* 解析OD資訊用結構體 */
+	set_DeltaMotorOD_Struct(true,OD_tmp);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, value);
+	/* send data */
+	SDO_transmit(true, R_MOTOR);
+	SDO_transmit(true, L_MOTOR);
+	return 0;
+}
+
+/** * @brief Delta IMS AGV-Motor set Acceleration(0-3000rpm) function
+ 	* @param None
+ 	* @return (int) Program Error.
+**	**/
+int Delta_IMS_Motor_Control::writeAcceleration(uint32_t acc)
+{
+	/* 取得對應的OD列表 */
+	uint32_t OD_tmp = (uint32_t)ObjectDictionaryTable::ProfileAcceleration;
+	/* 32Format to 8Format transform union type */
+	FormatTo_8_16_32 FormatTo_8;
+	/* 解析OD資訊用結構體 */
+	set_DeltaMotorOD_Struct(true,OD_tmp);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
+	FormatTo_8.ud32 = acc;
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, FormatTo_8.ud8);
+	/* send data */
+	SDO_transmit(true, L_MOTOR);	
+	SDO_transmit(true, R_MOTOR);	
+	return 0;
+}
+
+/** * @brief Delta IMS AGV-Motor set Decelerate(0-3000rpm) function
+ 	* @param None
+ 	* @return (int) Program Error.
+**	**/
+int Delta_IMS_Motor_Control::writeDecelerate(uint32_t dec)
+{
+	/* 取得對應的OD列表 */
+	uint32_t OD_tmp = (uint32_t)ObjectDictionaryTable::ProfileDeceleration;
+	/* 32Format to 8Format transform union type */
+	FormatTo_8_16_32 FormatTo_8;
+	/* 解析OD資訊用結構體 */
+	set_DeltaMotorOD_Struct(true,OD_tmp);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
+	FormatTo_8.ud32 = dec;
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, FormatTo_8.ud8);
+	/* send data */
+	SDO_transmit(true, L_MOTOR);	
+	SDO_transmit(true, R_MOTOR);	
+	return 0;
+}
+
+/** * @brief 寫入速度設定值
+	* @param Lvelocity(int32_t) Set the operating Lmotor velocity
+	* @param Rvelocity(int32_t) Set the operating Rmotor velocity
+ 	* @return (int)
+**	**/
+int Delta_IMS_Motor_Control::writeVelocity(int32_t Lvelocity,int32_t Rvelocity)
+{
+	/* 取得對應的OD列表 */
+	uint32_t OD_tmp = (uint32_t)ObjectDictionaryTable::TargetVelocity;
+	/* 32Format to 8Format transform union type */
+	FormatTo_8_16_32 FormatTo_8;
+	/* 解析OD資訊用結構體 */
+	set_DeltaMotorOD_Struct(true,OD_tmp);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
+	FormatTo_8.d32 = Lvelocity;
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, FormatTo_8.ud8);
+	/* send data */
+	SDO_transmit(true, L_MOTOR);
+	/* OD資訊用結構體 to VCI_CAN_OBJ結構體 */
+	FormatTo_8.d32 = Rvelocity;
+	DeltaMotorOD_To_CANalystiiOBJ((uint16_t)FunctionCodeTable::RxSDO, FormatTo_8.ud8);
+	/* send data */
+	SDO_transmit(true, R_MOTOR);
+
+	return 0;
+}
+
 #endif	/* Delta_IMS_Motor_Operation */
 
 
@@ -270,21 +394,26 @@ int Delta_IMS_Motor_Control::SDO_transmit(bool rw, uint8_t id)
 {
 	uint16_t tmp = can_obj_Tx.ID;
 	can_obj_Tx.ID+=id; 
-	// ROS_INFO("ID    : 0x%02x",can_obj_Tx.ID);
-	// ROS_INFO("Len   : 0x%02x",can_obj_Tx.DataLen);
-	// ROS_INFO("CC    : 0x%02x",can_obj_Tx.Data[0]);
-	// ROS_INFO("indexL: 0x%02x",can_obj_Tx.Data[1]);
-	// ROS_INFO("indexH: 0x%02x",can_obj_Tx.Data[2]);
-	// ROS_INFO("indexS: 0x%02x",can_obj_Tx.Data[3]);
-	// ROS_INFO("data0 : 0x%02x",can_obj_Tx.Data[4]);
-	// ROS_INFO("data1 : 0x%02x",can_obj_Tx.Data[5]);
-	// ROS_INFO("data2 : 0x%02x",can_obj_Tx.Data[6]);
-	// ROS_INFO("data3 : 0x%02x",can_obj_Tx.Data[7]);
+	// ROS_INFO("TX - ID    : 0x%02x",can_obj_Tx.ID);
+	// ROS_INFO("TX - Len   : 0x%02x",can_obj_Tx.DataLen);
+	// ROS_INFO("TX - CC    : 0x%02x",can_obj_Tx.Data[0]);
+	// ROS_INFO("TX - indexL: 0x%02x",can_obj_Tx.Data[1]);
+	// ROS_INFO("TX - indexH: 0x%02x",can_obj_Tx.Data[2]);
+	// ROS_INFO("TX - indexS: 0x%02x",can_obj_Tx.Data[3]);
+	// ROS_INFO("TX - data0 : 0x%02x",can_obj_Tx.Data[4]);
+	// ROS_INFO("TX - data1 : 0x%02x",can_obj_Tx.Data[5]);
+	// ROS_INFO("TX - data2 : 0x%02x",can_obj_Tx.Data[6]);
+	// ROS_INFO("TX - data3 : 0x%02x",can_obj_Tx.Data[7]);
 	// ROS_INFO("---------------------------");
 	if(can_node.send_can_frame(0,can_obj_Tx,1))
 	{
-		ROS_INFO("CANalystii channel(0) send Success");
+		// usleep(1);
+		// ROS_INFO("CANalystii channel(0) send Success");
 		// SDO_receive(rw, id);
+	}
+	else
+	{
+		ROS_ERROR("[SDO_transmit] Failure");
 	}
 	can_obj_Tx.ID = tmp;
 	return 0;
@@ -297,31 +426,10 @@ int Delta_IMS_Motor_Control::SDO_transmit(bool rw, uint8_t id)
 **	**/
 int Delta_IMS_Motor_Control::SDO_receive(bool rw, uint8_t id)
 {
-	uint16_t tmp = can_obj_Tx.ID;
-	can_obj_Tx.ID+=id; 
-	// ROS_INFO("ID    : 0x%02x",can_obj_Tx.ID);
-	// ROS_INFO("Len   : 0x%02x",can_obj_Tx.DataLen);
-	// ROS_INFO("CC    : 0x%02x",can_obj_Tx.Data[0]);
-	// ROS_INFO("indexL: 0x%02x",can_obj_Tx.Data[1]);
-	// ROS_INFO("indexH: 0x%02x",can_obj_Tx.Data[2]);
-	// ROS_INFO("indexS: 0x%02x",can_obj_Tx.Data[3]);
-	// ROS_INFO("data0 : 0x%02x",can_obj_Tx.Data[4]);
-	// ROS_INFO("data1 : 0x%02x",can_obj_Tx.Data[5]);
-	// ROS_INFO("data2 : 0x%02x",can_obj_Tx.Data[6]);
-	// ROS_INFO("data3 : 0x%02x",can_obj_Tx.Data[7]);
-	// ROS_INFO("---------------------------");
-	if(can_node.send_can_frame(0,can_obj_Tx,1))
-	{
-		// ROS_INFO("CANalystii channel(0) send Success");
-		can_obj_Rx = can_obj_init;
-		if(can_node.receive_can_frame(0,can_obj_Rx,1))
-		{	
-			CANalystiiOBJ_To_DeltaMotorOD(rw, id);
-		}
+	if(can_node.receive_can_frame(0,can_obj_Rx,1))
+	{	
+		CANalystiiOBJ_To_DeltaMotorOD(rw, id);
 	}
-	can_obj_Tx.ID = tmp;
-
-
 
 	return 0;
 }
@@ -390,7 +498,7 @@ void Delta_IMS_Motor_Control::DeltaMotorOD_To_CANalystiiOBJ(uint16_t fc, uint8_t
 	if(OD_struct_Tx.read_write == true)
 		if( (OD_struct_Tx.dataLen<=4) && (OD_struct_Tx.dataLen>=0) )
 			for(int i=0; i<OD_struct_Tx.dataLen; i++)	
-				can_obj_Tx.Data[i+4] = *data+i;
+				can_obj_Tx.Data[i+4] = *(data+i);
 }
 
 /** * @brief OD資訊用結構體 to VCI_CAN_OBJ結構體 function
@@ -400,6 +508,17 @@ void Delta_IMS_Motor_Control::DeltaMotorOD_To_CANalystiiOBJ(uint16_t fc, uint8_t
 **	**/
 void Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(bool rw, uint8_t id)
 {
+	// ROS_INFO("RX - ID    : 0x%02x",can_obj_Rx.ID);
+	// ROS_INFO("RX - Len   : 0x%02x",can_obj_Rx.DataLen);
+	// ROS_INFO("RX - CC    : 0x%02x",can_obj_Rx.Data[0]);
+	// ROS_INFO("RX - indexL: 0x%02x",can_obj_Rx.Data[1]);
+	// ROS_INFO("RX - indexH: 0x%02x",can_obj_Rx.Data[2]);
+	// ROS_INFO("RX - indexS: 0x%02x",can_obj_Rx.Data[3]);
+	// ROS_INFO("RX - data0 : 0x%02x",can_obj_Rx.Data[4]);
+	// ROS_INFO("RX - data1 : 0x%02x",can_obj_Rx.Data[5]);
+	// ROS_INFO("RX - data2 : 0x%02x",can_obj_Rx.Data[6]);
+	// ROS_INFO("RX - data3 : 0x%02x",can_obj_Rx.Data[7]);
+	// ROS_INFO("---------------------------");
 	uint8_t read_cc_check = 0;	/* read CommandCode check */
 	uint8_t command_code = 0;
 	uint8_t source_id = (uint8_t)(can_obj_Rx.ID&0x007F);
