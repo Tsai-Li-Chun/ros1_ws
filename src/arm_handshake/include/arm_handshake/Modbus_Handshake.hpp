@@ -21,16 +21,16 @@
 /* Define ---------------------------------------------------*/
 /* Define Begin */
 
-#define addr_runRL	(uint16_t)0x0000
-#define addr_cmd 	(uint16_t)0x1000
-#define addr_ret	(uint16_t)0x1100
-#define addr_status (uint16_t)0x1102
+#define addr_runRL	(int)0
+#define addr_cmd 	(int)4096
+#define addr_ret	(int)4352
+#define addr_status (int)4354
 
-#define cmd_code_PickStation	(int)1
-#define cmd_code_HandEye		(int)2
-#define cmd_code_PlaceStation	(int)3
-#define cmd_code_BackHome		(int)4
-#define cmd_code_Standby		(int)5
+#define cmd_code_PickStation	(uint16_t)1
+#define cmd_code_HandEye		(uint16_t)2
+#define cmd_code_PlaceStation	(uint16_t)3
+#define cmd_code_BackHome		(uint16_t)4
+#define cmd_code_Standby		(uint16_t)5
 
 /* Define End */
 
@@ -67,8 +67,6 @@ private:
 public:
 	/* 建構函數 - TCP模式 */
 	Modbus_Handshake(const char* IP, int port=502, int slave=2);
-	/* 建構函數 - RTU模式 */
-	Modbus_Handshake(const char* device, int BR, char parity='N', int data_bit=8, int stop_bit=1, int slave=1);
 	/* 解建構函數 */
 	~Modbus_Handshake();
 

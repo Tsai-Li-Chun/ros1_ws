@@ -57,40 +57,45 @@
 **	**/
 int main(int argc, char **argv)
 {
-	if( argc!=2 ) 
-	{	/* 若程式輸入參數數量錯誤 */
-		ROS_ERROR("Input parameter quantity Error");
-		ros::shutdown();
-		return 1;
-	}
 	/* 宣告libmodbus-API的Return用變數 */
 	int rc;
 	/* ros init */
     ros::init(argc,argv,"arm_robot");
 	/* 建立modbus通訊物件 */
 	Modbus_Handshake robot_arm("192.168.1.10");
+	ROS_INFO("robot_arm init OK"); sleep(1);
 
-	if( argv[1] == "1" )
-	{
+	ROS_INFO("argv[1] = %s",argv[1]);
+	int number = atoi(argv[1]);
+	ROS_INFO("argv[1] = %d",number);
+
+	if( number == 1 )
+	{	ROS_INFO("robot_arm.grab_material()");
 		robot_arm.grab_material();
 	}
-	else if( argv[1] == "2" )
-	{
+	else if( number == 2 )
+	{	ROS_INFO("robot_arm.handeye()");
 		robot_arm.handeye();
 	}
-	else if( argv[1] == "3" )
-	{
+	else if( number == 3 )
+	{	ROS_INFO("robot_arm.release_material()");
 		robot_arm.release_material();
 	}
-	else if( argv[1] == "4" )
-	{
+	else if( number == 4 )
+	{	ROS_INFO("robot_arm.back_home()");
 		robot_arm.back_home();
 	}
-	else if( argv[1] == "5" )
-	{
+	else if( number == 5 )
+	{	ROS_INFO("robot_arm.arm_standby()");
 		robot_arm.arm_standby();
 	}
 
+	while (ros::ok())
+	{
+		ros::spinOnce();
+	}
+
+	ros::shutdown();
 	/* main quit */
 	return 0;
 }

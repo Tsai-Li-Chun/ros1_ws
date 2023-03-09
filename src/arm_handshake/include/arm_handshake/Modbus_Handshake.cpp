@@ -62,27 +62,8 @@ Modbus_Handshake::Modbus_Handshake(const char* IP, int port, int slave)
 	mb = modbus_new_tcp(IP,port);
 	if( Modbus_slave_connect(slave) != 0 )
 		ROS_INFO("Modbus TCP Mode Setup Failure!");
-	handshake.value_int = (-1);
-	run_RL();
-}
-
-/** * @brief Constructor - RTU Mode
- 	* @param device(char*) Modbus Device File path
- 	* @param BR(int) Baud Rate
- 	* @param parity(int) even/odd parity, default 'N'
- 	* @param data_bit(int) DataBit Length, default 8(bit)
- 	* @param stop_bit(int) StopBit Length, default 1(bit)
- 	* @param slave(int) Modbus Device ID, default 1
- 	* @return None
-**	**/
-Modbus_Handshake::Modbus_Handshake(const char* device, int BR, char parity, int data_bit, int stop_bit, int slave)
-{
-	/* 初始化modbus通訊設定 */
-	mb = modbus_new_rtu(device,BR,parity,data_bit,stop_bit);
-	if( Modbus_slave_connect(slave) != 0 )
-		ROS_INFO("Modbus RTU Mode Setup Failure!");
-	handshake.value_int = (-1);
-	run_RL();
+	// handshake.value_int = (-1);
+	// run_RL();
 }
 
 /** * @brief Setup SlaveID & Connect
@@ -114,7 +95,7 @@ int Modbus_Handshake::Modbus_slave_connect(int slave)
 	{	/* 若slaveID設定成功,打印訊息 */
 		ROS_INFO("Setup Slave ID \"%d\" Success", slave);
 	}
-
+	
 	/* 建立連結 */
 	rc = modbus_connect(mb);
 	if( rc != 0 )
@@ -167,8 +148,9 @@ void Modbus_Handshake::run_RL(void)
 **	**/
 void Modbus_Handshake::back_home(void)
 {
-	int rc=0;
+	int rc=0; ROS_INFO("back_home");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_BackHome);
+	ROS_INFO("rc = %d",rc);
 	while( handshake.value_int!=0 )
 	{
 		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
@@ -183,8 +165,9 @@ void Modbus_Handshake::back_home(void)
 **	**/
 void Modbus_Handshake::grab_material(void)
 {
-	int rc=0;
+	int rc=0; ROS_INFO("grab_material");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_PickStation);
+	ROS_INFO("rc = %d",rc);
 	while( handshake.value_int!=0 )
 	{
 		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
@@ -199,8 +182,9 @@ void Modbus_Handshake::grab_material(void)
 **	**/
 void Modbus_Handshake::release_material(void)
 {
-	int rc=0;
+	int rc=0; ROS_INFO("release_material");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_PlaceStation);
+	ROS_INFO("rc = %d",rc);
 	while( handshake.value_int!=0 )
 	{
 		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
@@ -215,8 +199,9 @@ void Modbus_Handshake::release_material(void)
 **	**/
 void Modbus_Handshake::handeye(void)
 {
-	int rc=0;
+	int rc=0; ROS_INFO("handeye");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_HandEye);
+	ROS_INFO("rc = %d",rc);
 	while( handshake.value_int!=0 )
 	{
 		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
@@ -231,8 +216,9 @@ void Modbus_Handshake::handeye(void)
 **	**/
 void Modbus_Handshake::arm_standby(void)
 {
-	int rc=0;
+	int rc=0; ROS_INFO("arm_standby");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_Standby);
+	ROS_INFO("rc = %d",rc);
 	while( handshake.value_int!=0 )
 	{
 		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
