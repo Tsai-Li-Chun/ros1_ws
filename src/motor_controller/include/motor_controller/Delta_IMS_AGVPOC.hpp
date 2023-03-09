@@ -56,6 +56,8 @@ public:
 	/* 解建構函數 */
 	~Delta_IMS_Motor_Control();
 
+	int32_t Actual_Speed[2];
+
 	/* CANalystii 初始化函數 */
 	int CANalystii_SetUp(void);
 	/* CANalystii 設備開啟函數 */
@@ -65,6 +67,7 @@ public:
 
 	/* 設定工作模式 */
 	int set_OperationMode(uint8_t mode);
+	void clear_RxBuffer(void);
 	/* 馬達激磁函數 */
 	int motorSON();
 	/* 馬達解磁函數 */

@@ -13,6 +13,7 @@
         "${workspaceFolder}/src/delta_amr2st_urdf/include/delta_amr2st_urdf",
         "${workspaceFolder}/src/motor_controller/include/motor_controller",
         "${workspaceFolder}/src/canalyst/canalystii_node/include",
+        "${workspaceFolder}/src/arm_handshake/include/arm_handshake",
         "${workspaceFolder}/devel/include/"
       ],
       "name": "ROS",

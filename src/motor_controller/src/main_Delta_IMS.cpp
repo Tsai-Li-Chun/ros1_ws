@@ -101,10 +101,10 @@ int main(int argc, char **argv)
 	ros::Subscriber twist_sub = nh.subscribe("/cmd_vel", 100, twist_callback);
 	// /* 建立計時物件並初始化計時中斷 */
 	// ros::Timer timer = nh.createTimer(ros::Duration(0.01), timer_callback);
-	// /* 初始化motor_fb物件 */
-	// motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
+	/* 初始化motor_fb物件 */
+	motor_fb = nh.advertise<motor_feedback_msgs::motor_feedback>("/motor_feedback",100);
 	/* 建立delay用物件 */
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(100);
 
 	sleep(1);
 	/*  CANalystii drive start and channel open */
@@ -120,7 +120,9 @@ int main(int argc, char **argv)
 	rc = DIMC.writeVelocity(0,0);
 	sleep(1);
 	rc = DIMC.motorSON();
-	sleep(5);
+	sleep(1);
+	DIMC.clear_RxBuffer();
+	sleep(1);
 	ROS_INFO("Delta IMS AGV-Motor initialization Success");
 	// rc = DIMC.set_OperationMode((uint8_t)OperationModeTable::HomingMoode);
 	// sleep(1);
@@ -136,7 +138,21 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
-		// rc = DIMC.writeVelocity(10000,10000);
+		// current_time = ros::Time::now();
+		// dt = (current_time - last_time).toSec();
+		// DIMC.readActualVelocity(velocity_A);
+		// // mf.header.frame_id = "motor_feedback";
+		// // mf.header.seq = 0;
+		// // mf.header.stamp = ros::Time::now();
+		// mf.positionL = 0;
+		// mf.positionR = 0;
+		// mf.AvelocityL = velocity_A[0];
+		// mf.AvelocityR = velocity_A[1];
+		// mf.DvelocityL = 0;
+		// mf.DvelocityR = 0;
+		// motor_fb.publish(mf);
+		// last_time = current_time;
+
 		ros::spinOnce();
 		loop_rate.sleep();
 	}

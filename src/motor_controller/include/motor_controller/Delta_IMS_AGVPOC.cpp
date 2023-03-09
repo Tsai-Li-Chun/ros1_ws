@@ -192,6 +192,18 @@ int Delta_IMS_Motor_Control::set_OperationMode(uint8_t mode)
 	return 0;
 }
 
+/** * @brief Delta IMS AGV-Motor clear receive Buffer
+ 	* @param None
+ 	* @return None
+**	**/
+void Delta_IMS_Motor_Control::clear_RxBuffer(void)
+{
+	ROS_INFO("[clear RxBuffer] start...");
+	for(int i=0; i<2048; i++)
+		can_node.receive_can_frame(0,can_obj_Rx,2048,100);
+	ROS_INFO("[clear RxBuffer] Over");
+}
+
 /** * @brief Delta IMS AGV-Motor Servo ON function
  	* @param None
  	* @return (int) Program Error.
@@ -409,7 +421,7 @@ int Delta_IMS_Motor_Control::SDO_transmit(bool rw, uint8_t id)
 	{
 		// usleep(1);
 		// ROS_INFO("CANalystii channel(0) send Success");
-		// SDO_receive(rw, id);
+		// if(rw==false) SDO_receive(rw, id);
 	}
 	else
 	{
@@ -508,17 +520,6 @@ void Delta_IMS_Motor_Control::DeltaMotorOD_To_CANalystiiOBJ(uint16_t fc, uint8_t
 **	**/
 void Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(bool rw, uint8_t id)
 {
-	// ROS_INFO("RX - ID    : 0x%02x",can_obj_Rx.ID);
-	// ROS_INFO("RX - Len   : 0x%02x",can_obj_Rx.DataLen);
-	// ROS_INFO("RX - CC    : 0x%02x",can_obj_Rx.Data[0]);
-	// ROS_INFO("RX - indexL: 0x%02x",can_obj_Rx.Data[1]);
-	// ROS_INFO("RX - indexH: 0x%02x",can_obj_Rx.Data[2]);
-	// ROS_INFO("RX - indexS: 0x%02x",can_obj_Rx.Data[3]);
-	// ROS_INFO("RX - data0 : 0x%02x",can_obj_Rx.Data[4]);
-	// ROS_INFO("RX - data1 : 0x%02x",can_obj_Rx.Data[5]);
-	// ROS_INFO("RX - data2 : 0x%02x",can_obj_Rx.Data[6]);
-	// ROS_INFO("RX - data3 : 0x%02x",can_obj_Rx.Data[7]);
-	// ROS_INFO("---------------------------");
 	uint8_t read_cc_check = 0;	/* read CommandCode check */
 	uint8_t command_code = 0;
 	uint8_t source_id = (uint8_t)(can_obj_Rx.ID&0x007F);
@@ -530,21 +531,11 @@ void Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(bool rw, uint8_t id)
 	if(can_obj_Rx.RemoteFlag == 1)
 		ROS_ERROR("The SourceDevice-RemoteFlag is Remote frame");
 	command_code = can_obj_Rx.Data[0];
+	OD_struct_Rx.index_sub = can_obj_Rx.Data[3];
+	OD_struct_Rx.index_main = (((uint16_t)can_obj_Rx.Data[2])<<8);
+	OD_struct_Rx.index_main |= (uint16_t)(can_obj_Rx.Data[1]);
 
-	if(rw == true)
-	{	/* if write operation */
-		if( command_code == ((uint8_t)SDO_CommandCodeTable::writeR_Err) )
-		{	/* Display SDO AbortCode Message */
-			memcpy(&SDO_AbortCode, can_obj_Rx.Data+4, 4);
-			ROS_ERROR("CANopen SDO transmit Failure, SDO_AbortCode = 0x%08xh",SDO_AbortCode);
-		}
-		else if( command_code == ((uint8_t)SDO_CommandCodeTable::writeR_Pass) )
-		{	/* Display Success Message */
-			memcpy(&OD_index_main, can_obj_Rx.Data+1, 2);
-			ROS_INFO("CANopen SDO [transmit] OD(0x%02xh - 0x%02xh) Success",OD_index_main,can_obj_Rx.Data[3]);
-		}
-	}
-	else if(rw == false)
+	if(rw == false)
 	{	/* if read operation */
 		read_cc_check = 0;
 		if( command_code == ((uint8_t)SDO_CommandCodeTable::readR_1byte) ) {read_cc_check++;OD_struct_Rx.dataLen=1;}
@@ -556,21 +547,16 @@ void Delta_IMS_Motor_Control::CANalystiiOBJ_To_DeltaMotorOD(bool rw, uint8_t id)
 			ROS_ERROR("CANopen SDO [receive] Failure, SDO_AbortCode = 0x%08xh",SDO_AbortCode);
 		}
 		else if( read_cc_check != 1 )
-			ROS_ERROR("CANopen SDO [receive] CommandCode does not meet the standard");
-		else if( read_cc_check == 1 )
+			ROS_ERROR("CANopen SDO [receive] CommandCode(%d) does not meet the standard",command_code);
+		else if( OD_struct_Rx.index_main == 0x606C )
 		{
-			Waiting_Takeout_Data = true;
-			OD_struct_Rx.index_sub = can_obj_Rx.Data[3];
-			memcpy(&OD_struct_Rx.index_main, can_obj_Rx.Data+1, 2);
-			// OD_struct_Rx.index_main = (((uint16_t)can_obj_Rx.Data[2])<<8);
-			// OD_struct_Rx.index_main |= (uint16_t)(can_obj_Rx.Data[1]);
 			memcpy(&OD_struct_Rx.data, can_obj_Rx.Data+4, 4);
-
-			ROS_INFO("COBID=0x%04xh, sourceID=0x%02xh",can_obj_Rx.ID ,source_id);
-			ROS_INFO("OD   =0x%04xh",OD_struct_Rx.index_main);
-			ROS_INFO("ODsub=0x%04xh",OD_struct_Rx.index_sub);
-			ROS_INFO("Len  =%d",OD_struct_Rx.dataLen);
-			ROS_INFO("data =%d",OD_struct_Rx.data);
+			Actual_Speed[id-1] = OD_struct_Rx.data;
+			// ROS_INFO("COBID=0x%04xh, sourceID=0x%02xh",can_obj_Rx.ID ,source_id);
+			// ROS_INFO("OD   =0x%04xh",OD_struct_Rx.index_main);
+			// ROS_INFO("ODsub=0x%04xh",OD_struct_Rx.index_sub);
+			// ROS_INFO("Len  =%d",OD_struct_Rx.dataLen);
+			// ROS_INFO("data =%d",OD_struct_Rx.data);
 		}
 	}
 }
