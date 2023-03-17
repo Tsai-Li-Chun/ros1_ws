@@ -119,6 +119,8 @@ int Modbus_Handshake::Modbus_slave_connect(int slave)
 **	**/
 Modbus_Handshake::~Modbus_Handshake()
 {
+	modbus_write_register(mb,addr_runRL,3);
+	modbus_write_register(mb,addr_setRL,0);
 	/* 關閉連結 */
 	modbus_close(mb);
 	/* 釋放modbus通訊結構體的位址 */
@@ -135,11 +137,16 @@ Modbus_Handshake::~Modbus_Handshake()
 void Modbus_Handshake::run_RL(void)
 {
 	int rc=0;
-	rc = modbus_write_register(mb,addr_runRL,1);
+	rc = modbus_write_register(mb,addr_setRL,1);
 	if( rc )
-		ROS_INFO("delta arm robot RL execute Success!");
+		ROS_INFO("delta arm robot RL addr_setRL Success!");
 	else
-		ROS_ERROR("delta arm robot RL execute Failure!");
+		ROS_ERROR("delta arm robot RL addr_setRL Failure!");
+	rc = modbus_write_register(mb,addr_runRL,6);
+	if( rc )
+		ROS_INFO("delta arm robot RL addr_runRL Success!");
+	else
+		ROS_ERROR("delta arm robot RL addr_runRL Failure!");
 }
 
 /** * @brief 回home指令
@@ -151,10 +158,14 @@ void Modbus_Handshake::back_home(void)
 	int rc=0; ROS_INFO("back_home");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_BackHome);
 	ROS_INFO("rc = %d",rc);
+	handshake.value_int = 0;
+	modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 	while( handshake.value_int!=0 )
 	{
-		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 		display_status_msg(handshake.value_int);
+		handshake.value_int = 0;
+		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+		usleep(100000);
 	}
 	ROS_INFO("Task, BackHome Success!");
 }
@@ -168,12 +179,16 @@ void Modbus_Handshake::grab_material(void)
 	int rc=0; ROS_INFO("grab_material");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_PickStation);
 	ROS_INFO("rc = %d",rc);
+	handshake.value_int=0;
+	modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 	while( handshake.value_int!=0 )
-	{
-		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+	{	
 		display_status_msg(handshake.value_int);
+		handshake.value_int=0;
+		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+		usleep(100000);
 	}
-	ROS_INFO("Task, PickStation Success!");
+	ROS_INFO("Task, grab_material Success!");
 }
 
 /** * @brief 放下物料指令
@@ -185,12 +200,16 @@ void Modbus_Handshake::release_material(void)
 	int rc=0; ROS_INFO("release_material");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_PlaceStation);
 	ROS_INFO("rc = %d",rc);
+	handshake.value_int = 0;
+	modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 	while( handshake.value_int!=0 )
 	{
-		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 		display_status_msg(handshake.value_int);
+		handshake.value_int = 0;
+		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+		usleep(100000);
 	}
-	ROS_INFO("Task, PickStation Success!");
+	ROS_INFO("Task, release_material Success!");
 }
 
 /** * @brief 手眼辨識指令
@@ -202,12 +221,16 @@ void Modbus_Handshake::handeye(void)
 	int rc=0; ROS_INFO("handeye");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_HandEye);
 	ROS_INFO("rc = %d",rc);
+	handshake.value_int = 0;
+	modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 	while( handshake.value_int!=0 )
 	{
-		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 		display_status_msg(handshake.value_int);
+		handshake.value_int = 0;
+		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+		usleep(100000);
 	}
-	ROS_INFO("Task, PickStation Success!");
+	ROS_INFO("Task, handeye Success!");
 }
 
 /** * @brief 手臂內縮待命指令
@@ -219,12 +242,33 @@ void Modbus_Handshake::arm_standby(void)
 	int rc=0; ROS_INFO("arm_standby");
 	rc = modbus_write_register(mb,addr_cmd,cmd_code_Standby);
 	ROS_INFO("rc = %d",rc);
+	handshake.value_int = 0;
+	modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 	while( handshake.value_int!=0 )
 	{
-		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
 		display_status_msg(handshake.value_int);
+		handshake.value_int = 0;
+		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+		usleep(100000);
 	}
-	ROS_INFO("Task, PickStation Success!");
+	ROS_INFO("Task, arm_standby Success!");
+}
+
+void Modbus_Handshake::backzero(void)
+{
+	int rc=0; ROS_INFO("backzero");
+	rc = modbus_write_register(mb,addr_cmd,cmd_code_backzero);
+	ROS_INFO("rc = %d",rc);
+	handshake.value_int = 0;
+	modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+	while( handshake.value_int!=0 )
+	{
+		display_status_msg(handshake.value_int);
+		handshake.value_int = 0;
+		modbus_read_registers(mb,addr_ret,1,handshake.value_u16);
+		usleep(100000);
+	}
+	ROS_INFO("Task, backzero Success!");
 }
 
 /** * @brief 顯示目前robot狀態
@@ -242,6 +286,7 @@ void Modbus_Handshake::display_status_msg(int status)
 		case 3: ROS_INFO("Task, PlaceStation runing"); break;
 		case 4: ROS_INFO("Task, BackHome runing"); break;
 		case 5: ROS_INFO("Task, Standby runing"); break;
+		case 100: ROS_INFO("Task, backzero runing"); break;
 	}
 }
 

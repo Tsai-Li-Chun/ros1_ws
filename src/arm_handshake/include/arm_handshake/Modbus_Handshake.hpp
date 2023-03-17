@@ -21,8 +21,9 @@
 /* Define ---------------------------------------------------*/
 /* Define Begin */
 
-#define addr_runRL	(int)0
-#define addr_cmd 	(int)4096
+#define addr_setRL	(int)0x220
+#define addr_runRL	(int)0x228
+#define addr_cmd 	(int)0x1300
 #define addr_ret	(int)4352
 #define addr_status (int)4354
 
@@ -31,6 +32,7 @@
 #define cmd_code_PlaceStation	(uint16_t)3
 #define cmd_code_BackHome		(uint16_t)4
 #define cmd_code_Standby		(uint16_t)5
+#define cmd_code_backzero		(uint16_t)100
 
 /* Define End */
 
@@ -82,6 +84,8 @@ public:
 	void handeye(void);
 	/* 手臂內縮待命指令 */
 	void arm_standby(void);
+	/* 手臂內縮待命指令 */
+	void backzero(void);
 
 	/* 顯示目前robot狀態 */
 	void display_status_msg(int);

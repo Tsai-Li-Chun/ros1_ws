@@ -14,6 +14,8 @@
 #include <geometry_msgs/Twist.h>
 #include "Delta_IMS_AGVPOC.hpp"
 #include "motor_feedback_msgs/motor_feedback.h"
+#include "sensor_msgs/Joy.h"
+
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -24,7 +26,7 @@
 /* Define ---------------------------------------------------*/
 /* Define Begin */
 
-#define acc_dec_time (uint32_t)1000
+#define acc_dec_time (uint32_t)1
 
 /* Define End */
 
@@ -61,6 +63,8 @@ int32_t velL=0,velR=0;
 
 const double ms_to_rpm = 3183.09891613572;
 
+bool wait_sw = true;
+
 /* Variables End */
 
 
@@ -69,6 +73,7 @@ const double ms_to_rpm = 3183.09891613572;
 
 void twist_callback(const geometry_msgs::Twist& twist_msg);
 void timer_callback(const ros::TimerEvent& e);
+void joy_callback(const sensor_msgs::Joy&);
 
 /* Function End */
 
@@ -78,6 +83,16 @@ void timer_callback(const ros::TimerEvent& e);
 /* ⇩⇩⇩⇩⇩⇩⇩⇩⇩⇩ Program ⇩⇩⇩⇩⇩⇩⇩⇩⇩⇩ ---------------------------*/
 /* ---------------------------------------------------------*/
 /* Program Begin */
+
+void clac_vecRL(void)
+{
+	double velLtmp,velRtmp;
+	velLtmp = twist_last.linear.x - twist_last.angular.z ;
+	velRtmp = twist_last.linear.x + twist_last.angular.z ;
+	velL = (int32_t)(velLtmp*ms_to_rpm*10);
+	velR = (int32_t)(velRtmp*ms_to_rpm*10);
+	ROS_INFO("L:%d , R:%d",velL,velR);
+}
 
 /** * @brief  Program entry point.
 	* @param argc(int) Number of input parameters
@@ -99,6 +114,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;
 	/* 建立topic-Subscriber物件並初始化 */
 	ros::Subscriber twist_sub = nh.subscribe("/cmd_vel", 100, twist_callback);
+    ros::Subscriber sub_joy   = nh.subscribe("/joy",100,joy_callback);
 	// /* 建立計時物件並初始化計時中斷 */
 	// ros::Timer timer = nh.createTimer(ros::Duration(0.01), timer_callback);
 	/* 初始化motor_fb物件 */
@@ -138,21 +154,6 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
-		// current_time = ros::Time::now();
-		// dt = (current_time - last_time).toSec();
-		// DIMC.readActualVelocity(velocity_A);
-		// // mf.header.frame_id = "motor_feedback";
-		// // mf.header.seq = 0;
-		// // mf.header.stamp = ros::Time::now();
-		// mf.positionL = 0;
-		// mf.positionR = 0;
-		// mf.AvelocityL = velocity_A[0];
-		// mf.AvelocityR = velocity_A[1];
-		// mf.DvelocityL = 0;
-		// mf.DvelocityR = 0;
-		// motor_fb.publish(mf);
-		// last_time = current_time;
-
 		ros::spinOnce();
 		loop_rate.sleep();
 	}
@@ -174,15 +175,25 @@ void twist_callback(const geometry_msgs::Twist& twist_msg)
 	double velLtmp,velRtmp;
 	velLtmp = twist_last.linear.x - twist_last.angular.z ;
 	velRtmp = twist_last.linear.x + twist_last.angular.z ;
-	if(velLtmp>1) velLtmp=1;
-	else if(velLtmp<(-1)) velLtmp=(-1);
-	if(velRtmp>1) velRtmp=1;
-	else if(velRtmp<(-1)) velRtmp=(-1);
+	if(velLtmp>1.0f) velLtmp=1.0f;
+	else if(velLtmp<(-1.0f)) velLtmp=(-1.0f);
+	if(velRtmp>1.0f) velRtmp=1.0f;
+	else if(velRtmp<(-1.0f)) velRtmp=(-1.0f);
 	velL = (int32_t)(velLtmp*ms_to_rpm*10);
 	velR = (int32_t)(velRtmp*ms_to_rpm*10);
 	// printf("%d , %d\n",velL,velR);
 	DIMC.writeVelocity(velL,velR);
 }
+
+void joy_callback( const sensor_msgs::Joy &joy_msg )
+{
+	ROS_INFO("joy_callback");
+	if(joy_msg.buttons[5]==1)
+	{
+		wait_sw = false;
+	}
+}
+
 
 void timer_callback(const ros::TimerEvent& e)
 {

@@ -1,0 +1,12 @@
+<!--
+	@file name : test.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<node name="joy_node" pkg="joy" type="joy_node" />
+
+	
+</launch>
