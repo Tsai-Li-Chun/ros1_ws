@@ -15,9 +15,9 @@
 		<node name="joy_control_node" pkg="keyboard" type="joy_control_node" />
 	</group>
 
-	<node name="main_Delta_IMS" 
+	<node name="main_motorController" 
 		  pkg="motor_controller"
-		  type="main_Delta_IMS"
+		  type="main_motorController"
 		  output="screen" >
 	</node>
 	

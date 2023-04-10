@@ -80,5 +80,10 @@
         "regex": "cpp",
         "shared_mutex": "cpp"
     },
-    "cmake.sourceDirectory": "${workspaceFolder}/src/hipnuc_imu_ch110/serial_imu"
+    "cmake.sourceDirectory": "${workspaceFolder}/src/hipnuc_imu_ch110/serial_imu",
+    "python.analysis.extraPaths": [
+        "/home/deltaagv/carto_ws/install_isolated/lib/python2.7/dist-packages",
+        "/home/deltaagv/catkin_ws/devel/lib/python2.7/dist-packages",
+        "/opt/ros/melodic/lib/python2.7/dist-packages"
+    ]
 }

@@ -15,23 +15,13 @@
 
 
 	<node name="map_server" pkg="map_server" type="map_server" args="$(find slam_navigation)/map/$(arg map_file).yaml"/>
-	<node name="joy_node" pkg="joy" type="joy_node" />
-	<node name="joy_control_node" pkg="keyboard" type="joy_control_node" />
-	<node name="main_Delta_IMS" pkg="motor_controller" type="main_Delta_IMS" output="screen" />
-	<!-- <node name="main_tf_odometry"  pkg="odometry_transform" type="main_tf_odometry" output="screen" /> -->
-	<node pkg="hector_mapping" type="hector_mapping" name="hector_mapping" output="screen">
-		<remap from="/map" to="/map_fack" />
-		<param name="pub_mdap_odom_transform" value="true"/>
-		<param name="scan_topic" value="/sick_safetyscanners/scan" />
-		<param name="map_frame" value="map" />
-		<param name="base_frame" value="base_footprint" />
-		<param name="odom_frame" value="base_footprint" />
-	</node>
+	<node name="main_motorController" pkg="motor_controller" type="main_motorController" output="screen" />
+	<node name="main_tf_odometry"  pkg="odometry_transform" type="main_tf_odometry" output="screen" />
 	<include file="$(find sick_safetyscanners)/launch/sick_safetyscanners.launch" />
 
 	<!-- <include file="$(find slam_navigation)/launch/gmapping_test.launch" /> -->
 	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
-	<!-- <include file="$(find slam_navigation)/launch/amcl_test.launch" /> -->
+	<include file="$(find slam_navigation)/launch/amcl_test.launch" />
 	<include file="$(find slam_navigation)/launch/move_base_test2.launch" />
 
 
