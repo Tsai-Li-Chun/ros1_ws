@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot name="TY2_SW" xmlns:xacro="http://ros.org/wiki/xacro">
+	
+	<xacro:arg name="laser_visual" default="true"/>
+	<xacro:arg name="imu_visual"   default="true"/>
+
+	<gazebo reference="body_link">
+		<material>Gazebo/BlackTransparent</material>
+	</gazebo>
+
+	<gazebo reference="Lwheel_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+
+	<gazebo reference="Rwheel_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+
+	<gazebo reference="imu_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+
+	<gazebo reference="scanF_link">
+		<material>Gazebo/Yellow</material>
+	</gazebo>
+	<gazebo reference="scanB_link">
+		<material>Gazebo/Yellow</material>
+	</gazebo>
+
+	<gazebo reference="sub_wheel1_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="sub_wheel2_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="sub_wheel3_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+	<gazebo reference="sub_wheel4_link">
+		<material>Gazebo/Black</material>
+	</gazebo>
+
+</robot>

@@ -122,7 +122,7 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
 	./include/${PROJECT_NAME}
 	/usr/local/include/modbus
-	/home/deltaagv/ros1_ws/src/canalyst/canalystii_node/include
+	${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/include
 )
 
 ## Declare a C++ library
@@ -222,9 +222,9 @@ add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(main_motorController ${catkin_LIBRARIES} modbus )
 
 add_executable(main_Delta_IMS src/main_Delta_IMS.cpp 
-			include/${PROJECT_NAME}//Delta_IMS_AGVPOC.cpp
-			/home/deltaagv/ros1_ws/src/canalyst/canalystii_node/src/canalystii_node.cpp
-			/home/deltaagv/ros1_ws/src/canalyst/canalystii_node/src/canalystii.cpp) 
+			include/${PROJECT_NAME}/Delta_IMS_AGVPOC.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/src/canalystii_node.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/src/canalystii.cpp) 
 add_dependencies(main_Delta_IMS ${canalystii_node_msg_EXPORTED_TARGETS})
 target_link_libraries(main_Delta_IMS ${catkin_LIBRARIES}
-			/home/deltaagv/ros1_ws/src/canalyst/canalystii_node/lib/libcontrolcan.so)
+		${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/lib/libcontrolcan.so)
