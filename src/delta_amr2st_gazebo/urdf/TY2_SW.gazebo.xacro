@@ -5,26 +5,118 @@
 	<xacro:arg name="imu_visual"   default="true"/>
 
 	<gazebo reference="body_link">
+		<mu1>0.1</mu1>
+		<mu2>0.1</mu2>
+		<kp>1000000.0</kp>
+		<kd>100.0</kd>
+		<minDepth>0.001</minDepth>
+		<maxVel>1.0</maxVel>
 		<material>Gazebo/BlackTransparent</material>
 	</gazebo>
 
 	<gazebo reference="Lwheel_link">
+		<mu1>0.1</mu1>
+		<mu2>0.1</mu2>
+		<kp>500000.0</kp>
+		<kd>10.0</kd>
+		<minDepth>0.001</minDepth>
+		<maxVel>0.1</maxVel>
+		<fdir1>1 0 0</fdir1>
 		<material>Gazebo/Black</material>
 	</gazebo>
 
 	<gazebo reference="Rwheel_link">
+		<mu1>0.1</mu1>
+		<mu2>0.1</mu2>
+		<kp>500000.0</kp>
+		<kd>10.0</kd>
+		<minDepth>0.001</minDepth>
+		<maxVel>0.1</maxVel>
+		<fdir1>1 0 0</fdir1>
 		<material>Gazebo/Black</material>
 	</gazebo>
 
-	<gazebo reference="imu_link">
+	<gazebo reference="imu_ch110_link">
+		<sensor type="imu" name="imu">
+			<always_on>true</always_on>
+			<visualize>$(arg imu_visual)</visualize>
+			<plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+				<topicName>imu_data</topicName>
+				<bodyName>imu_ch110_link</bodyName>
+				<frameName>imu_ch110_link</frameName>
+				<updateRateHZ>10.0</updateRateHZ>
+				<gaussianNoise>0.0</gaussianNoise>
+				<xyzOffset>0 0 0</xyzOffset>
+				<rpyOffset>0 0 0</rpyOffset>
+				<initialOrientationAsReference>false</initialOrientationAsReference>
+			</plugin>
+		</sensor>
 		<material>Gazebo/Black</material>
 	</gazebo>
 
 	<gazebo reference="scanF_link">
 		<material>Gazebo/Yellow</material>
+		<sensor type="ray" name="sickMnanoscan3_F">
+			<pose>0 0 0 0 0 0</pose>
+			<visualize>$(arg laser_visual)</visualize>
+			<update_rate>5</update_rate>
+			<ray>
+				<scan>
+					<horizontal>
+						<samples>1411</samples>
+						<resolution>0.17</resolution>
+						<min_angle>-2.09</min_angle>
+						<max_angle>2.09</max_angle>
+					</horizontal>
+				</scan>
+				<range>
+					<min>0.14</min>
+					<max>10</max>
+					<resolution>0.015</resolution>
+				</range>
+				<noise>
+					<type>gaussian</type>
+					<mean>0.0</mean>
+					<stddev>0.01</stddev>
+				</noise>
+			</ray>
+			<plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+				<topicName>scanF</topicName>
+				<frameName>scanF_link</frameName>
+			</plugin>
+		</sensor>
 	</gazebo>
 	<gazebo reference="scanB_link">
 		<material>Gazebo/Yellow</material>
+		<sensor type="ray" name="sickMnanoscan3_B">
+			<pose>0 0 0 0 0 0</pose>
+			<visualize>$(arg laser_visual)</visualize>
+			<update_rate>5</update_rate>
+			<ray>
+				<scan>
+					<horizontal>
+						<samples>1411</samples>
+						<resolution>0.17</resolution>
+						<min_angle>-2.09</min_angle>
+						<max_angle>2.09</max_angle>
+					</horizontal>
+				</scan>
+				<range>
+					<min>0.14</min>
+					<max>10</max>
+					<resolution>0.015</resolution>
+				</range>
+				<noise>
+					<type>gaussian</type>
+					<mean>0.0</mean>
+					<stddev>0.01</stddev>
+				</noise>
+			</ray>
+			<plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+				<topicName>scanB</topicName>
+				<frameName>scanB_link</frameName>
+			</plugin>
+		</sensor>
 	</gazebo>
 
 	<gazebo reference="sub_wheel1_link">
