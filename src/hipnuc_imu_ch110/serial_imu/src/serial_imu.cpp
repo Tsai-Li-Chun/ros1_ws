@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "serial_imu");
 	ros::NodeHandle n;
 
-	ros::Publisher IMU_pub = n.advertise<sensor_msgs::Imu>("/IMU_data", 20);
+	ros::Publisher IMU_pub = n.advertise<sensor_msgs::Imu>("/imu_data", 20);
 	ros::Publisher Imu_0x91_pub = n.advertise<serial_imu::Imu_0x91_msg>("/imu_0x91_package", 10);
 	ros::Publisher Imu_0x62_pub = n.advertise<serial_imu::Imu_0x62_msg>("/imu_0x62_package", 10);
 

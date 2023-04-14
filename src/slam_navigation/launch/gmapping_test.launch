@@ -8,7 +8,7 @@
 	<!-- laser的topic名，與自己激光雷達topic相對應 -->
 	<arg name="scan_topic"  default="/sick_safetyscanners/scan" />
 	<!-- 機器人坐標系 -->
-	<arg name="base_frame"  default="base_link"/>
+	<arg name="base_frame"  default="base_footprint"/>
 	<!-- 世界坐標系 -->
 	<arg name="odom_frame"  default="odom"/>
 

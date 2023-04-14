@@ -1,0 +1,13 @@
+<!--
+	@file name : rosbag_replay.launch
+	@author : Tsai,Li-Chun
+	@brief  : 
+-->
+
+<launch>
+
+	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
+	<node pkg="rosbag" type="play" name="rosbag_play" args="$(find slam_navigation)/bag/dwa_general.bag -l"/>
+	<node pkg="rqt_bag" type="rqt_bag" name="rqt_bag" args="$(find slam_navigation)/bag/dwa_general.bag"/>
+
+</launch>
