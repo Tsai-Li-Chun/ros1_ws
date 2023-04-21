@@ -7,7 +7,7 @@
 <launch>
 
 	<node name="amcl" pkg="amcl" type="amcl" output="screen" >
-		<remap from="scan" to="/sick_safetyscanners/scan"/>
+		<remap from="scan" to="/sick_safetyscanners/scanF"/>
 		<param name="use_map_topic" value="true"/>
 		<param name="odom_model_type" value="diff-corrected"/>
 		<param name="min_particles" value="250"/>
@@ -17,6 +17,11 @@
 		<param name="global_frame_id" value="map"/>
 		<param name="update_min_a" value="0.1"/>
 		<param name="update_min_d" value="0.1"/>
+		<param name="odom_alpha1" value="0.005"/>
+		<param name="odom_alpha2" value="0.005"/>
+		<param name="odom_alpha3" value="0.010"/>
+		<param name="odom_alpha4" value="0.005"/>
+		<param name="odom_alpha5" value="0.000"/>
 	</node>
 
 </launch>

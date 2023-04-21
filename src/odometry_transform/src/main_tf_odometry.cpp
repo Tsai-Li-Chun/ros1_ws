@@ -23,6 +23,9 @@
 
 /* Define ---------------------------------------------------*/
 /* Define Begin */
+
+#define low_pass_filter 0.6f
+
 /* Define End */
 
 
@@ -44,7 +47,7 @@ const double enc_to_mm = 0.0005599597921296297;
 const double mm_to_M = 0.001;
 const double AMR_width = 0.5476;
 /* motor feedback message object */
-motor_feedback_msgs::motor_feedback motor_info;
+motor_feedback_msgs::motor_feedback mf_last;
 /* delta time(s) */
 double dt;
 /* X,Y,th 距離 */
@@ -61,6 +64,8 @@ double vy = 0;
 double vth = 0;
 double AvelocityL_M= 0;
 double AvelocityR_M = 0;
+double AvelocityL_lpf = 0;
+double AvelocityR_lpf = 0;
 /* 建立ROS time物件 */
 ros::Time current_time, last_time;
 /* 建立計算旋轉勁度物件 */
@@ -71,6 +76,7 @@ geometry_msgs::TransformStamped odom_trans;
 nav_msgs::Odometry odom;
 // /* 建立odom里程計topic發布物件 */
 // ros::Publisher odom_pub;
+motor_feedback_msgs::motor_feedback encodom;
 
 /* Variables End */
 
@@ -103,7 +109,9 @@ int main(int argc, char **argv)
 	
 	ros::NodeHandle nh;
 	ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 100);
+	ros::Publisher encodom_pub = nh.advertise<motor_feedback_msgs::motor_feedback>("encodom", 100);
 	ros::Subscriber sub_enc = nh.subscribe("/motor_feedback", 100, motor_feedback_callback);
+	
 	/* 建立tf廣播物件 */
 	tf::TransformBroadcaster odom_broadcaster;
 	ros::Rate sleep(100);
@@ -151,6 +159,19 @@ int main(int argc, char **argv)
 		odom.twist.twist.angular.z = vth;
 		/* publish the message */
 		odom_pub.publish(odom);
+
+		encodom.header.stamp = current_time;
+		encodom.vx = vx;
+		encodom.vy = vy;
+		encodom.vth = vth;
+		encodom.delta_x = delta_x;
+		encodom.delta_y = delta_y;
+		encodom.delta_th = delta_th;
+		encodom.x = x;
+		encodom.y = y;
+		encodom.th = th;
+		encodom_pub.publish(encodom);
+
 		/* updata last time */
 		last_time = current_time;
 		sleep.sleep();
@@ -166,19 +187,34 @@ int main(int argc, char **argv)
 	* @param mf_last(motor_feedback) motor feedback message
  	* @return none.
 **	**/
-void motor_feedback_callback(const motor_feedback_msgs::motor_feedback& mf_last)
+void motor_feedback_callback(const motor_feedback_msgs::motor_feedback& motor_info)
 {
-	/* ]get motor feedback message */
-	motor_info = mf_last;
-	// ROS_INFO("position : %d , %d", motor_info.positionL, motor_info.positionR);
-	// ROS_INFO("Avelocity : %d , %d", motor_info.AvelocityL, motor_info.AvelocityR);
-	// ROS_INFO("Dvelocity : %d , %d", motor_info.DvelocityL, motor_info.DvelocityR);
-	// ROS_INFO(" ");
+	// double Lacctemp,Racctemp;
+
+	// Lacctemp = (motor_info.AvelocityL-mf_last.AvelocityL)*enc_to_mm*mm_to_M;
+	// Racctemp = (motor_info.AvelocityR-mf_last.AvelocityR)*enc_to_mm*mm_to_M;
+	// if( (Lacctemp<=1.0) || (Lacctemp>=-1.0) )
+	// 		AvelocityL_M = motor_info.AvelocityL*enc_to_mm*mm_to_M;
+	// else 	AvelocityL_M = mf_last.AvelocityL*enc_to_mm*mm_to_M;
+
+	encodom.AvelocityL = motor_info.AvelocityL;
+	encodom.AvelocityR = motor_info.AvelocityR;
+
 	AvelocityL_M = motor_info.AvelocityL*enc_to_mm*mm_to_M;
 	AvelocityR_M = motor_info.AvelocityR*enc_to_mm*mm_to_M;
+
+	AvelocityL_lpf = (low_pass_filter*AvelocityL_M)+((1.0-low_pass_filter)*AvelocityL_lpf);
+	AvelocityR_lpf = (low_pass_filter*AvelocityR_M)+((1.0-low_pass_filter)*AvelocityR_lpf);
+
+	encodom.AvelocityL_M = AvelocityL_M;
+	encodom.AvelocityR_M = AvelocityR_M;
+	encodom.AvelocityL_lpf = AvelocityL_lpf;
+	encodom.AvelocityR_lpf = AvelocityR_lpf;
+
 	vx = ((AvelocityL_M+AvelocityR_M)/2);
 	vth = ((AvelocityR_M-AvelocityL_M)/AMR_width);
-	// ROS_INFO("%lf , %lf",vx ,vth);
+
+	mf_last = motor_info;
 }
 
 /** * @brief  motor info init.
@@ -187,23 +223,27 @@ void motor_feedback_callback(const motor_feedback_msgs::motor_feedback& mf_last)
 **	**/
 void motor_info_init(void)
 {
+	current_time = ros::Time::now();
+	last_time = current_time;
 	vx = 0;
 	vy = 0;
 	vth = 0;
 	x = 0;
 	y = 0;
 	th = 0;
-	motor_info.header.frame_id = "motor_feedback";
-	// motor_info.header.seq = 0;
-	// motor_info.header.stamp = ros::Time::now();
-	motor_info.positionL = 0;
-	motor_info.positionR = 0;
-	motor_info.AvelocityL = 0;
-	motor_info.AvelocityR = 0;
-	motor_info.DvelocityL = 0;
-	motor_info.DvelocityR = 0;
-	current_time = ros::Time::now();
-	last_time = current_time;
+	AvelocityL_M = 0;
+	AvelocityR_lpf = 0;
+	AvelocityL_M = 0;
+	AvelocityR_lpf = 0;
+	mf_last.header.frame_id = "motor_feedback";
+	// mf_last.header.seq = 0;
+	mf_last.header.stamp = current_time;
+	mf_last.positionL = 0;
+	mf_last.positionR = 0;
+	mf_last.AvelocityL = 0;
+	mf_last.AvelocityR = 0;
+	mf_last.DvelocityL = 0;
+	mf_last.DvelocityR = 0;
 }
 
 /* Program End */

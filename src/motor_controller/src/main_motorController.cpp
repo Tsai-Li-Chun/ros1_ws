@@ -115,18 +115,19 @@ int main(int argc, char **argv)
 		current_time = ros::Time::now();
 		dt = (current_time - last_time).toSec();
 		// ROS_INFO("%lf\n",dt);
-		BKC.readActualPosition(position);
-		BKC.readActualVelocity(velocity_A);
+		// BKC.readActualPosition(position);
+		// BKC.readActualVelocity(velocity_A);
 		BKC.readDemandVelocity(velocity_D);
-		// mf.header.frame_id = "motor_feedback";
-		// mf.header.seq = 0;
-		// mf.header.stamp = ros::Time::now();
-		mf.positionL = position[0];
-		mf.positionR = position[1];
-		mf.AvelocityL = velocity_A[0];
-		mf.AvelocityR = velocity_A[1];
-		mf.DvelocityL = velocity_D[0];
-		mf.DvelocityR = velocity_D[1];
+
+		mf.header.stamp = current_time;
+		mf.positionL = 0;
+		mf.positionR = 0;
+		mf.AvelocityL = velocity_D[0];
+		mf.AvelocityR = velocity_D[1];
+		// mf.DvelocityL = velocity_D[0];
+		// mf.DvelocityR = velocity_D[1];
+		// printf("%010d(%010d) , %010d(%010d)\n",velocity_D[0],velocity_A[0],velocity_D[1],velocity_A[1]);
+
 		motor_fb.publish(mf);
 		last_time = current_time;
 
@@ -148,10 +149,10 @@ void twist_callback(const geometry_msgs::Twist& twist_msg)
 {
 	twist_last = twist_msg;
 	double velLtmp,velRtmp;
-	if(twist_last.linear.x>1.0) twist_last.linear.x=1.0;
-	else if(twist_last.linear.x<(-1.0)) twist_last.linear.x=(-1.0);
-	if(twist_last.angular.z>0.5) twist_last.angular.z=0.5;
-	else if(twist_last.angular.z<(-0.5)) twist_last.angular.z=(-0.5);
+	if(twist_last.linear.x>1.2) twist_last.linear.x=1.2;
+	else if(twist_last.linear.x<(-1.2)) twist_last.linear.x=(-1.2);
+	if(twist_last.angular.z>1.2) twist_last.angular.z=1.2;
+	else if(twist_last.angular.z<(-1.2)) twist_last.angular.z=(-1.2);
 	// printf("%d , %d\n",velL,velR);
 	velLtmp = twist_last.linear.x - twist_last.angular.z ;
 	velRtmp = twist_last.linear.x + twist_last.angular.z ;

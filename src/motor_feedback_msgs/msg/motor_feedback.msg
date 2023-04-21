@@ -5,3 +5,16 @@ int32 AvelocityL
 int32 AvelocityR
 int32 DvelocityL
 int32 DvelocityR
+float64 AvelocityL_lpf
+float64 AvelocityL_M
+float64 AvelocityR_lpf
+float64 AvelocityR_M
+float64 vx
+float64 vy
+float64 vth
+float64 delta_x
+float64 delta_y
+float64 delta_th
+float64 x
+float64 y
+float64 th

@@ -313,7 +313,7 @@ int BLVD_KRD_Control::motorReverse(int32_t v)
 **	**/
 int BLVD_KRD_Control::motorLturn(int32_t w)
 {
-
+return 0;
 }
 
 /** * @brief motor R-turn test
@@ -322,7 +322,7 @@ int BLVD_KRD_Control::motorLturn(int32_t w)
 **	**/
 int BLVD_KRD_Control::motorRturn(int32_t w)
 {
-
+return 0;
 }
 #endif /* setup configuration and simple test END */
 
@@ -354,6 +354,7 @@ int BLVD_KRD_Control::readActualVelocity(int32_t *speed)
 {
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_r_ActualVelocity;
 	rc = readRegisters(RAT,6,uint16Buffer);
+	// printf("%05d\n",(int)RAT);
 	// motor L
 	speed[1] = 0;
 	speed[1] = (speed[1]|uint16Buffer[0])<<16;
@@ -362,6 +363,7 @@ int BLVD_KRD_Control::readActualVelocity(int32_t *speed)
 	speed[0] = 0;
 	speed[0] = (speed[0]|uint16Buffer[3])<<16;
 	speed[0] |= uint16Buffer[4];
+	// printf("%08x(%05d) , %08x(%05d)\n",speed[0],speed[0],speed[1],speed[1]);
 	return rc;
 }
 
@@ -581,7 +583,7 @@ int BLVD_KRD_Control::writeDriverInputCommand(int32_t status)
 **	**/
 int BLVD_KRD_Control::writeDiagnosis(void)
 {
-
+return 0;
 }
 #endif /* write(set) simple parameter END */
 
@@ -592,7 +594,7 @@ int BLVD_KRD_Control::writeDiagnosis(void)
 **	**/
 int BLVD_KRD_Control::readAlarm(int32_t *alarm)
 {
-
+return 0;
 }
 
 /** * @brief Read Communication Error.
@@ -601,7 +603,7 @@ int BLVD_KRD_Control::readAlarm(int32_t *alarm)
 **	**/
 int BLVD_KRD_Control::readCommunicationError(int32_t *err)
 {
-
+return 0;
 }
 
 /** * @brief RESET Alarm.
@@ -610,7 +612,7 @@ int BLVD_KRD_Control::readCommunicationError(int32_t *err)
 **	**/
 int BLVD_KRD_Control::ResetAlarm(void)
 {
-
+return 0;
 }
 
 /** * @brief AlarmCode to StringMessage.
@@ -670,7 +672,7 @@ std::string BLVD_KRD_Control::getStrOfAlarm(uint8_t alarm)
 **	**/
 int BLVD_KRD_Control::readInt32t(uint16_t Adr, int32_t *v)
 {
-
+return 0;
 }
 
 /** * @brief Read data for multiple successive registers
@@ -694,7 +696,7 @@ int BLVD_KRD_Control::readRegisters(BLVD_KRD_RegAdr_Table Adr, uint8_t L, uint16
 **	**/
 int BLVD_KRD_Control::writeInt32t(uint16_t Adr, int32_t *Data)
 {
-
+return 0;
 }
 
 /** * @brief Write data to multiple successive registers

@@ -38,3 +38,6 @@ target_link_libraries(keyboard_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(joy_control_node src/joy_control.cpp)
 target_link_libraries(joy_control_node ${catkin_LIBRARIES})
+
+add_executable(fake_cmdvel src/fake_cmdvel.cpp)
+target_link_libraries(fake_cmdvel ${catkin_LIBRARIES})
