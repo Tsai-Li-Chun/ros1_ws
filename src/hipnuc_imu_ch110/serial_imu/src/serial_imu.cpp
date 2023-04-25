@@ -209,12 +209,15 @@ void publish_imu_data(raw_t *data, sensor_msgs::Imu *imu_data)
 	imu_data->orientation.y = data->imu[data->nimu - 1].quat[2];
 	imu_data->orientation.z = data->imu[data->nimu - 1].quat[3];
 	imu_data->orientation.w = data->imu[data->nimu - 1].quat[0];
+	imu_data->orientation_covariance = { 1e-6, 0.0, 0.0, 0.0, 1e-6, 0.0, 0.0, 0.0, 1e-6};
 	imu_data->angular_velocity.x = data->imu[data->nimu - 1].gyr[0] * DEG_TO_RAD;
 	imu_data->angular_velocity.y = data->imu[data->nimu - 1].gyr[1] * DEG_TO_RAD;
 	imu_data->angular_velocity.z = data->imu[data->nimu - 1].gyr[2] * DEG_TO_RAD;
+	imu_data->angular_velocity_covariance = { 1e-6, 0.0, 0.0, 0.0, 1e-6, 0.0, 0.0, 0.0, 1e-6};
 	imu_data->linear_acceleration.x = data->imu[data->nimu - 1].acc[0] * GRA_ACC;
 	imu_data->linear_acceleration.y = data->imu[data->nimu - 1].acc[1] * GRA_ACC;
 	imu_data->linear_acceleration.z = data->imu[data->nimu - 1].acc[2] * GRA_ACC;
+	imu_data->linear_acceleration_covariance = { 1e-6, 0.0, 0.0, 0.0, 1e-6, 0.0, 0.0, 0.0, 1e-6};
 }
 
 

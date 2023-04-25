@@ -4,8 +4,8 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /TF1
         - /TF1/Frames1
+        - /LaserScanF1/Autocompute Value Bounds1
       Splitter Ratio: 0.49766355752944946
     Tree Height: 711
   - Class: rviz/Selection
@@ -54,48 +54,91 @@ Visualization Manager:
     - Alpha: 0.5
       Class: rviz/RobotModel
       Collision Enabled: false
-      Enabled: false
+      Enabled: true
       Links:
         All Links Enabled: true
         Expand Joint Details: false
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        Lwheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Rwheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        base_footprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        imu_ch110_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        lidarprom_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        realsensor_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        scanB_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        scanF_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Name: RobotModel
       Robot Description: robot_description
       TF Prefix: ""
       Update Interval: 0
-      Value: false
+      Value: true
       Visual Enabled: true
     - Class: rviz/TF
       Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
       Frame Timeout: 15
       Frames:
-        All Enabled: false
+        All Enabled: true
         Lwheel_link:
-          Value: false
+          Value: true
         Rwheel_link:
-          Value: false
+          Value: true
         base_footprint:
           Value: true
         base_link:
-          Value: false
-        body_link:
-          Value: false
+          Value: true
         imu_ch110_link:
-          Value: false
+          Value: true
         lidarprom_link:
-          Value: false
+          Value: true
         map:
           Value: true
-        odom:
+        odom_combined:
           Value: true
         realsensor_link:
-          Value: false
+          Value: true
         scanB_link:
-          Value: false
+          Value: true
         scanF_link:
-          Value: false
+          Value: true
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -104,24 +147,23 @@ Visualization Manager:
       Show Names: true
       Tree:
         map:
-          odom:
+          odom_combined:
             base_footprint:
               base_link:
-                body_link:
-                  Lwheel_link:
-                    {}
-                  Rwheel_link:
-                    {}
-                  imu_ch110_link:
-                    {}
-                  lidarprom_link:
-                    {}
-                  realsensor_link:
-                    {}
-                  scanB_link:
-                    {}
-                  scanF_link:
-                    {}
+                Lwheel_link:
+                  {}
+                Rwheel_link:
+                  {}
+                imu_ch110_link:
+                  {}
+                lidarprom_link:
+                  {}
+                realsensor_link:
+                  {}
+                scanB_link:
+                  {}
+                scanF_link:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 0.699999988079071
@@ -157,14 +199,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.36535000801086426
-        Min Value: 0.36535000801086426
+        Max Value: 0.4181492030620575
+        Min Value: 0.34429696202278137
         Value: true
       Axis: Z
       Channel Name: intensities
       Class: rviz/LaserScan
-      Color: 255; 255; 255
-      Color Transformer: AxisColor
+      Color: 255; 0; 0
+      Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -174,7 +216,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 4
+      Size (Pixels): 5
       Size (m): 0.009999999776482582
       Style: Points
       Topic: /sick_safetyscanners/scanF
@@ -185,14 +227,14 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.36535000801086426
-        Min Value: 0.36535000801086426
+        Max Value: 0.3734884560108185
+        Min Value: 0.35273587703704834
         Value: true
       Axis: Z
       Channel Name: intensity
       Class: rviz/LaserScan
-      Color: 255; 255; 255
-      Color Transformer: AxisColor
+      Color: 0; 0; 255
+      Color Transformer: FlatColor
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
@@ -202,7 +244,7 @@ Visualization Manager:
       Position Transformer: XYZ
       Queue Size: 10
       Selectable: true
-      Size (Pixels): 3
+      Size (Pixels): 5
       Size (m): 0.009999999776482582
       Style: Points
       Topic: /sick_safetyscanners/scanB
@@ -363,7 +405,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 2.984116792678833
+      Distance: 4.602944850921631
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
