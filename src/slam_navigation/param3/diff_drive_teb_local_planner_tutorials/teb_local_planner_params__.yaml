@@ -46,21 +46,21 @@ TebLocalPlannerROS:
 
  # Obstacles
 
- min_obstacle_dist: 0.05
+ min_obstacle_dist: 0.1
  include_costmap_obstacles: True
  costmap_obstacles_behind_robot_dist: 1.5
  obstacle_poses_affected: 30
  costmap_converter_plugin: "costmap_converter::CostmapToLinesDBSRANSAC"
  costmap_converter_spin_thread: True
  costmap_converter_rate: 5
- inflation_dist:  0.6
+ inflation_dist:  1.0
  # Optimization
 
  no_inner_iterations: 5
  no_outer_iterations: 4
  optimization_activate: True
  optimization_verbose: False
- penalty_epsilon: 0.1
+ penalty_epsilon: 0.5
  weight_max_vel_x: 2
  weight_max_vel_theta: 700 #490 375
  weight_acc_lim_x: 1

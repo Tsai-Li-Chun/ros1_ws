@@ -12,7 +12,9 @@
 	<!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_basefootprint" args="0.0 0.0 0.0 0 0 0.0 /odom /base_footprint 40" /> -->
 
 	<node name="map_server" pkg="map_server" type="map_server" args="$(find slam_navigation)/map/$(arg map_file).yaml"/>
-	<node name="keyboard_node" pkg="keyboard" type="keyboard_node" />
+	<!-- <node name="keyboard_node" pkg="keyboard" type="keyboard_node" /> -->
+	<!-- <node name="joy_node" pkg="joy" type="joy_node" />
+	<node name="joy_control_node" pkg="keyboard" type="joy_control_node" /> -->
 	<!-- <node name="fake_cmdvel" pkg="keyboard" type="fake_cmdvel" /> -->
 	<node name="main_motorController" pkg="motor_controller" type="main_motorController" output="screen" />
 	<node name="main_tf_odometry"  pkg="odometry_transform" type="main_tf_odometry" output="screen" />
@@ -23,6 +25,9 @@
 	<!-- <include file="$(find slam_navigation)/launch/gmapping_test.launch" /> -->
 	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
 	<include file="$(find slam_navigation)/launch/amcl_test.launch" />
-	<!-- <include file="$(find slam_navigation)/launch/move_base_test1.launch" /> -->
+	<include file="$(find slam_navigation)/launch/move_base_test1.launch" />
+
+	  <!-- rqt_plot -->
+  <!-- <node pkg="rqt_plot" name="rqt_plot" type="rqt_plot"/> -->
 
 </launch>

@@ -10,7 +10,7 @@
 <launch>
 
 	<arg name="mapping_mode" default="gmapping"/>
-	<arg name="control_mode" default="keyborad"/>
+	<arg name="control_mode" default="joy"/>
 
 	<group if="$(eval control_mode=='keyborad')">
 		<node name="keyboard_node" pkg="keyboard" type="keyboard_node" />
@@ -22,6 +22,9 @@
 
 	<node name="main_motorController" pkg="motor_controller" type="main_motorController" output="screen">
 	</node>
+	
+	<include file="$(find imu_launch)/launch/imu_msg.launch" />
+	<include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" />
 
 	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
 	<include file="$(find sick_safetyscanners)/launch/sick_safetyscanners.launch" />

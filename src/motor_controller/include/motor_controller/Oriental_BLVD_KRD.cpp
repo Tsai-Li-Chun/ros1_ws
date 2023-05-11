@@ -493,6 +493,8 @@ int BLVD_KRD_Control::writeSetupType(int32_t mode)
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_SetupType;
 	int32_to_2uint16(mode,uint16Buffer);
 	int32_to_2uint16(mode,(uint16Buffer+2));
+	// printf("%05x %05x\n",uint16Buffer[0],uint16Buffer[1]);
+	// printf("%05x %05x\n",uint16Buffer[2],uint16Buffer[3]);
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
@@ -507,7 +509,7 @@ int BLVD_KRD_Control::writeVelocity(int32_t Lvelocity,int32_t Rvelocity)
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Velocity;
 	int32_to_2uint16(Rvelocity,uint16Buffer);
 	int32_to_2uint16(Lvelocity,(uint16Buffer+2));
-	// printf("%016x , %016x\n",Lvelocity ,Rvelocity);
+	// printf("%0d , %0d\n",Lvelocity ,Rvelocity);
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
@@ -521,6 +523,8 @@ int BLVD_KRD_Control::writeAcceleration(int32_t acc)
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Acc;
 	int32_to_2uint16(acc,uint16Buffer);
 	int32_to_2uint16(acc,(uint16Buffer+2));
+	// printf("%05x %05x\n",uint16Buffer[0],uint16Buffer[1]);
+	// printf("%05x %05x\n",uint16Buffer[2],uint16Buffer[3]);
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }
@@ -534,6 +538,8 @@ int BLVD_KRD_Control::writeDecelerate(int32_t dec)
 	BLVD_KRD_RegAdr_Table RAT=BLVD_KRD_RegAdr_Table::ADRS_w_Dec;
 	int32_to_2uint16(dec,uint16Buffer);
 	int32_to_2uint16(dec,(uint16Buffer+2));
+	// printf("%05x %05x\n",uint16Buffer[0],uint16Buffer[1]);
+	// printf("%05x %05x\n",uint16Buffer[2],uint16Buffer[3]);
 	rc = writeRegisters(RAT,4,uint16Buffer);
 	return rc;
 }

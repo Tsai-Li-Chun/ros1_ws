@@ -98,7 +98,7 @@ void joy_callback( const sensor_msgs::Joy &joy_msg )
 {
     enlarge = 0.5;
     if(joy_msg.buttons[4]==1) enlarge = 1;
-    cmd_vel.linear.x = (joy_msg.axes[4])*enlarge*(-1);
+    cmd_vel.linear.x = (joy_msg.axes[4])*enlarge*(1);
     // cmd_vel.linear.y = joy_msg.axes[0];
     cmd_vel.angular.z= (joy_msg.axes[0])*(enlarge*0.8);
 }

@@ -5,24 +5,18 @@
 -->
 
 <launch>
-	<!-- laser的topic名，與自己激光雷達topic相對應 -->
-	<arg name="scan_topic"  default="/sick_safetyscanners/scan" />
-	<!-- 機器人坐標系 -->
-	<arg name="base_frame"  default="base_footprint"/>
-	<!-- 世界坐標系 -->
-	<arg name="odom_frame"  default="odom"/>
+	<!-- Arguments -->
+	<arg name="scan_topic"  default="/sick_safetyscanners/scanF" />
+	<arg name="set_base_frame" default="base_footprint"/>
+	<arg name="set_odom_frame" default="odom_combined"/>
+	<arg name="set_map_frame"  default="map"/>
 
-	<!-- 啟動slam gmapping節點, 內部含節點參數設定 -->
-	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
-		<param name="base_frame" value="$(arg base_frame)"/>
-		<param name="odom_frame" value="$(arg odom_frame)"/>
-		<param name="map_update_interval" value="1.0"/>
-		<param name="temporalUpdate" value="0.1"/>
-		<param name="xmin" value="-10.0"/>
-		<param name="xmax" value="10.0"/>
-		<param name="ymin" value="-4.0"/>
-		<param name="ymax" value="4.0"/>
+	<!-- Gmapping -->
+	<node pkg="gmapping" type="slam_gmapping" name="turtlebot3_slam_gmapping" output="screen">
+		<param name="base_frame" value="$(arg set_base_frame)"/>
+		<param name="odom_frame" value="$(arg set_odom_frame)"/>
+		<param name="map_frame"  value="$(arg set_map_frame)"/>
+		<rosparam command="load" file="$(find slam_navigation)/launch/config/gmapping_params.yaml" />
 		<remap from="scan" to="$(arg scan_topic)"/>
 	</node>
-
 </launch>

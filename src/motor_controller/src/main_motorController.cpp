@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 
 	sleep(1);
 	/* motor Init - 事先將觸發方式(-4)等參數set,後續更新速度即可即時變化 */
-	rc = BKC.motorInit(48,1000,1000,(-4));
+	rc = BKC.motorInit(48,300,300,(-4));
 	sleep(1);
 
 	current_time = ros::Time::now();
@@ -151,11 +151,11 @@ void twist_callback(const geometry_msgs::Twist& twist_msg)
 	double velLtmp,velRtmp;
 	if(twist_last.linear.x>1.2) twist_last.linear.x=1.2;
 	else if(twist_last.linear.x<(-1.2)) twist_last.linear.x=(-1.2);
-	if(twist_last.angular.z>1.2) twist_last.angular.z=1.2;
-	else if(twist_last.angular.z<(-1.2)) twist_last.angular.z=(-1.2);
-	// printf("%d , %d\n",velL,velR);
-	velLtmp = twist_last.linear.x - twist_last.angular.z ;
-	velRtmp = twist_last.linear.x + twist_last.angular.z ;
+	if(twist_last.angular.z>1.0) twist_last.angular.z=1.0;
+	else if(twist_last.angular.z<(-1.0)) twist_last.angular.z=(-1.0);
+	velLtmp = twist_last.linear.x - (twist_last.angular.z/2) ;
+	velRtmp = twist_last.linear.x + (twist_last.angular.z/2) ;
+	// printf("%lf , %lf\n",velLtmp,velRtmp);
 	velL = (int32_t)(velLtmp*ms_to_rpm);
 	velR = (int32_t)(velRtmp*ms_to_rpm);
 	BKC.writeVelocity(velL,velR);
