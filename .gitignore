@@ -1,5 +1,7 @@
 build/**
 devel/**
+.vscode/**
+.catkin_tools/**
 .catkin_workspace
 .includePath_bak
 src/slam_navigation/map/**
