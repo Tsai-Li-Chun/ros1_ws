@@ -19,6 +19,8 @@ find_package(catkin REQUIRED
         visualization_msgs
         )
 
+set(OpenGL_GL_PREFERENCE LEGACY)
+
 find_package(Eigen3 REQUIRED)
 include_directories(
     include

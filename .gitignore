@@ -9,3 +9,4 @@ src/slam_navigation/bag/**
 *.project
 *.cproject
 *.rst
+*.bag
