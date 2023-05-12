@@ -6,3 +6,6 @@ devel/**
 .includePath_bak
 src/slam_navigation/map/**
 src/slam_navigation/bag/**
+*.project
+*.cproject
+*.rst
