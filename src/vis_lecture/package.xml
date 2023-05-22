@@ -59,6 +59,10 @@
   <exec_depend>tf</exec_depend>  
   <!-- 以上不加也行,教學都有加 -->
 
+  <build_depend>visualization_msgs</build_depend>
+  <build_export_depend>visualization_msgs</build_export_depend>
+  <exec_depend>visualization_msgs</exec_depend>
+
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->

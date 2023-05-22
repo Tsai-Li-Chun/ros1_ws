@@ -12,6 +12,7 @@ add_compile_options(-std=c++11)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   tf
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -225,3 +226,9 @@ target_link_libraries(tf_simulation3 ${catkin_LIBRARIES})
 add_executable(tf_odometry1 src/tf_odometry1.cpp)
 target_link_libraries(tf_odometry1 ${catkin_LIBRARIES})
 # add_dependencies(tf_listen vis_lecture)
+
+add_executable(basic_shapes src/rviz1_basic_shapes.cpp)
+target_link_libraries(basic_shapes ${catkin_LIBRARIES})
+
+add_executable(points_and_lines src/rviz2_points_and_lines.cpp)
+target_link_libraries(points_and_lines ${catkin_LIBRARIES})
