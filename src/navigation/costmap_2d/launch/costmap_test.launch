@@ -1,6 +1,7 @@
 <launch>
 
     <!-- Arguments -->
+    <arg name="type" default="none" />
     <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
     <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map.yaml"/>
     <arg name="open_rviz" default="true"/>
@@ -30,7 +31,7 @@
     <!-- costmap_test -->
     <!-- <include file="$(find costmap_2d)/launch/example.launch" /> -->
     <node pkg="costmap_2d" type="costmap_test" name="costmap_test" output="screen">
-      <rosparam command="load" file="$(find costmap_2d)/params/global1_costmap_params.yaml" />
+      <rosparam command="load" file="$(find costmap_2d)/params/$(arg type)_costmap_params.yaml" />
     </node>
 
 </launch>

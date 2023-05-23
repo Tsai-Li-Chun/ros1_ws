@@ -8,7 +8,6 @@ Panels:
         - /TF1/Frames1
         - /TF1/Tree1
         - /Group1
-        - /Group1/local_costmap1/Status1
         - /Axes1
       Splitter Ratio: 0.5
     Tree Height: 794
@@ -28,7 +27,7 @@ Panels:
   - Class: rviz/Time
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -163,7 +162,7 @@ Visualization Manager:
       Color: 0; 255; 0
       Color Transformer: FlatColor
       Decay Time: 0
-      Enabled: false
+      Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
       Min Color: 0; 0; 0
@@ -178,7 +177,7 @@ Visualization Manager:
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
-      Value: false
+      Value: true
     - Alpha: 1
       Arrow Length: 0.05000000074505806
       Axes Length: 0.30000001192092896
@@ -318,10 +317,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 140.18951416015625
+      Scale: 95.53522491455078
       Target Frame: <Fixed Frame>
-      X: 0.3682669401168823
-      Y: -0.29951590299606323
+      X: 0.11515568196773529
+      Y: -2.196490526199341
     Saved: ~
 Window Geometry:
   Displays:
