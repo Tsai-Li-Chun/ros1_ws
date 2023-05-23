@@ -1,0 +1,11 @@
+image: ./test.png
+# 地圖解析度(meters/pixel)
+resolution: 0.1
+# 地圖圖片左下角的位置座標
+origin: [-5.0000, -5.0000, 0.000000]
+# 是否顛倒
+negate: 0
+# 占用閥值
+occupied_thresh: 0.65
+# 自由閥值
+free_thresh: 0.196

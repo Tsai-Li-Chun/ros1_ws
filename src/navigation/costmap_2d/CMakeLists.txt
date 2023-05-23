@@ -136,6 +136,14 @@ target_link_libraries(costmap_2d_node
     ${catkin_LIBRARIES}
 )
 
+add_executable(costmap_test src/costmap_test.cpp)
+add_dependencies(costmap_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(costmap_test
+    costmap_2d
+    ${Boost_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+
 ## Configure Tests
 if(CATKIN_ENABLE_TESTING)
   # Find package test dependencies
