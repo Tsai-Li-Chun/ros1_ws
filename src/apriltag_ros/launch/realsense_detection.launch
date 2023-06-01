@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- rviz -->
+  <arg name="open_rviz" default="false"/>
+  <group if="$(arg open_rviz)"> 
+    <arg name="rvizconfig" default="$(find apriltag_ros)/rviz/continuous_detection.rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
+  </group>
+
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+  <include file="$(find apriltag_ros)/launch/continuous_detection.launch" />
+</launch>
