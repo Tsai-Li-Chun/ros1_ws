@@ -207,4 +207,5 @@ include_directories(
 # catkin_add_nosetests(test)
 
 add_executable(send_goal src/send_goal.cpp)
+add_dependencies(send_goal ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(send_goal ${catkin_LIBRARIES})
