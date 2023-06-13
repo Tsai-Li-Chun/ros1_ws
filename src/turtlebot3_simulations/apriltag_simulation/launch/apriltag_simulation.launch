@@ -10,6 +10,7 @@
   <arg name="open_rviz" default="true"/>
   <arg name="move_forward_only" default="false"/>
 
+
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(find turtlebot3_gazebo)/worlds/turtlebot3_world.world"/>
     <arg name="paused" value="false"/>
@@ -49,5 +50,9 @@
 
   <!-- Apriltag node -->
   <include file="$(find apriltag_simulation)/launch/continuous_detection.launch" />
+
+  <!-- static_transform_publisher -->
+  <node pkg="tf" type="static_transform_publisher" name="map_to_tag0" args="-0.15 0.0 0.2 -1.5708 0.0 1.5708 map true_tag0 100" />
+  <node pkg="tf" type="static_transform_publisher" name="map_to_tag1" args="-0.15 -1.1 0.2 -1.5708 0.0 1.5708 map true_tag1 100" />
 
 </launch>

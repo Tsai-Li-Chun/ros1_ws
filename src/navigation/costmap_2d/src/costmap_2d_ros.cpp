@@ -87,7 +87,8 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
 
   ros::Time last_error = ros::Time::now();
   std::string tf_error;
-  // we need to make sure that the transform between the robot base frame and the global frame is available
+  // 確保robot base_link to globel_link 之間的轉換有效
+  // 有效後才跳出迴圈，有效前每5s打印1次警告
   while (ros::ok()
       && !tf_.canTransform(global_frame_, robot_base_frame_, ros::Time(), ros::Duration(0.1), &tf_error))
   {
