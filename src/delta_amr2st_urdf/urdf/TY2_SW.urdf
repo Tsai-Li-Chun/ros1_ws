@@ -107,9 +107,10 @@
 		<child link="scanB_link" />
 	</joint>
 	<joint name="body_to_camera_joint" type="fixed">
-		<origin xyz="0.4129 0.3 0.1" rpy="0 0 1.5707963268" />
 		<parent link="base_link" />
 		<child link="camera_link" />
+		<origin xyz="0.5 0.0 0.1" rpy="0 0 3.1415926536" />
+		<!-- <axis xyz="0 0 1"/> -->
 	</joint>
 	<joint name="body_to_imu_joint" type="fixed">
 		<origin xyz="0 0 -0.0246" rpy="0 0 0" />
