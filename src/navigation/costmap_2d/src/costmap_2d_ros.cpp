@@ -110,12 +110,13 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   private_nh.param("track_unknown_space", track_unknown_space, false);
   private_nh.param("always_send_full_costmap", always_send_full_costmap, false);
 
+  // 創建CostmapLayer類(此類負責維護costmap各子地圖)
   layered_costmap_ = new LayeredCostmap(global_frame_, rolling_window, track_unknown_space);
-
+  // 取得plugins參數
   if (!private_nh.hasParam("plugins"))
-  {
+  { //若無設置,載入預設的舊參數
     loadOldParameters(private_nh);
-  } else {
+  } else { //若有設置,從參數服務器載入參數
     warnForOldParameters(private_nh);
   }
 
@@ -125,14 +126,18 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
     private_nh.getParam("plugins", my_list);
     for (int32_t i = 0; i < my_list.size(); ++i)
     {
+      // 從my_list中取得子地圖的名稱&種類
       std::string pname = static_cast<std::string>(my_list[i]["name"]);
       std::string type = static_cast<std::string>(my_list[i]["type"]);
       ROS_INFO("%s: Using plugin \"%s\"", name_.c_str(), pname.c_str());
 
       copyParentParameters(pname, type, private_nh);
 
+      // 建立type所對應的class物件,並將指標plugin指向該class物件的位址
       boost::shared_ptr<Layer> plugin = plugin_loader_.createInstance(type);
+      // 將plugin(costmap子地圖)新增進layered_costmap_中管理
       layered_costmap_->addPlugin(plugin);
+      // 實際執行的是Layer中的initialize
       plugin->initialize(layered_costmap_, name + "/" + pname, &tf_);
     }
   }
@@ -143,20 +148,22 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   {
     topic_param = "footprint_topic";
   }
-
+  // 訂閱topic(footprint),callback函數為setUnpaddedRobotFootprintPolygon
+  // callback函數會將收到的footprint膨脹後傳遞至costmap的各層子地圖
   private_nh.param(topic_param, topic, std::string("footprint"));
   footprint_sub_ = private_nh.subscribe(topic, 1, &Costmap2DROS::setUnpaddedRobotFootprintPolygon, this);
 
+  // publish to the footprint topic
   if (!private_nh.searchParam("published_footprint_topic", topic_param))
   {
     topic_param = "published_footprint";
   }
-
+  // 建立topic,此topic上會發布根據當前robot位置計算出的footprint座標範圍
   private_nh.param(topic_param, topic, std::string("footprint"));  // TODO: revert to oriented_footprint in N-turtle
   footprint_pub_ = private_nh.advertise<geometry_msgs::PolygonStamped>(topic, 1);
-
   setUnpaddedRobotFootprint(makeFootprintFromParams(private_nh));
 
+  // 建立costmap發布器,Costmap2DPublisher是用於costmap發布相關功能的封裝物件
   publisher_ = new Costmap2DPublisher(&private_nh, layered_costmap_->getCostmap(), global_frame_, "costmap",
                                       always_send_full_costmap);
 
@@ -165,7 +172,9 @@ Costmap2DROS::Costmap2DROS(const std::string& name, tf2_ros::Buffer& tf) :
   initialized_ = true;
   stopped_ = false;
 
+  // 開啟參數動態設置服務
   dsrv_ = new dynamic_reconfigure::Server<Costmap2DConfig>(ros::NodeHandle("~/" + name));
+  // callback函數reconfigureCB,對物件成員的配置賦值+開啟更新costmap的執行緒
   dynamic_reconfigure::Server<Costmap2DConfig>::CallbackType cb = [this](auto& config, auto level){ reconfigureCB(config, level); };
   dsrv_->setCallback(cb);
 }
@@ -309,6 +318,8 @@ void Costmap2DROS::checkOldParam(ros::NodeHandle& nh, const std::string &param_n
   }
 }
 
+/* 開啟參數動態設置服務的callback函式,僅在node啟動時運行一次 */
+/* 加載.cfg文件中的參數,並對物件中相對應的變數賦值 */
 void Costmap2DROS::reconfigureCB(costmap_2d::Costmap2DConfig &config, uint32_t level)
 {
   transform_tolerance_ = config.transform_tolerance;
@@ -410,6 +421,7 @@ void Costmap2DROS::movementCB(const ros::TimerEvent &event)
   }
 }
 
+/* 執行緒 - 更新costmap */
 void Costmap2DROS::mapUpdateLoop(double frequency)
 {
   ros::NodeHandle nh;
@@ -422,6 +434,7 @@ void Costmap2DROS::mapUpdateLoop(double frequency)
     gettimeofday(&start, NULL);
     #endif
     
+    /* update costmap */
     updateMap();
 
     #ifdef HAVE_SYS_TIME_H
@@ -432,6 +445,7 @@ void Costmap2DROS::mapUpdateLoop(double frequency)
     ROS_DEBUG("Map update time: %.9f", t_diff);
     #endif
     
+    // 更新地圖邊界 & 發布
     if (publish_cycle.toSec() > 0 && layered_costmap_->isInitialized())
     {
       unsigned int x0, y0, xn, yn;
@@ -447,14 +461,17 @@ void Costmap2DROS::mapUpdateLoop(double frequency)
     }
     r.sleep();
     // make sure to sleep for the remainder of our cycle time
+    // 頻率計數器r消耗掉一個更新週期中剩餘的時間，如果發現時間偏差比較大就給出警告
     if (r.cycleTime() > ros::Duration(1 / frequency))
       ROS_WARN("Map update loop missed its desired rate of %.4fHz... the loop actually took %.4f seconds", frequency,
                r.cycleTime().toSec());
   }
 }
 
+/* 更新costmap的函式 */
 void Costmap2DROS::updateMap()
 {
+  // 若運行狀態為非暫停狀態,才允許更新地圖
   if (!stop_updates_)
   {
     // get global pose
@@ -464,9 +481,10 @@ void Costmap2DROS::updateMap()
       double x = pose.pose.position.x,
              y = pose.pose.position.y,
              yaw = tf2::getYaw(pose.pose.orientation);
-
+      // 調用layered_costmap_的updateMap函數，參數是機器人位元姿
       layered_costmap_->updateMap(x, y, yaw);
 
+      // update robot foootprint and publish
       geometry_msgs::PolygonStamped footprint;
       footprint.header.frame_id = global_frame_;
       footprint.header.stamp = ros::Time::now();
@@ -478,6 +496,7 @@ void Costmap2DROS::updateMap()
   }
 }
 
+/* 繳活costmap各子地圖的函式,此函式由 move_base的node調用  */
 void Costmap2DROS::start()
 {
   std::vector < boost::shared_ptr<Layer> > *plugins = layered_costmap_->getPlugins();
@@ -494,9 +513,11 @@ void Costmap2DROS::start()
   }
   stop_updates_ = false;
 
-  // block until the costmap is re-initialized.. meaning one update cycle has run
+  // 在costmap被重新初始化前while(1)於此, meaning one update cycle has run
   // note: this does not hold, if the user has disabled map-updates allgother
   ros::Rate r(100.0);
+  // initialized_ set true 即代表costmap初始化完成
+  // initialized_ 於成員函式updateMap中可被 set true
   while (ros::ok() && !initialized_ && map_update_thread_)
     r.sleep();
 }
