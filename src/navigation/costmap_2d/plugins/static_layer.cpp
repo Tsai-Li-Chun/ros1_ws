@@ -59,13 +59,16 @@ StaticLayer::~StaticLayer()
     delete dsrv_;
 }
 
+/* 初始化函式 */
 void StaticLayer::onInitialize()
 {
   ros::NodeHandle nh("~/" + name_), g_nh;
   current_ = true;
 
+  // get global frame
   global_frame_ = layered_costmap_->getGlobalFrameID();
 
+  //初始化以下参数
   std::string map_topic;
   nh.param("map_topic", map_topic, std::string("map"));
   nh.param("first_map_only", first_map_only_, false);
@@ -82,15 +85,17 @@ void StaticLayer::onInitialize()
   lethal_threshold_ = std::max(std::min(temp_lethal_threshold, 100), 0);
   unknown_cost_value_ = temp_unknown_cost_value;
 
-  // Only resubscribe if topic has changed
+  // 當話題改變後才重新訂閱
   if (map_sub_.getTopic() != ros::names::resolve(map_topic))
   {
-    // we'll subscribe to the latched topic that the map server uses
+    // 訂閱 map_topic, callback為incomingMap
     ROS_INFO("Requesting the map...");
     map_sub_ = g_nh.subscribe(map_topic, 1, &StaticLayer::incomingMap, this);
+    // map_received_ & has_updated_data_ set false
+    // map_topic有數據時進入callabck function, 此兩變數會 set true
     map_received_ = false;
     has_updated_data_ = false;
-
+    // map_topic無數據時不會進入callabck function, 阻塞於此
     ros::Rate r(10);
     while (!map_received_ && g_nh.ok())
     {

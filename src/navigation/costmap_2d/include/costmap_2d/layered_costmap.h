@@ -76,6 +76,7 @@ public:
     return global_frame_;
   }
 
+  /* 重新設置主地圖尺寸、原點、解析度函式 */
   void resizeMap(unsigned int size_x, unsigned int size_y, double resolution, double origin_x, double origin_y,
                  bool size_locked = false);
 

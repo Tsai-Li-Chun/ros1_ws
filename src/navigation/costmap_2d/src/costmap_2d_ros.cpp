@@ -421,11 +421,12 @@ void Costmap2DROS::movementCB(const ros::TimerEvent &event)
   }
 }
 
-/* 執行緒 - 更新costmap */
+/* 執行緒 - 更新costmap, frequency為更新頻率 */
 void Costmap2DROS::mapUpdateLoop(double frequency)
 {
   ros::NodeHandle nh;
   ros::Rate r(frequency);
+  // 確認NodeHandle是否正常運行
   while (nh.ok() && !map_update_thread_shutdown_)
   {
     #ifdef HAVE_SYS_TIME_H
@@ -522,6 +523,7 @@ void Costmap2DROS::start()
     r.sleep();
 }
 
+/* 關閉costmap各子地圖的函式,此函式由 move_base的node調用  */
 void Costmap2DROS::stop()
 {
   stop_updates_ = true;
@@ -536,12 +538,16 @@ void Costmap2DROS::stop()
   stopped_ = true;
 }
 
+/* 暫停costmap各子地圖更新的函式,此函式由 move_base的node調用  */
+/* 此函式不會對costmap各子地圖內的變數等資訊進行任何變更 */
 void Costmap2DROS::pause()
 {
   stop_updates_ = true;
   initialized_ = false;
 }
 
+/* 恢復costmap各子地圖更新的函式,此函式由 move_base的node調用  */
+/* 此函式不會對costmap各子地圖內的變數等資訊進行任何變更 */
 void Costmap2DROS::resume()
 {
   stop_updates_ = false;

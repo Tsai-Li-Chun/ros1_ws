@@ -79,12 +79,17 @@ LayeredCostmap::~LayeredCostmap()
   }
 }
 
+/* 重新設置主地圖的尺寸、原點、解析度 */
+/* 再通過plugin指標調用各層地圖的matchSize，使其以上參數和主地圖匹配 */
 void LayeredCostmap::resizeMap(unsigned int size_x, unsigned int size_y, double resolution, double origin_x,
                                double origin_y, bool size_locked)
 {
   boost::unique_lock<Costmap2D::mutex_t> lock(*(costmap_.getMutex()));
   size_locked_ = size_locked;
+  // 調用costmap_的resizeMap方法, 此為真正在resize的函式
   costmap_.resizeMap(size_x, size_y, resolution, origin_x, origin_y);
+  // 利用plugin對每層子地圖調用initial方法(此方法寫於父類Costmap2D中)
+  // 將plugin所指的每層子地圖的大小都設置為costmap_資料成員一樣的空間大小
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
       ++plugin)
   {
@@ -92,10 +97,12 @@ void LayeredCostmap::resizeMap(unsigned int size_x, unsigned int size_y, double 
   }
 }
 
+/* 對每層子地圖的更新函式，更新過程分為兩步, updateBounds & updateCosts */
 void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
 {
   // Lock for the remainder of this function, some plugins (e.g. VoxelLayer)
   // implement thread unsafe updateBounds() functions.
+  // 將一些執行緒進行時會影響數值更新的類方法鎖上
   boost::unique_lock<Costmap2D::mutex_t> lock(*(costmap_.getMutex()));
 
   // if we're using a rolling buffer costmap... we need to update the origin using the robot's position
@@ -106,8 +113,8 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
     costmap_.updateOrigin(new_origin_x, new_origin_y);
   }
 
-  if (plugins_.size() == 0)
-    return;
+// 如果沒有子圖層，就不需要updateMap
+  if (plugins_.size() == 0) return;
 
   minx_ = miny_ = 1e30;
   maxx_ = maxy_ = -1e30;
@@ -115,15 +122,15 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
        ++plugin)
   {
-    if(!(*plugin)->isEnabled())
-      continue;
+    if(!(*plugin)->isEnabled()) continue;
     double prev_minx = minx_;
     double prev_miny = miny_;
     double prev_maxx = maxx_;
     double prev_maxy = maxy_;
+    // 更新子地圖邊界, 4個傳入minx/y,maxx/y參數構成矩形範圍。各子地圖調用父類方法updateBounds
     (*plugin)->updateBounds(robot_x, robot_y, robot_yaw, &minx_, &miny_, &maxx_, &maxy_);
     if (minx_ > prev_minx || miny_ > prev_miny || maxx_ < prev_maxx || maxy_ < prev_maxy)
-    {
+    { // 若邊界超出規定, 打印警告
       ROS_WARN_THROTTLE(1.0, "Illegal bounds change, was [tl: (%f, %f), br: (%f, %f)], but "
                         "is now [tl: (%f, %f), br: (%f, %f)]. The offending layer is %s",
                         prev_minx, prev_miny, prev_maxx , prev_maxy,
@@ -132,10 +139,12 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
     }
   }
 
+  // 將得到的bound從world坐標系轉換到map坐標系
   int x0, xn, y0, yn;
   costmap_.worldToMapEnforceBounds(minx_, miny_, x0, y0);
   costmap_.worldToMapEnforceBounds(maxx_, maxy_, xn, yn);
 
+  // 防止轉換後的座標超出地圖範圍
   x0 = std::max(0, x0);
   xn = std::min(int(costmap_.getSizeInCellsX()), xn + 1);
   y0 = std::max(0, y0);
@@ -143,13 +152,15 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
 
   ROS_DEBUG("Updating area x: [%d, %d] y: [%d, %d]", x0, xn, y0, yn);
 
-  if (xn < x0 || yn < y0)
-    return;
+  if (xn < x0 || yn < y0) return;
 
+  // 將主地圖上bound範圍內的cell的cost恢復為預設值
   costmap_.resetMap(x0, y0, xn, yn);
+  // 對每層子地圖調用updateCosts函數
   for (vector<boost::shared_ptr<Layer> >::iterator plugin = plugins_.begin(); plugin != plugins_.end();
        ++plugin)
   {
+  
     if((*plugin)->isEnabled())
       (*plugin)->updateCosts(costmap_, x0, y0, xn, yn);
   }
@@ -159,6 +170,7 @@ void LayeredCostmap::updateMap(double robot_x, double robot_y, double robot_yaw)
   by0_ = y0;
   byn_ = yn;
 
+  // 標識地圖更新狀態
   initialized_ = true;
 }
 

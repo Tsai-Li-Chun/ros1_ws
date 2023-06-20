@@ -11,6 +11,7 @@ void CostmapLayer::touch(double x, double y, double* min_x, double* min_y, doubl
     *max_y = std::max(y, *max_y);
 }
 
+/* 使用主地圖的尺寸來設置該層子地圖的尺寸 */
 void CostmapLayer::matchSize()
 {
     Costmap2D* master = layered_costmap_->getCostmap();

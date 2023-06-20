@@ -43,6 +43,11 @@
 #include <geometry_msgs/Point.h>
 #include <boost/thread.hpp>
 
+
+/* Costmap2D類是記錄地圖資料的底層，紀錄以下資料 */
+/* map的x、y方向的尺寸，地圖解析度(map的一格代表實際地圖的尺寸)，map原點位置，地圖內容(unsigned char) */
+/* Costmap2D類提供了一些對地圖進行基本操作的函數，例如以下功能 */
+/* copy map、set/get map上該格的cost值、地圖座標和世界座標的轉換、獲取地圖大小/解析度/原點、設置footprint及內部的cost值 */
 namespace costmap_2d
 {
 
@@ -348,7 +353,7 @@ protected:
   virtual void initMaps(unsigned int size_x, unsigned int size_y);
 
   /**
-   * @brief  Raytrace a line and apply some action at each step
+   * @brief  指定兩點，此函數可找出兩點之間的其他點，使其組成趨近於直線的點集
    * @param  at The action to take... a functor
    * @param  x0 The starting x coordinate
    * @param  y0 The starting y coordinate
@@ -416,15 +421,15 @@ private:
     return x > 0 ? 1.0 : -1.0;
   }
 
-  mutex_t* access_;
-protected:
-  unsigned int size_x_;
-  unsigned int size_y_;
-  double resolution_;
-  double origin_x_;
-  double origin_y_;
-  unsigned char* costmap_;
-  unsigned char default_value_;
+  mutex_t* access_;             // 信號量
+protected:    
+  unsigned int size_x_;         // X軸尺寸
+  unsigned int size_y_;         // Y軸尺寸
+  double resolution_;           // 解析度
+  double origin_x_;             // X軸原點座標
+  double origin_y_;             // Y軸原點座標
+  unsigned char* costmap_;      // 儲存空間
+  unsigned char default_value_; // 預設cost值
 
   class MarkCell
   {

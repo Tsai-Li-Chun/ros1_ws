@@ -312,6 +312,7 @@ void Costmap2D::updateOrigin(double new_origin_x, double new_origin_y)
   delete[] local_map;
 }
 
+/* 將世界座標下的多邊形頂點轉換到地圖坐標，並存放進map_polygon陣列中 */
 bool Costmap2D::setConvexPolygonCost(const std::vector<geometry_msgs::Point>& polygon, unsigned char cost_value)
 {
   // we assume the polygon is given in the global_frame... we need to transform it to map coordinates
@@ -320,7 +321,7 @@ bool Costmap2D::setConvexPolygonCost(const std::vector<geometry_msgs::Point>& po
   {
     MapLocation loc;
     if (!worldToMap(polygon[i].x, polygon[i].y, loc.x, loc.y))
-    {
+    { // 若轉換成功, push_back新增進vector最後
       // ("Polygon lies outside map bounds, so we can't fill it");
       return false;
     }
@@ -341,6 +342,8 @@ bool Costmap2D::setConvexPolygonCost(const std::vector<geometry_msgs::Point>& po
   return true;
 }
 
+/* 這個函數迴圈調用raytraceLine()函數，不斷獲取相鄰儲存格中點之間的連線，最終組成多邊形邊上的cell。 */
+/* note : 需將最後一點和第一點連接起來，形成閉合。 */
 void Costmap2D::polygonOutlineCells(const std::vector<MapLocation>& polygon, std::vector<MapLocation>& polygon_cells)
 {
   PolygonOutlineCells cell_gatherer(*this, costmap_, polygon_cells);
@@ -349,23 +352,23 @@ void Costmap2D::polygonOutlineCells(const std::vector<MapLocation>& polygon, std
     raytraceLine(cell_gatherer, polygon[i].x, polygon[i].y, polygon[i + 1].x, polygon[i + 1].y);
   }
   if (!polygon.empty())
-  {
+  { // 將最後一點和起點連接起來
     unsigned int last_index = polygon.size() - 1;
     // we also need to close the polygon by going from the last point to the first
     raytraceLine(cell_gatherer, polygon[last_index].x, polygon[last_index].y, polygon[0].x, polygon[0].y);
   }
 }
 
+/* 獲取多邊形邊緣及set內部cells cost值函式 */
 void Costmap2D::convexFillCells(const std::vector<MapLocation>& polygon, std::vector<MapLocation>& polygon_cells)
 {
-  // we need a minimum polygon of a triangle
-  if (polygon.size() < 3)
-    return;
+  // 確保多邊形頂點不少於3個
+  if (polygon.size() < 3) return;
 
-  // first get the cells that make up the outline of the polygon
+  // 首先獲得輪廓點之間連線的列表，存放在polygon_cells中
   polygonOutlineCells(polygon, polygon_cells);
 
-  // quick bubble sort to sort points by x
+  // 按照x座標值進行快速氣泡排序法
   MapLocation swap;
   unsigned int i = 0;
   while (i < polygon_cells.size() - 1)
@@ -383,12 +386,14 @@ void Costmap2D::convexFillCells(const std::vector<MapLocation>& polygon, std::ve
       ++i;
   }
 
+  // 遍歷x, 相同的x檢查y, 獲得最大y和最小y的polygon cell
+  // 將範圍內的所有cell填充進polygon_cells
+  // 獲得多邊形邊緣及內部的所有cell。
   i = 0;
   MapLocation min_pt;
   MapLocation max_pt;
   unsigned int min_x = polygon_cells[0].x;
   unsigned int max_x = polygon_cells[polygon_cells.size() - 1].x;
-
   // walk through each column and mark cells inside the polygon
   for (unsigned int x = min_x; x <= max_x; ++x)
   {

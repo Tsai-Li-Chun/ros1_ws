@@ -55,13 +55,15 @@ class StaticLayer : public CostmapLayer
 public:
   StaticLayer();
   virtual ~StaticLayer();
-  virtual void onInitialize();
+  virtual void onInitialize();  /* 初始化函式 */
   virtual void activate();
   virtual void deactivate();
   virtual void reset();
 
+  /* 更新靜態地圖邊界函式 */
   virtual void updateBounds(double robot_x, double robot_y, double robot_yaw, double* min_x, double* min_y,
                             double* max_x, double* max_y);
+  /* 更新靜態地圖代價 */
   virtual void updateCosts(costmap_2d::Costmap2D& master_grid, int min_i, int min_j, int max_i, int max_j);
 
   virtual void matchSize();
@@ -77,6 +79,7 @@ private:
   void incomingUpdate(const map_msgs::OccupancyGridUpdateConstPtr& update);
   void reconfigureCB(costmap_2d::GenericPluginConfig &config, uint32_t level);
 
+  /* 將接收到的地圖“翻譯”到本層地圖 */
   unsigned char interpretValue(unsigned char value);
 
   std::string global_frame_;  ///< @brief The global frame for the costmap
