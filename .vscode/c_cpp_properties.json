@@ -14,6 +14,8 @@
         "${workspaceFolder}/src/motor_controller/include/motor_controller",
         "${workspaceFolder}/src/canalyst/canalystii_node/include",
         "${workspaceFolder}/src/arm_handshake/include/arm_handshake",
+        "${workspaceFolder}/src/photoneo_controller/include/photoneo_controller",
+        "${workspaceFolder}/src/robot_coordinate_transform/include/robot_coordinate_transform",
         "${workspaceFolder}/src/navigation/**",
         "${workspaceFolder}/devel/include/"
       ],

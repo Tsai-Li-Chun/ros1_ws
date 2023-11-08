@@ -16,7 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
   ${catkin_deps}
 )
 
-find_package(Boost)
+# find_package(Boost)
 
 catkin_package(
   INCLUDE_DIRS include
@@ -34,7 +34,7 @@ include_directories(
 )
 
 add_executable(keyboard_node src/keyboard.cpp)
-target_link_libraries(keyboard_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+target_link_libraries(keyboard_node ${catkin_LIBRARIES})
 
 add_executable(joy_control_node src/joy_control.cpp)
 target_link_libraries(joy_control_node ${catkin_LIBRARIES})
