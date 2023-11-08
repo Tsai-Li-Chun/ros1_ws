@@ -11,7 +11,6 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include "ros/ros.h"
-#include "shm_define.h"
 #include "shm_controller.hpp"
 /* User Includes End */
 
@@ -79,15 +78,7 @@ int main(int argc,char **argv)
 
 	/* Create shared memory control object */
     shared_memory_controller shm_ctl;
-    /* create and get shared memory segment */
-    int id = shm_ctl.get_shm(shm_key, shm_size, shm_flg);
-    if( id == (-1) ) return EXIT_FAILURE;
-    /* attach to the shared memory segment */
-    void *ptr = shm_ctl.attach_shm(id, nullptr, shm_rw_twoway);
-    if( ptr == (void*)(-1) ) return EXIT_FAILURE;
-	/* display information of the shm */
-    shm_ctl.shmds_information(); 
-    std::cout << "----------------------------------" << std::endl << std::endl;
+    shm_ctl.shm_StartUp(shm_key, shm_size, shm_flg, shm_rw_twoway);
 
 	while ( wait_key != 'q' )
 	{
@@ -127,7 +118,7 @@ int main(int argc,char **argv)
     // shm_ctl.write_shm(pose, 1*sizeof(float));
 
     /* detach and Remove shared memory segment */
-    if( shm_ctl.detach_shm(ptr) == (-1) )
+    if( shm_ctl.detach_shm() == (-1) )
         return EXIT_FAILURE;
 
     return EXIT_SUCCESS;

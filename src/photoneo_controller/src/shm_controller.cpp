@@ -73,6 +73,24 @@ shared_memory_controller::~shared_memory_controller()
  	* @param int flg, control flag value
  	* @return int8_t, unique identification ID number
 **	**/
+int shared_memory_controller::shm_StartUp(key_t key, size_t size, int ctlflg, int rwflg)
+{
+    /* create and get shared memory segment */
+    if( get_shm(key, size, ctlflg) == (-1) ) return EXIT_FAILURE;
+    /* attach to the shared memory segment */
+    if( attach_shm(rwflg) == (void*)(-1) ) return EXIT_FAILURE;
+	/* display information of the shm */
+    shmds_information(); 
+    std::cout << "----------------------------------" << std::endl << std::endl;
+	return EXIT_SUCCESS;
+}
+
+/** * @brief create and get shared memory segment
+ 	* @param key_t key, identification key
+ 	* @param size_t size, shared memory size
+ 	* @param int flg, control flag value
+ 	* @return int8_t, unique identification ID number
+**	**/
 int shared_memory_controller::get_shm(key_t key, size_t size, int flg)
 {
 	shm_id = shmget(key, size, flg);
@@ -92,9 +110,9 @@ int shared_memory_controller::get_shm(key_t key, size_t size, int flg)
  	* @param int flg, control flag value(R/W)
  	* @return void*, address linked to this program
 **	**/
-void* shared_memory_controller::attach_shm(int id, void* ptr, int flg)
+void* shared_memory_controller::attach_shm(int flg)
 {
-	shm_void_ptr = shmat(shm_id, NULL, 0);
+	shm_void_ptr = shmat(shm_id, NULL, flg);
 	if( shm_void_ptr != (void*)(-1) )
 		printf("Attach shared memroy Success. shm_ptr=: %p\n",shm_void_ptr);
 	else
@@ -109,7 +127,7 @@ void* shared_memory_controller::attach_shm(int id, void* ptr, int flg)
  	* @param void* ptr, specify address to this program
  	* @return void*, error code
 **	**/
-int8_t shared_memory_controller::detach_shm(void* ptr)
+int8_t shared_memory_controller::detach_shm(void)
 {
 	printf("Recevied detach shared memory command.\n");
 	return_code = shmdt(shm_void_ptr);
@@ -127,7 +145,7 @@ int8_t shared_memory_controller::detach_shm(void* ptr)
  	* @param void* ptr, specify address to this program
  	* @return void*, error code
 **	**/
-int8_t shared_memory_controller::remove_shm(int id)
+int8_t shared_memory_controller::remove_shm(void)
 {
 	printf("Recevied remove shared memory command.\n");
 	return_code = shmctl(shm_id, IPC_RMID, NULL);

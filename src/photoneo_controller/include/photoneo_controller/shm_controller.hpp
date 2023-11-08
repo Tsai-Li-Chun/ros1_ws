@@ -19,6 +19,7 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
+#include "shm_define.h"
 /* User Includes End */
 
 
@@ -53,14 +54,16 @@ public:
 	/* Destructor */
 	~shared_memory_controller();
 
+	/* shm start up */
+	int shm_StartUp(key_t key, size_t size, int ctlflg, int rwflg);
 	/* create and get shared memory segment */
 	int get_shm(key_t key, size_t size, int flg);
 	/* attach to the shared memory segment */
-	void* attach_shm(int id, void* ptr, int flg);
+	void* attach_shm(int flg);
 	/* detach from shared memory segment */
-	int8_t detach_shm(void* ptr);
+	int8_t detach_shm(void);
 	/* remove from shared memory segment */
-	int8_t remove_shm(int id);
+	int8_t remove_shm(void);
 	/* display information of the shm */
 	int shmds_information(void);
 
