@@ -1,5 +1,5 @@
 /** ******************************************************
-	* @file		shm_ros_controller.cpp
+	* @file		pho_ros_controller.cpp
 	* @author	Tsai,Li-chun
 	******************************************************
 **	**/
@@ -10,6 +10,7 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
+#include "pho_ros_controller.hpp"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -48,16 +49,14 @@
 /* ---------------------------------------------------------*/
 /* Program Begin */
 
-/** * @brief  Program entry point.
-	* @param argc(int) Number of input parameters
- 	* @param argv(int) input parameters
- 	* @return (int) Program Error.
+/** * @brief constructor
+	* @param None
+ 	* @return None
 **	**/
-int main(int argc, char **argv)
+pho_ros_controller::pho_ros_controller(ros::NodeHandlePtr n_ptr_)
 {
-
-	/* main quit */
-	return 0;
+	n_ = *n_ptr_;
+	// pub_pho_results_ = n_.advertise<photoneo_controller_msg_srv::p>();
 }
 
 /* Program End */
@@ -66,4 +65,4 @@ int main(int argc, char **argv)
 /* ---------------------------------------------------------*/
 
 
-/* ***** END OF shm_ros_controller.cpp ***** */
+/* ***** END OF pho_ros_controller.cpp ***** */

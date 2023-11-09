@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(robot_coordinate_transform)
+project(photoneo_controller_msg_srv)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,12 +8,12 @@ project(robot_coordinate_transform)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
+  message_generation
   std_msgs
 )
 
-# System dependencies are found with CMake's conventions
-find_package(Eigen3 REQUIRED COMPONENTS system)
+## System dependencies are found with CMake's conventions
+# find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -45,12 +45,15 @@ find_package(Eigen3 REQUIRED COMPONENTS system)
 ##   * uncomment the generate_messages entry below
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
-## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+# Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  array4xf32_msgs.msg
+  array4xf64_msgs.msg
+  matrix4x4_f32_msgs.msg
+  matrix4x4_f64_msgs.msg
+  LocalizationPose_msgs.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -66,11 +69,11 @@ find_package(Eigen3 REQUIRED COMPONENTS system)
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -103,8 +106,8 @@ find_package(Eigen3 REQUIRED COMPONENTS system)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES robot_coordinate_transform
-#  CATKIN_DEPENDS Eigen3 roscpp std_msgs
+#  LIBRARIES photoneo_controller_msg_srv
+ CATKIN_DEPENDS message_generation std_msgs
 #  DEPENDS system_lib
 )
 
@@ -117,12 +120,11 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
-  ./include/${PROJECT_NAME}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/robot_coordinate_transform.cpp
+#   src/${PROJECT_NAME}/photoneo_controller_msg_srv.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -133,7 +135,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/robot_coordinate_transform_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/photoneo_controller_msg_srv_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -197,14 +199,10 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_robot_coordinate_transform.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_photoneo_controller_msg_srv.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-add_executable(robot_coordinate_transform src/main.cpp src/MathTool.cpp src/M5Manipulator.cpp src/CoordinateTransformation.cpp )
-# add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(robot_coordinate_transform ${catkin_LIBRARIES})

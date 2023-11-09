@@ -10,6 +10,7 @@ project(photoneo_controller)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  photoneo_controller_msg_srv
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -100,7 +101,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES photoneo_controller
-#  CATKIN_DEPENDS roscpp
+#  CATKIN_DEPENDS roscpp photoneo_controller_msg
 #  DEPENDS system_lib
 )
 
@@ -201,6 +202,6 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(photoneo_controller src/main.cpp src/shm_controller.cpp)
-# # add_dependencies(photoneo_controller ${XXX_EXPORTED_TARGETS})
-target_link_libraries(photoneo_controller ${catkin_LIBRARIES})
+add_executable(photoneo_controller_node src/main.cpp src/shm_controller.cpp src/pho_ros_controller.cpp)
+add_dependencies(photoneo_controller_node ${catkin_EXPORTED_TARGETS})
+target_link_libraries(photoneo_controller_node ${catkin_LIBRARIES})

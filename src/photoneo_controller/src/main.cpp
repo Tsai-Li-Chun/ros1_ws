@@ -11,7 +11,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include "ros/ros.h"
-#include "shm_controller.hpp"
+#include "pho_ros_controller.hpp"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -75,6 +75,8 @@ int main(int argc,char **argv)
     ros::init(argc, argv, "photoneo_controller");
     ros::NodeHandle n;
     ros::Rate loop_rate(100);
+
+    // shm_ros_controller shm_ros_ctl;
 
 	/* Create shared memory control object */
     shared_memory_controller shm_ctl;

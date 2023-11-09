@@ -1,0 +1,5 @@
+std_msgs/Header header
+uint32 ID
+bool Occluded
+float64 VisibleOverlap
+matrix4x4_f32_msgs Transformation
