@@ -53,6 +53,7 @@ add_message_files(
   matrix4x4_f32_msgs.msg
   matrix4x4_f64_msgs.msg
   LocalizationPose_msgs.msg
+  LocalizationPoseList_msgs.msg
 )
 
 ## Generate services in the 'srv' folder

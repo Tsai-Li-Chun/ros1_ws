@@ -43,7 +43,7 @@ class shared_memory_controller
 private:
 	shmid_ds shm_ds;
     int8_t shm_id;
-	int8_t return_code;
+	int return_code;
     void *shm_void_ptr;
     void *return_code_ptr;
 
@@ -61,9 +61,9 @@ public:
 	/* attach to the shared memory segment */
 	void* attach_shm(int flg);
 	/* detach from shared memory segment */
-	int8_t detach_shm(void);
+	int detach_shm(void);
 	/* remove from shared memory segment */
-	int8_t remove_shm(void);
+	int remove_shm(void);
 	/* display information of the shm */
 	int shmds_information(void);
 
