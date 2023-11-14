@@ -44,14 +44,6 @@
 
 /* Function -------------------------------------------------*/
 /* Function Begin */
-
-// /* print Devices Information function */
-// void printDeviceInfoList(const pho::api::PhoXiDeviceInformation);
-// /* software trigger single scan function */
-// bool SoftwareTrigger_SingleScan(const pho::api::PPhoXi);
-// /* Print out profiles */
-// void printProfilesList(const std::vector<pho::api::PhoXiProfileDescriptor> &ProfilesInfo);
-
 /* Function End */
 
 

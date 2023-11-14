@@ -16,7 +16,6 @@
 /* User Includes Begin */
 #include "ros/ros.h"
 #include "shm_controller.hpp"
-#include "photoneo_controller_msg_srv/LocalizationPose_msgs.h"
 #include "photoneo_controller_msg_srv/LocalizationPoseList_msgs.h"
 /* User Includes End */
 
@@ -49,7 +48,8 @@ private:
 	int pho_results_quantity;
 
 	float shm_result[shm_float_size]={0};
-	photoneo_controller_msg_srv::LocalizationPose_msgs pho_results_msgs_;
+	photoneo_controller_msg_srv::LocalizationPose_msgs pho_result_msgs_;
+	photoneo_controller_msg_srv::LocalizationPoseList_msgs pho_result_list_msgs_;
 
 	/* setup pho_results_msgs_ data to 0 (initialization) */
 	void pho_results_msgs_Initialization(void);

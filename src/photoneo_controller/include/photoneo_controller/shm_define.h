@@ -27,6 +27,13 @@
 #define shm_rw_twoway (int)0
 #define shm_rw_readonly (int)SHM_RDONLY
 
+#define pho_results_MAXquantity 10
+#define loc_base_quantity 19
+#define loc_offset_ID 2
+#define loc_offset_Oc 3
+#define loc_offset_VO 3
+#define loc_offset_TF(i,j) (5+(4*i)+j)
+
 /* Define End */
 
 

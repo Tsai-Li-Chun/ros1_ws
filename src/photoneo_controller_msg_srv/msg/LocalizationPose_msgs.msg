@@ -1,4 +1,3 @@
-std_msgs/Header header
 uint32 ID
 bool Occluded
 float64 VisibleOverlap

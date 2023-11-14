@@ -57,7 +57,7 @@ pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_)
 {
 	shm_work_status = false;
 	n_ = n_ptr_;
-	pub_pho_results_ = n_->advertise<photoneo_controller_msg_srv::LocalizationPose_msgs>("pho_loc_results",10);
+	pub_pho_results_ = n_->advertise<photoneo_controller_msg_srv::LocalizationPoseList_msgs>("pho_loc_results",10);
 	timer_50_ = n_->createTimer(ros::Duration(10.0), &pho_ros_controller::time_50_callback, this);
 	timer_01_ = n_->createTimer(ros::Duration(0.01), &pho_ros_controller::time_01_callback, this);
 	
@@ -88,7 +88,7 @@ pho_ros_controller::~pho_ros_controller()
 void pho_ros_controller::Run(void)
 {
 
-	pub_pho_results_.publish(pho_results_msgs_);
+	pub_pho_results_.publish(pho_result_list_msgs_);
 }
 
 /** * @brief timer 5s callback function
@@ -124,7 +124,7 @@ void pho_ros_controller::time_01_callback(const ros::TimerEvent &event)
 			read_shm(shm_result, (size_t)shm_result[1]*sizeof(float));
 			pho_results_quantity = (int)((shm_result[1]-2)/19);
 			shm2rosmsg();
-			pub_pho_results_.publish(pho_results_msgs_);
+			pub_pho_results_.publish(pho_result_list_msgs_);
 			/* send reset signal */
 			shm_result[0] = 0.0f;
             write_shm(shm_result, sizeof(shm_result));
@@ -141,17 +141,28 @@ void pho_ros_controller::time_01_callback(const ros::TimerEvent &event)
 void pho_ros_controller::shm2rosmsg(void)
 {
 	int i,j,k;
+	pho_result_list_msgs_.LocalizationPoseList.clear();
 	for( k=0; k<pho_results_quantity; k++ )
 	{
-		pho_results_msgs_.ID = shm_result[k*19+2];
-		pho_results_msgs_.Occluded = shm_result[k*19+3];
-		pho_results_msgs_.VisibleOverlap = shm_result[k*19+4];
-		for(i=0; i<4; i++)
-			for(j=0; j<4; j++)
-				pho_results_msgs_.Transformation.row.at(i).col.at(j) = shm_result[k*19+5+(4*i)+j];
-		for( i=0; i<shm_float_size; i++)
-			shm_result[i] = 0;
+		if(k<pho_results_MAXquantity)
+		{
+			pho_result_msgs_.ID = shm_result[k*loc_base_quantity+loc_offset_ID];
+			pho_result_msgs_.Occluded = shm_result[k*loc_base_quantity+loc_offset_Oc];
+			pho_result_msgs_.VisibleOverlap = shm_result[k*loc_base_quantity+loc_offset_VO];
+			for(i=0; i<4; i++)
+				for(j=0; j<4; j++)
+					pho_result_msgs_.Transformation.row.at(i).col.at(j) = shm_result[k*loc_base_quantity+loc_offset_TF(i,j)];
+			pho_result_list_msgs_.LocalizationPoseList.push_back(pho_result_msgs_);
+			ROS_INFO("Reading target object: %ld / %d",pho_result_list_msgs_.LocalizationPoseList.size(),pho_results_quantity);
+		}
+		else
+		{
+			k=pho_results_MAXquantity;
+			ROS_WARN("result quantity exceeds the limit(pho_results_MAXquantity), retrieve only the first 10.");
+		}
 	}
+	for( i=0; i<shm_float_size; i++)
+		shm_result[i] = 0;
 	
 }
 
@@ -162,15 +173,10 @@ void pho_ros_controller::shm2rosmsg(void)
 void pho_ros_controller::pho_results_msgs_Initialization(void)
 {
 	int i,j;
-	pho_results_msgs_.header.frame_id = "pho_ros_controller";
-	pho_results_msgs_.header.stamp = ros::Time::now();
-	pho_results_msgs_.header.seq = 0;
-	pho_results_msgs_.ID = 0;
-	pho_results_msgs_.Occluded = 0;
-	pho_results_msgs_.VisibleOverlap = 0;
-	for(i=0; i<4; i++)
-		for(j=0; j<4; j++)
-			pho_results_msgs_.Transformation.row.at(i).col.at(j) = 0;
+	
+	// pho_results_msgs_.LocalizationPoseList.resize(pho_results_MAXquantity);
+	// for( i=0; i<shm_float_size; i++)
+	// 	pho_results_msgs_.LocalizationPoseList.at(i).header.frame_id = "pho_ros_controller";
 	for( i=0; i<shm_float_size; i++)
 		shm_result[i] = 0;
 }
