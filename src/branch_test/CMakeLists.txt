@@ -10,6 +10,7 @@ project(branch_test)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  photoneo_controller_msg_srv
 )
 
 ## System dependencies are found with CMake's conventions
@@ -116,9 +117,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
   ./include/${PROJECT_NAME}
-	/usr/local/include/modbus
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -205,8 +205,3 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-add_executable(arm_robot src/main.cpp
-					      include/${PROJECT_NAME}/Modbus_Handshake.cpp)
-# add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
-target_link_libraries(arm_robot ${catkin_LIBRARIES} modbus )
