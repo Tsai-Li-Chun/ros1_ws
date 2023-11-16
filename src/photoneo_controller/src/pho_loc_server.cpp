@@ -1,5 +1,5 @@
 /** ******************************************************
-	* @file		main.cpp
+	* @file		pho_loc_server.cpp
 	* @author	Tsai,Li-chun
 	******************************************************
 **	**/
@@ -68,7 +68,7 @@ int main(int argc,char **argv)
     ros::NodeHandle n;
     ros::Rate loop_rate(1);
 
-    pho_ros_controller pho_ros_ctl(&n);
+    pho_ros_controller pho_ros_ctl(&n,10.0f,0.01f);
 
     while( ros::ok() )
     {
@@ -84,4 +84,4 @@ int main(int argc,char **argv)
 /* ---------------------------------------------------------*/
 
 
-/* ***** END OF fake_cmdvel.cpp ***** */
+/* ***** END OF pho_loc_server.cpp ***** */

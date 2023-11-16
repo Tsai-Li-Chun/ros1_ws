@@ -16,6 +16,7 @@
 /* User Includes Begin */
 #include "ros/ros.h"
 #include "shm_controller.hpp"
+#include "photoneo_controller_msg_srv/pho_loc.h"
 #include "photoneo_controller_msg_srv/LocalizationPoseList_msgs.h"
 /* User Includes End */
 
@@ -40,8 +41,10 @@ class pho_ros_controller : public shared_memory_controller
 private:
 	ros::NodeHandle* n_;
 	ros::Publisher pub_pho_results_;
-	ros::Timer timer_50_,timer_01_;
+	ros::ServiceServer ser_pho_loc_;
+	ros::Timer timer_t1_,timer_t2_;
 
+	double t2_start_time,t2_end_time,t2_work_time;
 	/* false(sleeping), true(working) */
 	bool shm_work_status;
 	/* calculated number of target object */
@@ -51,20 +54,34 @@ private:
 	photoneo_controller_msg_srv::LocalizationPose_msgs pho_result_msgs_;
 	photoneo_controller_msg_srv::LocalizationPoseList_msgs pho_result_list_msgs_;
 
-	/* setup pho_results_msgs_ data to 0 (initialization) */
-	void pho_results_msgs_Initialization(void);
+	/* setup shm data to 0 */
+	void shm_all_zero(void);
 	/* Convert 1D array in SHM to ROS message format */
 	void shm2rosmsg(void);
+	/* send data request to shm */
+	void send_shm_request(void);
+	/* waiting for pho result to return */
+	void wait_pho_return(void);
+	/* retrieve and convert recognition results from Photoneo */
+	void retrieve_convert_pho_results(void);
+	/* send command to reset data in shm */
+	void send_shm_reset_command(void);
+	/* retrieve longest transformation time */
+	void get_MAX_TFtime(bool s_e);
 
-	/* timer 5s callback function */
-	void time_50_callback(const ros::TimerEvent &event);
-	/* timer 0.01s callback function */
-	void time_01_callback(const ros::TimerEvent &event);
+	/* service callback function */
+	bool service_pho_loc_callback(photoneo_controller_msg_srv::pho_loc::Request &req,
+								  photoneo_controller_msg_srv::pho_loc::Response &res);
+	/* timer ${time1}s callback function */
+	void time_t1_callback(const ros::TimerEvent &event);
+	/* timer ${time2}s callback function */
+	void time_t2_callback(const ros::TimerEvent &event);
 
 /* public members */
 public:
 	/* constructor */
-	pho_ros_controller(ros::NodeHandle* n_ptr_ );
+	pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, float time2 );
+	pho_ros_controller(ros::NodeHandle* n_ptr_, float time2, std::string service_mode);
 	/* destructor */
 	~pho_ros_controller();
 

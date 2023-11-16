@@ -81,7 +81,7 @@ int shared_memory_controller::shm_StartUp(key_t key, size_t size, int ctlflg, in
     if( attach_shm(rwflg) == (void*)(-1) ) return EXIT_FAILURE;
 	/* display information of the shm */
     shmds_information(); 
-    std::cout << "----------------------------------" << std::endl << std::endl;
+    // std::cout << "----------------------------------" << std::endl << std::endl;
 	return EXIT_SUCCESS;
 }
 
@@ -168,18 +168,18 @@ int shared_memory_controller::shmds_information(void)
 	return_code = shmctl(shm_id, IPC_STAT, &shm_ds);
 	if( return_code == 0 )
     {
-        printf("shm_ds.shm_perm.uid = %d\n",shm_ds.shm_perm.uid);
-        printf("shm_ds.shm_perm.mode= %d\n",shm_ds.shm_perm.mode);
-        printf("shm_ds.shm_perm.gid = %d\n",shm_ds.shm_perm.gid);
-        printf("shm_ds.shm_perm.cuid= %d\n",shm_ds.shm_perm.cuid);
-        printf("shm_ds.shm_perm.cgid= %d\n",shm_ds.shm_perm.cgid);
+        // printf("shm_ds.shm_perm.uid = %d\n",shm_ds.shm_perm.uid);
+        // printf("shm_ds.shm_perm.mode= %d\n",shm_ds.shm_perm.mode);
+        // printf("shm_ds.shm_perm.gid = %d\n",shm_ds.shm_perm.gid);
+        // printf("shm_ds.shm_perm.cuid= %d\n",shm_ds.shm_perm.cuid);
+        // printf("shm_ds.shm_perm.cgid= %d\n",shm_ds.shm_perm.cgid);
         printf("shm_ds.shm_segsz    = %ld\n",shm_ds.shm_segsz);
         printf("shm_ds.shm_nattch   = %ld\n",shm_ds.shm_nattch);
-        printf("shm_ds.shm_lpid     = %d\n",shm_ds.shm_lpid);
-        printf("shm_ds.shm_cpid     = %d\n",shm_ds.shm_cpid);
-        printf("shm_ds.shm_ctime    = %ld\n",shm_ds.shm_ctime);
-        printf("shm_ds.shm_atime    = %ld\n",shm_ds.shm_atime);
-        printf("shm_ds.shm_dtime    = %ld\n",shm_ds.shm_dtime);
+        // printf("shm_ds.shm_lpid     = %d\n",shm_ds.shm_lpid);
+        // printf("shm_ds.shm_cpid     = %d\n",shm_ds.shm_cpid);
+        // printf("shm_ds.shm_ctime    = %ld\n",shm_ds.shm_ctime);
+        // printf("shm_ds.shm_atime    = %ld\n",shm_ds.shm_atime);
+        // printf("shm_ds.shm_dtime    = %ld\n",shm_ds.shm_dtime);
     }
     else
         perror("shmctl error code: ");

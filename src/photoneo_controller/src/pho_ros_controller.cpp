@@ -49,24 +49,47 @@
 /* ---------------------------------------------------------*/
 /* Program Begin */
 
-/** * @brief constructor
-	* @param None
+/** * @brief constructor, Using timer call
+	* @param ros::NodeHandle*, NodeHandle ptr
  	* @return None
 **	**/
-pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_)
+pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, float time2)
 {
+	t2_work_time = 0.0f;
 	shm_work_status = false;
 	n_ = n_ptr_;
 	pub_pho_results_ = n_->advertise<photoneo_controller_msg_srv::LocalizationPoseList_msgs>("pho_loc_results",10);
-	timer_50_ = n_->createTimer(ros::Duration(10.0), &pho_ros_controller::time_50_callback, this);
-	timer_01_ = n_->createTimer(ros::Duration(0.01), &pho_ros_controller::time_01_callback, this);
+	timer_t1_ = n_->createTimer(ros::Duration(time1), &pho_ros_controller::time_t1_callback, this);
+	timer_t2_ = n_->createTimer(ros::Duration(time2), &pho_ros_controller::time_t2_callback, this);
+	ROS_INFO("pho_ros_controller constructor [Using timer call]");
 	
-	pho_results_msgs_Initialization();
+	shm_all_zero();
 	/* Create shared memory control object */
     if(shm_StartUp(shm_key, shm_size, shm_flg, shm_rw_twoway) == EXIT_SUCCESS)
 		ROS_INFO("Create shared memory control object, and attach Success!");
 	else
 		ROS_ERROR("Create and attach shared memory control object Failed!");
+	ROS_INFO("--------------------------------------------------------------------\n");
+}
+/** * @brief constructor, Using service call
+	* @param None
+ 	* @return None
+**	**/
+pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time2, std::string service_mode)
+{
+	shm_work_status = false;
+	n_ = n_ptr_;
+	ser_pho_loc_ = n_->advertiseService("pho_loc", &pho_ros_controller::service_pho_loc_callback, this);
+	timer_t2_ = n_->createTimer(ros::Duration(time2), &pho_ros_controller::time_t2_callback, this);
+	ROS_INFO("pho_ros_controller constructor [Using service call]");
+
+	shm_all_zero();
+	/* Create shared memory control object */
+    if(shm_StartUp(shm_key, shm_size, shm_flg, shm_rw_twoway) == EXIT_SUCCESS)
+		ROS_INFO("Create shared memory control object, and attach Success!");
+	else
+		ROS_ERROR("Create and attach shared memory control object Failed!");
+	ROS_INFO("--------------------------------------------------------------------\n");
 }
 
 /** * @brief destructor
@@ -87,51 +110,81 @@ pho_ros_controller::~pho_ros_controller()
 **	**/
 void pho_ros_controller::Run(void)
 {
-
-	pub_pho_results_.publish(pho_result_list_msgs_);
 }
 
-/** * @brief timer 5s callback function
+/** * @brief service callback function
+	* @param pho_loc::Request, service request dara
+	* @param pho_loc::Response, service response data
+ 	* @return bool, program result
+**	**/
+bool pho_ros_controller::service_pho_loc_callback(photoneo_controller_msg_srv::pho_loc::Request &req,
+												  photoneo_controller_msg_srv::pho_loc::Response &res)
+{
+	if( (shm_result[0]==0.0f) && (shm_work_status==false) )
+	{
+		shm_work_status = true;
+		get_MAX_TFtime(false);
+		/* send request */
+		send_shm_request();
+		/* waiting for pho result to return */
+		wait_pho_return();
+		/* retrieve and convert recognition results from Photoneo */
+		retrieve_convert_pho_results();
+		/* publish to topic */
+		pub_pho_results_.publish(pho_result_list_msgs_);
+		/* send reset signal */
+		send_shm_reset_command();
+		/* retrieve transformation time */
+		get_MAX_TFtime(true);
+		ROS_INFO("------------Finish------------\n");
+		shm_work_status = false;
+	}
+}
+
+/** * @brief timer ${time1}s callback function
 	* @param TimerEvent event, timer event
  	* @return None
 **	**/
-void pho_ros_controller::time_50_callback(const ros::TimerEvent &event)
+void pho_ros_controller::time_t1_callback(const ros::TimerEvent &event)
 {
-	ROS_INFO("time_50_callback: %lf",ros::Time::now().toSec());
 	if( (shm_result[0]==0.0f) && (shm_work_status==false) )
 	{
 		shm_work_status = true;
 		/* send request */
-		ROS_INFO("Send request for data command");
-		shm_result[0] = 1.0f;
-		// for(i=1; i<17; i++) pose[i] = 0.0f;
-		write_shm(shm_result, 1*sizeof(float));
+		send_shm_request();
+		// ROS_INFO("Send request for data command");
+		// shm_result[0] = 1.0f;
+		// // for(i=1; i<17; i++) pose[i] = 0.0f;
+		// write_shm(shm_result, 1*sizeof(float));
 		ROS_INFO("Waiting for data to return ...");
 	}
 }
 
-/** * @brief timer 0.01s callback function
+/** * @brief timer ${time2}s callback function
 	* @param TimerEvent event, timer event
  	* @return None
 **	**/
-void pho_ros_controller::time_01_callback(const ros::TimerEvent &event)
+void pho_ros_controller::time_t2_callback(const ros::TimerEvent &event)
 {
+	get_MAX_TFtime(false);
 	if( shm_work_status==true )
 	{
 		read_shm(shm_result, 2*sizeof(float));
 		if(shm_result[0]==2.0f)
 		{
-			read_shm(shm_result, (size_t)shm_result[1]*sizeof(float));
-			pho_results_quantity = (int)((shm_result[1]-2)/19);
-			shm2rosmsg();
+			/* retrieve and convert recognition results from Photoneo */
+			retrieve_convert_pho_results();
+			/* publish to topic */
 			pub_pho_results_.publish(pho_result_list_msgs_);
 			/* send reset signal */
-			shm_result[0] = 0.0f;
-            write_shm(shm_result, sizeof(shm_result));
-			shm_work_status = false;
+			send_shm_reset_command();
+			/* retrieve longest transformation time */
+			get_MAX_TFtime(true);
 			ROS_INFO("------------Finish------------\n");
+			shm_work_status = false;
 		}
 	}
+	// if( shm_work_status==true )	read_shm(shm_result, 2*sizeof(float));
 }
 
 /** * @brief Convert 1D array in SHM to ROS message format
@@ -170,15 +223,70 @@ void pho_ros_controller::shm2rosmsg(void)
 	* @param None
  	* @return None
 **	**/
-void pho_ros_controller::pho_results_msgs_Initialization(void)
+void pho_ros_controller::shm_all_zero(void)
 {
-	int i,j;
-	
-	// pho_results_msgs_.LocalizationPoseList.resize(pho_results_MAXquantity);
-	// for( i=0; i<shm_float_size; i++)
-	// 	pho_results_msgs_.LocalizationPoseList.at(i).header.frame_id = "pho_ros_controller";
-	for( i=0; i<shm_float_size; i++)
+	for(int i=0; i<shm_float_size; i++)
 		shm_result[i] = 0;
+}
+
+/** * @brief send data request to shm
+	* @param None
+ 	* @return None
+**	**/
+void pho_ros_controller::send_shm_request(void)
+{
+	ROS_INFO("Send request for data command");
+	shm_result[0] = 1.0f;
+	write_shm(shm_result, 1*sizeof(float));
+}
+
+/** * @brief waiting for pho result to return
+	* @param None
+ 	* @return None
+**	**/
+void pho_ros_controller::wait_pho_return(void)
+{
+	ROS_INFO("Waiting for data to return ...");
+	while( shm_result[0]!=2.0f ) {}
+}
+
+/** * @brief retrieve and convert recognition results from photoneo
+	* @param None
+ 	* @return None
+**	**/
+void pho_ros_controller::retrieve_convert_pho_results(void)
+{
+	read_shm(shm_result, (size_t)shm_result[1]*sizeof(float));
+	pho_results_quantity = (int)((shm_result[1]-2)/19);
+	shm2rosmsg();
+}
+
+/** * @brief send command to reset data in shm
+	* @param None
+ 	* @return None
+**	**/
+void pho_ros_controller::send_shm_reset_command(void)
+{
+	shm_result[0] = 0.0f; shm_result[1] = 0.0f;
+	write_shm(shm_result, 2*sizeof(float));
+}
+
+/** * @brief retrieve longest transformation time
+	* @param bool s_e, false retrieve start time,
+					   true retrieve end time and
+ 	* @return None
+**	**/
+void pho_ros_controller::get_MAX_TFtime(bool s_e)
+{
+	if( s_e == false )
+		t2_start_time = ros::Time::now().toSec();
+	else
+	{
+		t2_end_time = ros::Time::now().toSec();
+		if( t2_work_time<(t2_end_time-t2_start_time) )
+			t2_work_time = t2_end_time-t2_start_time;
+		ROS_INFO("time_t2_callback MAX work time: %lf",t2_work_time);
+	}
 }
 
 /* Program End */
