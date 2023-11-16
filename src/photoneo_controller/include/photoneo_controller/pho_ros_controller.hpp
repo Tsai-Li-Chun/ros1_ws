@@ -16,7 +16,7 @@
 /* User Includes Begin */
 #include "ros/ros.h"
 #include "shm_controller.hpp"
-#include "photoneo_controller_msg_srv/pho_loc.h"
+#include "photoneo_controller_msg_srv/pho_loc_service.h"
 #include "photoneo_controller_msg_srv/LocalizationPoseList_msgs.h"
 /* User Includes End */
 
@@ -34,6 +34,12 @@
 /* Extern Class -------------------------------------------*/
 /* Extern Class Begin */
 
+enum class service_mode:char
+{
+	server = 's',
+	client = 'c'
+};
+
 /* photoneo control object - ROS to shm version */
 class pho_ros_controller : public shared_memory_controller
 {
@@ -41,7 +47,8 @@ class pho_ros_controller : public shared_memory_controller
 private:
 	ros::NodeHandle* n_;
 	ros::Publisher pub_pho_results_;
-	ros::ServiceServer ser_pho_loc_;
+	ros::ServiceServer server_pho_loc_;
+	ros::ServiceClient client_pho_loc_;
 	ros::Timer timer_t1_,timer_t2_;
 
 	double t2_start_time,t2_end_time,t2_work_time;
@@ -70,8 +77,8 @@ private:
 	void get_MAX_TFtime(bool s_e);
 
 	/* service callback function */
-	bool service_pho_loc_callback(photoneo_controller_msg_srv::pho_loc::Request &req,
-								  photoneo_controller_msg_srv::pho_loc::Response &res);
+	bool service_pho_loc_callback(photoneo_controller_msg_srv::pho_loc_service::Request &req,
+								  photoneo_controller_msg_srv::pho_loc_service::Response &res);
 	/* timer ${time1}s callback function */
 	void time_t1_callback(const ros::TimerEvent &event);
 	/* timer ${time2}s callback function */
@@ -81,7 +88,7 @@ private:
 public:
 	/* constructor */
 	pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, float time2 );
-	pho_ros_controller(ros::NodeHandle* n_ptr_, float time2, std::string service_mode);
+	pho_ros_controller(ros::NodeHandle* n_ptr_, service_mode s_m);
 	/* destructor */
 	~pho_ros_controller();
 
