@@ -51,6 +51,8 @@
 
 /** * @brief constructor, Using timer call
 	* @param ros::NodeHandle*, NodeHandle ptr
+	* @param float time1, time interval between each trigger for 3D scanner
+	* @param float time2, time interval for reading shm data
  	* @return None
 **	**/
 pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, float time2)
@@ -72,24 +74,32 @@ pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, flo
 	ROS_INFO("--------------------------------------------------------------------\n");
 }
 /** * @brief constructor, Using service call
-	* @param None
+	* @param ros::NodeHandle*, NodeHandle ptr
+	* @param std::string, service_mode choose create server or client
  	* @return None
 **	**/
-pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time2, std::string service_mode)
+pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, service_mode s_m)
 {
 	shm_work_status = false;
 	n_ = n_ptr_;
-	ser_pho_loc_ = n_->advertiseService("pho_loc", &pho_ros_controller::service_pho_loc_callback, this);
-	timer_t2_ = n_->createTimer(ros::Duration(time2), &pho_ros_controller::time_t2_callback, this);
-	ROS_INFO("pho_ros_controller constructor [Using service call]");
-
-	shm_all_zero();
-	/* Create shared memory control object */
-    if(shm_StartUp(shm_key, shm_size, shm_flg, shm_rw_twoway) == EXIT_SUCCESS)
-		ROS_INFO("Create shared memory control object, and attach Success!");
-	else
-		ROS_ERROR("Create and attach shared memory control object Failed!");
-	ROS_INFO("--------------------------------------------------------------------\n");
+	timer_t2_ = n_->createTimer(ros::Duration(0.01), &pho_ros_controller::time_t2_callback, this);
+	if( s_m == service_mode::server )
+	{
+		server_pho_loc_ = n_->advertiseService("pho_loc_service", &pho_ros_controller::service_pho_loc_callback, this);
+		ROS_INFO("Create [Server] Success!");
+		shm_all_zero();
+		/* Create shared memory control object */
+		if(shm_StartUp(shm_key, shm_size, shm_flg, shm_rw_twoway) == EXIT_SUCCESS)
+			ROS_INFO("Create shared memory control object, and attach Success!");
+		else
+			ROS_ERROR("Create and attach shared memory control object Failed!");
+		ROS_INFO("--------------------------------------------------------------------\n");
+	}
+	else if( s_m == service_mode::client )
+	{
+		client_pho_loc_ = n_->serviceClient<photoneo_controller_msg_srv::pho_loc_service>("pho_loc_service");
+		ROS_INFO("Create [Client] Success!");
+	}
 }
 
 /** * @brief destructor
@@ -113,12 +123,12 @@ void pho_ros_controller::Run(void)
 }
 
 /** * @brief service callback function
-	* @param pho_loc::Request, service request dara
-	* @param pho_loc::Response, service response data
+	* @param pho_loc_service::Request, service request dara
+	* @param pho_loc_service::Response, service response data
  	* @return bool, program result
 **	**/
-bool pho_ros_controller::service_pho_loc_callback(photoneo_controller_msg_srv::pho_loc::Request &req,
-												  photoneo_controller_msg_srv::pho_loc::Response &res)
+bool pho_ros_controller::service_pho_loc_callback(photoneo_controller_msg_srv::pho_loc_service::Request &req,
+												  photoneo_controller_msg_srv::pho_loc_service::Response &res)
 {
 	if( (shm_result[0]==0.0f) && (shm_work_status==false) )
 	{
@@ -139,6 +149,7 @@ bool pho_ros_controller::service_pho_loc_callback(photoneo_controller_msg_srv::p
 		ROS_INFO("------------Finish------------\n");
 		shm_work_status = false;
 	}
+	return true;
 }
 
 /** * @brief timer ${time1}s callback function

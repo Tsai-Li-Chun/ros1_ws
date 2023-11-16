@@ -9,8 +9,8 @@ project(photoneo_controller)
 ## is used, also find other catkin packages
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  photoneo_controller_msg_srv
+	roscpp
+	photoneo_controller_msg_srv
 )
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -113,8 +113,8 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ./include/${PROJECT_NAME}
-  ${catkin_INCLUDE_DIRS}
+	./include/${PROJECT_NAME}
+	${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -202,6 +202,16 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(photoneo_controller_node src/main.cpp src/shm_controller.cpp src/pho_ros_controller.cpp)
-add_dependencies(photoneo_controller_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(photoneo_controller_node ${catkin_LIBRARIES})
+add_executable(pho_ros_node_server
+					src/pho_ros_node_server.cpp 
+					src/shm_controller.cpp
+					src/pho_ros_controller.cpp)
+add_dependencies(pho_ros_node_server ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pho_ros_node_server ${catkin_LIBRARIES})
+
+add_executable(pho_ros_node_client
+					src/pho_ros_node_client.cpp 
+					src/shm_controller.cpp
+					src/pho_ros_controller.cpp)
+add_dependencies(pho_ros_node_client ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pho_ros_node_client ${catkin_LIBRARIES})

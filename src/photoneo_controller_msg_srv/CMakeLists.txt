@@ -59,7 +59,7 @@ add_message_files(
 # Generate services in the 'srv' folder
 add_service_files(
   FILES
-  pho_loc.srv
+  pho_loc_service.srv
 )
 
 ## Generate actions in the 'action' folder
