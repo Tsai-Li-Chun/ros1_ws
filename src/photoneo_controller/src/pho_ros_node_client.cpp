@@ -60,16 +60,38 @@
 **	**/
 int main(int argc,char **argv)
 {
-    ros::init(argc, argv, "pho_ros_node_client");
-    ros::NodeHandle n;
-    ros::Rate loop_rate(1);
+	char key;
+	ros::init(argc, argv, "pho_ros_node_client");
+	ros::NodeHandle n;
+	photoneo_controller_msg_srv::LocalizationPoseList_msgs pho_result_list_msgs_;
 
-    // pho_ros_controller pho_ros_ctl(&n,10.0f,0.01f);
-    pho_ros_controller pho_ros_ctl(&n, service_mode::client);
+	// pho_ros_controller pho_ros_ctl(&n,10.0f,0.01f);
+	pho_ros_controller pho_ros_ctl(&n, service_mode::client);
 
-    ros::spin();
+	while( (ros::ok()) && (key!='q') )
+	{
+		// std::cout << "input 'q' to exit program, input 's' trigger the 3Dscanner: ";
+		// std::cin >> key;
+		sleep(15);
+		key = 's';
+		if( key=='s' )
+		{
+			if( pho_ros_ctl.client_call() )                             
+			{
+				ROS_INFO("call to the service");
+				pho_ros_ctl.pub_pho_results();
+				pho_result_list_msgs_ = pho_ros_ctl.get_pho_results();
+				ROS_INFO("Success to call service");
+			}
+			else
+			{
+				ROS_ERROR("Failed to call service");
+			}
+		}
+	}
+	
 
-    return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 /* Program End */

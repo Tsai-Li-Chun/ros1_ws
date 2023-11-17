@@ -53,13 +53,14 @@ private:
 
 	double t2_start_time,t2_end_time,t2_work_time;
 	/* false(sleeping), true(working) */
-	bool shm_work_status;
+	bool shm_work_status,this_status,server_return;
 	/* calculated number of target object */
 	int pho_results_quantity;
 
 	float shm_result[shm_float_size]={0};
 	photoneo_controller_msg_srv::LocalizationPose_msgs pho_result_msgs_;
 	photoneo_controller_msg_srv::LocalizationPoseList_msgs pho_result_list_msgs_;
+	photoneo_controller_msg_srv::pho_loc_service pho_loc_srv_;
 
 	/* setup shm data to 0 */
 	void shm_all_zero(void);
@@ -92,8 +93,12 @@ public:
 	/* destructor */
 	~pho_ros_controller();
 
-	/* photoneo control object entry point */
-	void Run(void);
+	/* calling the service provider */
+	bool client_call(void);
+	/* publish to topic (photoneo results) */
+	void pub_pho_results(void);
+	/* retrieve photoneo localization results */
+	photoneo_controller_msg_srv::LocalizationPoseList_msgs get_pho_results(void);
 };
 
 /* Extern Class End */

@@ -7,6 +7,7 @@
 
 /* System Includes ------------------------------------------*/
 /* System Includes Begin */
+#include <thread>
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
@@ -62,7 +63,6 @@ int main(int argc,char **argv)
 {
     ros::init(argc, argv, "pho_ros_node_server");
     ros::NodeHandle n;
-    ros::Rate loop_rate(1);
 
     // pho_ros_controller pho_ros_ctl(&n,10.0f,0.01f);
     pho_ros_controller pho_ros_ctl(&n, service_mode::server);

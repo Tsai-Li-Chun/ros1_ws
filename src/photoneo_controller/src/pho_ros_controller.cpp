@@ -7,6 +7,8 @@
 
 /* System Includes ------------------------------------------*/
 /* System Includes Begin */
+#include <thread>
+#include <chrono>
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
@@ -59,6 +61,7 @@ pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, flo
 {
 	t2_work_time = 0.0f;
 	shm_work_status = false;
+	this_status = false;
 	n_ = n_ptr_;
 	pub_pho_results_ = n_->advertise<photoneo_controller_msg_srv::LocalizationPoseList_msgs>("pho_loc_results",10);
 	timer_t1_ = n_->createTimer(ros::Duration(time1), &pho_ros_controller::time_t1_callback, this);
@@ -80,9 +83,10 @@ pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, float time1, flo
 **	**/
 pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, service_mode s_m)
 {
+	t2_work_time = 0.0f;
 	shm_work_status = false;
+	this_status = true;
 	n_ = n_ptr_;
-	timer_t2_ = n_->createTimer(ros::Duration(0.01), &pho_ros_controller::time_t2_callback, this);
 	if( s_m == service_mode::server )
 	{
 		server_pho_loc_ = n_->advertiseService("pho_loc_service", &pho_ros_controller::service_pho_loc_callback, this);
@@ -97,6 +101,7 @@ pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, service_mode s_m
 	}
 	else if( s_m == service_mode::client )
 	{
+		pub_pho_results_ = n_->advertise<photoneo_controller_msg_srv::LocalizationPoseList_msgs>("pho_loc_results",10);
 		client_pho_loc_ = n_->serviceClient<photoneo_controller_msg_srv::pho_loc_service>("pho_loc_service");
 		ROS_INFO("Create [Client] Success!");
 	}
@@ -108,18 +113,43 @@ pho_ros_controller::pho_ros_controller(ros::NodeHandle* n_ptr_, service_mode s_m
 **	**/
 pho_ros_controller::~pho_ros_controller()
 {
-	if(detach_shm() == 0)
-		ROS_INFO("Detach shared meeory Success");
-	else if(detach_shm() == (-1))
-		ROS_ERROR("Detach shared meeory Failed");
+	if( this_status == false )
+	{
+		if(detach_shm() == 0)
+			ROS_INFO("Detach shared meeory Success");
+		else if(detach_shm() == (-1))
+			ROS_ERROR("Detach shared meeory Failed");
+	}
 }
 
-/** * @brief photoneo controller object entry point
+/** * @brief calling the service provider
 	* @param None
- 	* @return None
+ 	* @return bool, execution result
 **	**/
-void pho_ros_controller::Run(void)
+bool pho_ros_controller::client_call(void)
 {
+	pho_loc_srv_.request.request = true;
+	server_return = client_pho_loc_.call(pho_loc_srv_);
+	pho_result_list_msgs_.LocalizationPoseList = pho_loc_srv_.response.LocalizationPoseList;
+	return server_return;
+}
+
+/** * @brief publish to topic (photoneo results)
+	* @param None
+ 	* @return bool, execution result
+**	**/
+void pho_ros_controller::pub_pho_results(void)
+{
+	pub_pho_results_.publish(pho_result_list_msgs_);
+}
+
+/** * @brief retrieve photoneo localization results
+	* @param None
+ 	* @return photoneo_controller_msg_srv::LocalizationPoseList_msgs
+**	**/
+photoneo_controller_msg_srv::LocalizationPoseList_msgs pho_ros_controller::get_pho_results(void)
+{
+	return pho_result_list_msgs_;
 }
 
 /** * @brief service callback function
@@ -132,7 +162,6 @@ bool pho_ros_controller::service_pho_loc_callback(photoneo_controller_msg_srv::p
 {
 	if( (shm_result[0]==0.0f) && (shm_work_status==false) )
 	{
-		shm_work_status = true;
 		get_MAX_TFtime(false);
 		/* send request */
 		send_shm_request();
@@ -140,15 +169,13 @@ bool pho_ros_controller::service_pho_loc_callback(photoneo_controller_msg_srv::p
 		wait_pho_return();
 		/* retrieve and convert recognition results from Photoneo */
 		retrieve_convert_pho_results();
-		/* publish to topic */
-		pub_pho_results_.publish(pho_result_list_msgs_);
 		/* send reset signal */
 		send_shm_reset_command();
 		/* retrieve transformation time */
 		get_MAX_TFtime(true);
 		ROS_INFO("------------Finish------------\n");
-		shm_work_status = false;
 	}
+	res = pho_loc_srv_.response;
 	return true;
 }
 
@@ -161,12 +188,9 @@ void pho_ros_controller::time_t1_callback(const ros::TimerEvent &event)
 	if( (shm_result[0]==0.0f) && (shm_work_status==false) )
 	{
 		shm_work_status = true;
+		get_MAX_TFtime(false);
 		/* send request */
 		send_shm_request();
-		// ROS_INFO("Send request for data command");
-		// shm_result[0] = 1.0f;
-		// // for(i=1; i<17; i++) pose[i] = 0.0f;
-		// write_shm(shm_result, 1*sizeof(float));
 		ROS_INFO("Waiting for data to return ...");
 	}
 }
@@ -177,16 +201,15 @@ void pho_ros_controller::time_t1_callback(const ros::TimerEvent &event)
 **	**/
 void pho_ros_controller::time_t2_callback(const ros::TimerEvent &event)
 {
-	get_MAX_TFtime(false);
 	if( shm_work_status==true )
 	{
 		read_shm(shm_result, 2*sizeof(float));
-		if(shm_result[0]==2.0f)
+		if( shm_result[0]==2.0f )
 		{
 			/* retrieve and convert recognition results from Photoneo */
 			retrieve_convert_pho_results();
 			/* publish to topic */
-			pub_pho_results_.publish(pho_result_list_msgs_);
+			pub_pho_results();
 			/* send reset signal */
 			send_shm_reset_command();
 			/* retrieve longest transformation time */
@@ -195,7 +218,6 @@ void pho_ros_controller::time_t2_callback(const ros::TimerEvent &event)
 			shm_work_status = false;
 		}
 	}
-	// if( shm_work_status==true )	read_shm(shm_result, 2*sizeof(float));
 }
 
 /** * @brief Convert 1D array in SHM to ROS message format
@@ -205,6 +227,7 @@ void pho_ros_controller::time_t2_callback(const ros::TimerEvent &event)
 void pho_ros_controller::shm2rosmsg(void)
 {
 	int i,j,k;
+	pho_loc_srv_.response.LocalizationPoseList.clear();
 	pho_result_list_msgs_.LocalizationPoseList.clear();
 	for( k=0; k<pho_results_quantity; k++ )
 	{
@@ -216,8 +239,8 @@ void pho_ros_controller::shm2rosmsg(void)
 			for(i=0; i<4; i++)
 				for(j=0; j<4; j++)
 					pho_result_msgs_.Transformation.row.at(i).col.at(j) = shm_result[k*loc_base_quantity+loc_offset_TF(i,j)];
+			pho_loc_srv_.response.LocalizationPoseList.push_back(pho_result_msgs_);
 			pho_result_list_msgs_.LocalizationPoseList.push_back(pho_result_msgs_);
-			ROS_INFO("Reading target object: %ld / %d",pho_result_list_msgs_.LocalizationPoseList.size(),pho_results_quantity);
 		}
 		else
 		{
@@ -227,7 +250,6 @@ void pho_ros_controller::shm2rosmsg(void)
 	}
 	for( i=0; i<shm_float_size; i++)
 		shm_result[i] = 0;
-	
 }
 
 /** * @brief setup pho_results_msgs_ data to 0 (initialization)
@@ -258,7 +280,11 @@ void pho_ros_controller::send_shm_request(void)
 void pho_ros_controller::wait_pho_return(void)
 {
 	ROS_INFO("Waiting for data to return ...");
-	while( shm_result[0]!=2.0f ) {}
+	while( shm_result[0]!=2.0f )
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		read_shm(shm_result, 2*sizeof(float));
+	}
 }
 
 /** * @brief retrieve and convert recognition results from photoneo
@@ -268,7 +294,7 @@ void pho_ros_controller::wait_pho_return(void)
 void pho_ros_controller::retrieve_convert_pho_results(void)
 {
 	read_shm(shm_result, (size_t)shm_result[1]*sizeof(float));
-	pho_results_quantity = (int)((shm_result[1]-2)/19);
+	pho_results_quantity = (int)((shm_result[1]-loc_offset_ID)/loc_base_quantity);
 	shm2rosmsg();
 }
 
@@ -296,7 +322,7 @@ void pho_ros_controller::get_MAX_TFtime(bool s_e)
 		t2_end_time = ros::Time::now().toSec();
 		if( t2_work_time<(t2_end_time-t2_start_time) )
 			t2_work_time = t2_end_time-t2_start_time;
-		ROS_INFO("time_t2_callback MAX work time: %lf",t2_work_time);
+		ROS_INFO("photoneo MAX work time: %lf",t2_work_time);
 	}
 }
 
