@@ -4,12 +4,16 @@ project(robot_coordinate_transform)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
+set(photoneo_controller_path /home/deltaagv/ros1_ws/src/photoneo_controller)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  std_msgs
+	roscpp
+	std_msgs
+	photoneo_controller_msg_srv
+	photoneo_controller
 )
 
 # System dependencies are found with CMake's conventions
@@ -104,7 +108,7 @@ find_package(Eigen3 REQUIRED COMPONENTS system)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robot_coordinate_transform
-#  CATKIN_DEPENDS Eigen3 roscpp std_msgs
+#  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
 )
 
@@ -115,9 +119,10 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
-  ./include/${PROJECT_NAME}
+	# include
+	${catkin_INCLUDE_DIRS}
+	./include/${PROJECT_NAME}
+	${photoneo_controller_path}/include/photoneo_controller
 )
 
 ## Declare a C++ library
@@ -205,6 +210,12 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(robot_coordinate_transform src/main.cpp src/MathTool.cpp src/M5Manipulator.cpp src/CoordinateTransformation.cpp )
+add_executable(robot_coordinate_transform 
+				 src/main.cpp
+				 src/MathTool.cpp
+				 src/M5Manipulator.cpp
+				 src/CoordinateTransformation.cpp
+				 ${photoneo_controller_path}/src/shm_controller.cpp
+				 ${photoneo_controller_path}/src/pho_ros_controller.cpp )
 # add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(robot_coordinate_transform ${catkin_LIBRARIES})

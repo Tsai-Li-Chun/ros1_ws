@@ -70,9 +70,9 @@ int main(int argc,char **argv)
 
 	while( (ros::ok()) && (key!='q') )
 	{
-		// std::cout << "input 'q' to exit program, input 's' trigger the 3Dscanner: ";
-		// std::cin >> key;
-		sleep(15);
+		std::cout << "input 'q' to exit program, input 's' trigger the 3Dscanner: ";
+		std::cin >> key;
+		// sleep(15);
 		key = 's';
 		if( key=='s' )
 		{
