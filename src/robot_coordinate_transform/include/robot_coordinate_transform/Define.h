@@ -1,7 +1,10 @@
 ﻿#pragma once
-#include "eigen3/Eigen/Dense"
-// #include "Eigen/Dense"
-//#include "/Visual Studio/CoordinateTransform/Eigen/Dense"
+
+#if defined(_WIN32)
+    #include "Eigen/Dense"
+#elif defined (__linux__)
+    #include "eigen3/Eigen/Dense"
+#endif
 
 #define PI (3.14159265359)
 #define RAD_TO_DEG (1.0 / PI * 180.0)
@@ -23,7 +26,7 @@ public:
     void SetData(const Matrix3d rotation) {
         rotation_ = rotation;
 
-        euler_ = rotation.eulerAngles(2, 1, 0);
+        euler_ = rotation.eulerAngles(2, 1, 0); // 2 : Z  ,  1 : Y  ,  0 : X
 
         quat_ = Quaterniond(rotation);
     }
@@ -66,7 +69,7 @@ public:
     }
 
 private:
-    Vector3d euler_; // euler z-y-x (rad)
+    Vector3d euler_; // euler z-y-x (unit : rad)
     Quaterniond quat_;
     Matrix3d rotation_;
 }; // end of struct

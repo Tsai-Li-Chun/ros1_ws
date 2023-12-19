@@ -1,10 +1,12 @@
 #pragma once
 
-#include "RCT_define.h"
+#include "Define.h"
 
 class MathTool
 {
 public:
+    MathTool();
+    ~MathTool();
 	double CalculateAngleBetweenVectors(const Vector3d vec1, const Vector3d vec2) const; // return : (unit : deg)
 
     inline double sind(const double value) const { return sin(value * DEG_TO_RAD); }
