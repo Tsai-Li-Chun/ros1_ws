@@ -7,11 +7,11 @@
 	<xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/common_properties.xacro"/>
 	<xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/TY2_SW.gazebo.xacro"/>
 	<xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/TY2_SW_diff_drive_plugins.xacro"/>
-	<xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro"/>	
+	<!--xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro"/>	
 
 	<xacro:sensor_d435 name="camera" parent="base_link" use_nominal_extrinsics="true" publish_pointcloud="true">
 		<origin rpy="0 0 0 " xyz="0.4129 0 0.2675"/>
-	</xacro:sensor_d435>
+	</xacro:sensor_d435-->
 
 	<link name="base_footprint"/>
 
@@ -273,12 +273,12 @@
 		<axis xyz="0 0 -1" />
 	</joint>
 	<joint name="body_to_scanF_joint" type="fixed">>
-		<origin xyz="0.33142 -0.22887 0.23138" rpy="0 0 -0.7853981634" />
+		<origin xyz="0.37142 -0.25887 0.23138" rpy="0 0 -0.7853981634" /><!--origin xyz="0.33142 -0.22887 0.23138"/-->
 		<parent link="base_link" />
 		<child link="scanF_link" />
 	</joint>
 	<joint name="body_to_scanB_joint" type="fixed">>
-		<origin xyz="-0.33142 0.22887 0.23138" rpy="0 0 2.3561944902" />
+		<origin xyz="-0.37142 0.25887 0.23138" rpy="0 0 2.3561944902" />
 		<parent link="base_link" />
 		<child link="scanB_link" />
 	</joint>
@@ -313,11 +313,5 @@
 		<parent link="base_link" />
 		<child link="sub_wheel4_link" />
 	</joint>
-	
-	<!--add realsense d435-->
-	<!--xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/_d435.urdf.xacro" />
-	<xacro:sensor_d435 parent="base_link" >
-		<origin rpy="0 0 0 " xyz="0.4129 0 0.2675"/>
-	</xacro:sensor_d435-->
 
 </robot>

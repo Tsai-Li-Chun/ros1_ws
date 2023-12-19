@@ -11,7 +11,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include "ros/ros.h"
-#include "pho_ros_controller.hpp"
+#include "shm_controller.hpp"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -74,14 +74,52 @@ int main(int argc,char **argv)
 
     ros::init(argc, argv, "photoneo_controller");
     ros::NodeHandle n;
-    ros::Rate loop_rate(1);
+    ros::Rate loop_rate(100);
 
-    pho_ros_controller pho_ros_ctl(&n);
+	/* Create shared memory control object */
+    shared_memory_controller shm_ctl;
+    shm_ctl.shm_StartUp(shm_key, shm_size, shm_flg, shm_rw_twoway);
 
-    while( ros::ok() )
-    {
-        ros::spin();
-    }
+	while ( wait_key != 'q' )
+	{
+        printf("Press Q to exit the program, press R to read from shared memory: ");
+        std::cin >> wait_key;
+        if( wait_key == 'r' )
+        {
+            /* send request */
+            printf("Send request for data command\n");
+            pose[0] = 1.0f;
+            // for(i=1; i<17; i++) pose[i] = 0.0f;
+            shm_ctl.write_shm(pose, 1*sizeof(float));
+            /* wait for response */
+            printf("Waiting for data to return ...\n");
+            while( pose[0] != 2.0f )
+            {
+                shm_ctl.read_shm(pose, 2*sizeof(float));
+                // printf("pose[0]=%10.4f , pose[1]=%10.4f\n",pose[0],pose[1]);
+                sleep(1);
+            }
+            shm_ctl.read_shm(pose, (size_t)pose[1]*sizeof(float));
+            for(i=0; i<(int)pose[1]; i++) printf("(%10.4f) ",pose[i]);
+            printf("\n");
+            /* send reset signal */
+            printf("Response received. Send reset signal ... ");
+            for(i=0; i<shm_float_size; i++) pose[i] = 0.0f;
+            shm_ctl.write_shm(pose, sizeof(pose));
+            printf("Finish\n\n");
+        }
+		ros::spinOnce();
+		loop_rate.sleep();
+	}
+
+    // /* send remove shared memory signal */
+    // printf("send remove shared memory signal.\n");
+    // pose[0] = 4.0f;
+    // shm_ctl.write_shm(pose, 1*sizeof(float));
+
+    /* detach and Remove shared memory segment */
+    if( shm_ctl.detach_shm() == (-1) )
+        return EXIT_FAILURE;
 
     return EXIT_SUCCESS;
 }

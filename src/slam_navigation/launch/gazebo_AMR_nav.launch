@@ -8,7 +8,7 @@
 	<node name="map_server" pkg="map_server" type="map_server" args="$(find map2gazebo)/map/$(arg map_file).yaml"/>
 
 
-	<include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" />
+	<!--include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" /-->
 
 
 	<include file="$(find slam_navigation)/launch/amcl_test.launch" />

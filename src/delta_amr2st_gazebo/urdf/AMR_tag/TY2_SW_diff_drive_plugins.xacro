@@ -18,7 +18,7 @@
       <torque>100</torque>
       <wheelTorque>100</wheelTorque>
       <wheelAcceleration>2</wheelAcceleration>
-      <odometrySource>world</odometrySource>
+      <odometrySource>encoder</odometrySource><!-- 'encoder' instead of 'world' is also possible -->
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
       <odometryFrame>odom</odometryFrame>

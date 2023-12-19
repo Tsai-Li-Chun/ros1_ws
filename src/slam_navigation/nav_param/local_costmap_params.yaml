@@ -1,0 +1,19 @@
+local_costmap:
+  global_frame: map
+  robot_base_frame: base_link
+  rolling_window: true
+  update_frequency: 4.0 # 5.0
+  publish_frequency: 2.0 # 2.0
+  static_map: false
+  width: 5.5 #5.0
+  height: 5.5 # 5.0
+  resolution: 0.1
+  transform_tolerance: 0.1 #0.5
+  map_type: costmap
+
+  plugins:
+    - {name: obstacle_layer,           type: "costmap_2d::ObstacleLayer"}
+#- {name: prohibition_layer,        type: "prohibition_layer_namespace::ProhibitionLayer"}
+    - {name: local_simple_layer,        type: "simple_layer_namespace::SimpleLayer"}
+    - {name: inflation_layer,          type: "costmap_2d::InflationLayer"}
+
