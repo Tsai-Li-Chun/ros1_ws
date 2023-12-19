@@ -1,5 +1,6 @@
 build/**
 devel/**
+carto_ws/**
 .vscode/**
 .catkin_tools/**
 .catkin_workspace
