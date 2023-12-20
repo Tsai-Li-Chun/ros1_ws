@@ -58,13 +58,14 @@ TRAJECTORY_BUILDER_2D.motion_filter.max_distance_meters = 0.1
 TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(3.0) --3
 
 TRAJECTORY_BUILDER_2D.ceres_scan_matcher.occupied_space_weight = 1.
-TRAJECTORY_BUILDER_2D.ceres_scan_matcher.translation_weight = 5 --1.
-TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 8 --1.
+TRAJECTORY_BUILDER_2D.ceres_scan_matcher.translation_weight = 10 --5 --1.
+TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 40 --8 --1.
 --new added============================
 TRAJECTORY_BUILDER_2D.ceres_scan_matcher.ceres_solver_options.max_num_iterations = 2e3 --15
 TRAJECTORY_BUILDER_2D.voxel_filter_size = 0.025 --0.05
-TRAJECTORY_BUILDER_2D.adaptive_voxel_filter.max_length = 1.0
-TRAJECTORY_BUILDER_2D.adaptive_voxel_filter.min_num_points = 50
+TRAJECTORY_BUILDER_2D.adaptive_voxel_filter.max_length = 0.8 --1.0
+TRAJECTORY_BUILDER_2D.adaptive_voxel_filter.min_num_points = 200 --50
+TRAJECTORY_BUILDER_2D.adaptive_voxel_filter.max_range = 40.
 
 TRAJECTORY_BUILDER_2D.loop_closure_adaptive_voxel_filter.min_num_points = 30
 TRAJECTORY_BUILDER_2D.loop_closure_adaptive_voxel_filter.max_range = 10.
@@ -90,9 +91,9 @@ POSE_GRAPH.constraint_builder.loop_closure_rotation_weight = 1e5 --1e8
 POSE_GRAPH.constraint_builder.ceres_scan_matcher.translation_weight = 1e5 --100--10.
 POSE_GRAPH.constraint_builder.ceres_scan_matcher.rotation_weight = 1e5 --10--1.
 
-POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.linear_xy_search_window = 3
-POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.linear_z_search_window = 0.6
-POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.angular_search_window = math.rad(15.)
+POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher.linear_search_window = 5. --3
+POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher_3d.angular_search_window = math.rad(30.) --15.
+POSE_GRAPH.constraint_builder.fast_correlative_scan_matcher.branch_and_bound_depth = 7
 
 POSE_GRAPH.optimization_problem.acceleration_weight = 1e3 --2e2
 POSE_GRAPH.optimization_problem.rotation_weight = 3e5 --3e3

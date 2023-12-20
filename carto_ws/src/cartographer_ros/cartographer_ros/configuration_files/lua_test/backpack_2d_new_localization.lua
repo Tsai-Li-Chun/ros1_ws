@@ -18,10 +18,14 @@ TRAJECTORY_BUILDER.pure_localization_trimmer = {
   max_submaps_to_keep = 3,
 }
 POSE_GRAPH.optimize_every_n_nodes = 5 --20 --2
+POSE_GRAPH.constraint_builder.min_score = 0.75 --0.85
+POSE_GRAPH.max_num_final_iterations = 200 --2e3 --1
 
+TRAJECTORY_BUILDER_2D.motion_filter.max_angle_radians = math.rad(0.2)
+TRAJECTORY_BUILDER_2D.ceres_scan_matcher.ceres_solver_options.max_num_iterations = 30 --2e3 --15
+TRAJECTORY_BUILDER_2D.submaps.num_range_data = 35 --60 --90
+TRAJECTORY_BUILDER_2D.max_range = 8.0
 
-TRAJECTORY_BUILDER_2D.submaps.num_range_data = 60 --90
-TRAJECTORY_BUILDER_2D.max_range = 10.
 
 
 return options

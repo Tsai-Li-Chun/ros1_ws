@@ -1,0 +1,34 @@
+<!--
+DESCRITPION
+-->
+
+<launch>
+  <!--
+  - cartographer
+  - rviz view
+  -->
+
+  <arg name="gui" default="false"/>
+  <!--param name="/use_sim_time" value="true" /-->
+  <node name="cartographer_node" pkg="cartographer_ros"
+    type="cartographer_node" args="
+        -configuration_directory $(find cartographer_ros)/configuration_files/lua_test
+        -configuration_basename backpack_2d_new.lua"
+    output="screen">
+    <!--remap from="echoes" to="horizontal_laser_2d" /-->
+    <!--front-->
+    <remap from="scan_1" to="/sick_safetyscanners/scanF" /> 
+    <!--back-->
+    <remap from="scan_2" to="/sick_safetyscanners/scanB" />
+    <remap from="odom" to="/odom_filtered" />
+    <remap from="imu" to="/imu_data" />
+    <remap from="landmark" to="/apriltag_ros_continuous_node/landmark" />
+  </node>
+
+ <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+    type="cartographer_occupancy_grid_node" args="-resolution 0.03" />
+
+ <!--node name="rviz" pkg="rviz" type="rviz" /--><!--args="-d $(find delta_robot_agv)/rviz/deltarobot.rviz"/-->
+
+
+</launch>
