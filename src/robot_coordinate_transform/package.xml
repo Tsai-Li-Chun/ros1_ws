@@ -63,9 +63,11 @@
   <exec_depend>std_msgs</exec_depend>
 
   <build_depend>photoneo_controller_msg_srv</build_depend>
+  <build_export_depend>photoneo_controller_msg_srv</build_export_depend>
   <exec_depend>photoneo_controller_msg_srv</exec_depend>
 
   <build_depend>photoneo_controller</build_depend>
+  <build_export_depend>photoneo_controller</build_export_depend>
   <exec_depend>photoneo_controller</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->

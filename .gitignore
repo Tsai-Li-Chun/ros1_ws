@@ -11,3 +11,4 @@ src/slam_navigation/bag/**
 *.cproject
 *.rst
 *.bag
+first_step.sh

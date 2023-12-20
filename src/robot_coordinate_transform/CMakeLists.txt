@@ -108,7 +108,7 @@ find_package(Eigen3 REQUIRED COMPONENTS system)
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES robot_coordinate_transform
-#  CATKIN_DEPENDS roscpp std_msgs
+ CATKIN_DEPENDS roscpp std_msgs photoneo_controller_msg_srv photoneo_controller
 #  DEPENDS system_lib
 )
 
@@ -217,5 +217,5 @@ add_executable(robot_coordinate_transform
 				 src/CoordinateTransformation.cpp
 				 ${photoneo_controller_path}/src/shm_controller.cpp
 				 ${photoneo_controller_path}/src/pho_ros_controller.cpp )
-# add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
+add_dependencies(robot_coordinate_transform ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(robot_coordinate_transform ${catkin_LIBRARIES})

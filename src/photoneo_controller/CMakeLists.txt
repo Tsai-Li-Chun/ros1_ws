@@ -10,6 +10,7 @@ project(photoneo_controller)
 
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
+	std_msgs
 	photoneo_controller_msg_srv
 )
 
@@ -101,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES photoneo_controller
-#  CATKIN_DEPENDS roscpp photoneo_controller_msg
+ CATKIN_DEPENDS roscpp std_msgs photoneo_controller_msg_srv
 #  DEPENDS system_lib
 )
 
