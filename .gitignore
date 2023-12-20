@@ -12,3 +12,5 @@ src/slam_navigation/bag/**
 *.rst
 *.bag
 first_step.sh
+richie_build.sh
+peien_build.sh
