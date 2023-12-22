@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+		 Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+		 For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot name="TY2_SW" xmlns:xacro="http://ros.org/wiki/xacro">
+
+	<xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/common_properties.xacro"/>
+	<xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/TY2_SW.gazebo.xacro"/>
+	<xacro:include filename="$(find delta_amr2st_gazebo)/urdf/AMR_tag/TY2_SW_diff_drive_plugins.xacro"/>
+	<!--xacro:include filename="$(find realsense2_description)/urdf/_d435.urdf.xacro"/>	
+
+	<xacro:sensor_d435 name="camera" parent="base_link" use_nominal_extrinsics="true" publish_pointcloud="true">
+		<origin rpy="0 0 0 " xyz="0.4129 0 0.2675"/>
+	</xacro:sensor_d435-->
+
+	<link name="base_footprint"/>
+
+	<!--link name="base_link"/-->
+
+	<link name="base_link">
+		<visual>
+			<geometry>
+				<box size="0.8 0.48 0.37" />
+			</geometry>
+			<origin xyz="0 0 0.1" rpy="0 0 0" />
+			<material name="red" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0.1" rpy="0 0 0" />
+			<geometry>
+				<box size="0.8 0.48 0.37" />
+			</geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<mass value="5.0"/>
+			<inertia ixx="0.153" ixy="0.0" ixz="0.0"
+					 iyy="0.3237" iyz="0.0"
+					 izz="0.3626" />
+			<!--mass value="8.2573504e-01"/>
+			<inertia ixx="2.2124416e-03" ixy="-1.2294101e-05" ixz="3.4938785e-05"
+					 iyy="2.1193702e-03" iyz="-5.0120904e-06"
+					 izz="2.0064271e-03" /-->
+		</inertial>
+	</link>
+	
+	<link name="Lwheel_link">
+		<visual>
+			<geometry>
+				<cylinder length="0.05" radius="0.11" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<cylinder length="0.05" radius="0.11" />
+			</geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0" />
+			<mass value="2.8498940e-02" />
+			<inertia ixx="1.1175580e-05" ixy="-4.2369783e-11" ixz="-5.9381719e-09"
+					 iyy="1.1192413e-05" iyz="-1.4400107e-11"
+					 izz="2.0712558e-05" />
+		</inertial>
+	</link>
+	<link name="Rwheel_link">
+		<visual>
+			<geometry>
+				<cylinder length="0.05" radius="0.11" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0"/>
+			<geometry>
+				<cylinder length="0.05" radius="0.11" />
+			</geometry>
+		</collision>
+		<inertial>
+			<origin xyz="0 0 0" />
+			<mass value="2.8498940e-02" />
+			<inertia ixx="1.1175580e-05" ixy="-4.2369783e-11" ixz="-5.9381719e-09"
+					 iyy="1.1192413e-05" iyz="-1.4400107e-11"
+					 izz="2.0712558e-05" />
+		</inertial>
+	</link>
+	<link name="scanF_link">
+		<visual>
+			<geometry>
+				<box size="0.14 0.14 0.08" />
+			</geometry>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<material name="yallow" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<geometry>
+				<box size="0.14 0.14 0.08" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.114" />
+			<origin xyz="0 0 0" />
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+	<link name="scanB_link">
+		<visual>
+			<geometry>
+				<box size="0.14 0.14 0.08" />
+			</geometry>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<material name="yallow" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0.03" rpy="0 0 0" />
+			<geometry>
+				<box size="0.14 0.14 0.08" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.114" />
+			<origin xyz="0 0 0" />
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+	<!--link name="realsensor_link">
+		<visual>
+			<geometry>
+				<box size="0.05 0.16 0.05" />
+			</geometry>
+			<material name="white" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.05 0.16 0.05" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.114" />
+			<origin xyz="0 0 0" />
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link-->
+	<link name="imu_ch110_link">
+		<visual>
+			<geometry>
+				<box size="0.04 0.04 0.025" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<origin xyz="0 0 0" rpy="0 0 0" />
+			<geometry>
+				<box size="0.04 0.04 0.025" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.114" />
+			<origin xyz="0 0 0" />
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+
+	<link name="sub_wheel1_link">
+		<visual>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.01"/>
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+	<link name="sub_wheel2_link">
+		<visual>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.01"/>
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+	<link name="sub_wheel3_link">
+		<visual>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.01"/>
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+	<link name="sub_wheel4_link">
+		<visual>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+			<material name="black" />
+		</visual>
+		<collision>
+			<geometry>
+				<sphere radius="0.025" />
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="0.01"/>
+			<inertia ixx="0.001" ixy="0.0" ixz="0.0"
+					 iyy="0.001" iyz="0.0"
+					 izz="0.001" />
+		</inertial>
+	</link>
+
+	<joint name="basefootprint_to_base_joint" type="fixed">
+		<origin xyz="0 0 0.11" rpy="0 0 0" />
+		<parent link="base_footprint" />
+		<child link="base_link" />
+	</joint>
+	<!--joint name="base_to_body_joint" type="fixed">
+		<origin xyz="0 0 0" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="base_link" />
+	</joint-->
+	<joint name="body_to_Lwheel_joint" type="continuous">
+		<origin xyz="0 0.2738 0" rpy="-1.5707 0 0" />
+		<parent link="base_link" />
+		<child link="Lwheel_link" />
+		<axis xyz="0 0 1" />
+	</joint>
+	<joint name="body_to_Rwheel_joint" type="continuous">
+		<origin xyz="0 -0.2738 0" rpy="1.5707 0 0" />
+		<parent link="base_link" />
+		<child link="Rwheel_link" />
+		<axis xyz="0 0 -1" />
+	</joint>
+	<joint name="body_to_scanF_joint" type="fixed">>
+		<origin xyz="0.37142 -0.25887 0.23138" rpy="0 0 -0.7853981634" /><!--origin xyz="0.33142 -0.22887 0.23138"/-->
+		<parent link="base_link" />
+		<child link="scanF_link" />
+	</joint>
+	<joint name="body_to_scanB_joint" type="fixed">>
+		<origin xyz="-0.37142 0.25887 0.23138" rpy="0 0 2.3561944902" />
+		<parent link="base_link" />
+		<child link="scanB_link" />
+	</joint>
+	<!--joint name="body_to_realsensor_joint" type="fixed">>
+		<origin xyz="0.4129 0 0.2675" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="realsensor_link" />
+	</joint-->
+	<joint name="body_to_imu_joint" type="fixed">>
+		<origin xyz="0 0 -0.0246" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="imu_ch110_link" />
+	</joint>
+
+	<joint name="body_to_Swheel1_joint" type="fixed">>
+		<origin xyz="0.375 0.215 -0.085" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="sub_wheel1_link" />
+	</joint>
+	<joint name="body_to_Swheel2_joint" type="fixed">>
+		<origin xyz="0.375 -0.215 -0.085" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="sub_wheel2_link" />
+	</joint>
+	<joint name="body_to_Swheel3_joint" type="fixed">>
+		<origin xyz="-0.375 -0.215 -0.085" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="sub_wheel3_link" />
+	</joint>
+	<joint name="body_to_Swheel4_joint" type="fixed">>
+		<origin xyz="-0.375 0.215 -0.085" rpy="0 0 0" />
+		<parent link="base_link" />
+		<child link="sub_wheel4_link" />
+	</joint>
+
+</robot>

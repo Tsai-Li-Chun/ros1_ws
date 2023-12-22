@@ -1,0 +1,35 @@
+<!--
+DESCRITPION
+-->
+
+<launch>
+  <!--
+  - cartographer
+  - rviz view
+  -->
+
+  <arg name="gui" default="false"/>
+
+
+  <node name="cartographer_node" pkg="cartographer_ros"
+    type="cartographer_node" args="
+        -configuration_directory $(find cartographer_ros)/configuration_files
+        -configuration_basename backpack_deltarobot_2d.lua"
+    output="screen">
+    <!--remap from="echoes" to="horizontal_laser_2d" /-->
+    <!--front-->
+    <remap from="scan_1" to="/scanf1" /> 
+    <!--back-->
+    <remap from="scan_2" to="/scanf0" />
+    <remap from="odom" to="/odom" />
+    <remap from="imu" to="/imu_data" />
+    <remap from="landmark" to="/apriltag_ros_continuous_node/landmark" />
+  </node>
+
+ <node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+    type="cartographer_occupancy_grid_node" args="-resolution 0.03" />
+
+ <node name="rviz" pkg="rviz" type="rviz" args="-d $(find delta_robot_agv)/rviz/deltarobot.rviz"/>
+
+
+</launch>

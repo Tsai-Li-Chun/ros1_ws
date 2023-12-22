@@ -1,0 +1,50 @@
+<!--
+#### this file launches basic functions of AMR ####
+#### 1. remote controll
+#### 2. AMR base node
+#### 3. imu
+#### 4. sick scanner
+#### 5. laser scanner merger
+#### 6. odometry transfrom
+#### 7. ekf node for odom correction
+#### 8. laser scan matcher
+-->
+<launch>
+
+	<arg name="control_mode" default="joy"/>
+
+	<group if="$(eval control_mode=='keyborad')">
+		<node name="keyboard_node" pkg="keyboard" type="keyboard_node" />
+	</group>
+	<group if="$(eval control_mode=='joy')">
+		<node name="joy_node" pkg="joy" type="joy_node" />
+		<node name="joy_control_node" pkg="keyboard" type="joy_control_node" />
+	</group>
+
+	<node name="main_motorController" pkg="motor_controller" type="main_motorController" output="screen">
+	</node>
+	
+	<node name="main_tf_odometry"  pkg="odometry_transform" type="main_tf_odometry" output="screen" />
+	
+	<include file="$(find imu_launch)/launch/imu_msg.launch" />
+	<!--include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" /-->
+
+	<include file="$(find delta_amr2st_urdf)/launch/display.launch" />
+	
+	<include file="$(find sick_safetyscanners)/launch/sick_safetyscanners.launch" />
+	
+	<include file="$(find ira_laser_tools)/launch/laserscan_multi_merger.launch" />
+	
+	<include file="$(find laser_scan_matcher)/demo/laser_scan_matcher.launch" />
+	
+	<node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_odom" respawn="false" output="screen">
+        	<remap from="odometry/filtered" to="odom_filtered" />
+        	<rosparam command="load" file="$(find robot_localization)/params/robot_localization.yaml" />
+	</node>
+ 
+  <!--map server for move base-->
+	<arg name="map_file" default="new_map" />
+  <node name="map_server" pkg="map_server" type="map_server" args="/home/deltaagv/ros1_ws/map/$(arg map_file).yaml"/>
+		
+
+</launch>

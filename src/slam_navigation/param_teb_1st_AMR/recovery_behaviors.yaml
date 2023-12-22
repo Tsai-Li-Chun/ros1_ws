@@ -1,0 +1,12 @@
+recovery_behaviors: [{name: conservative_clear, type: clear_costmap_recovery/ClearCostmapRecovery}, 
+                     {name: aggressive_clear, type: clear_costmap_recovery/ClearCostmapRecovery}]
+
+conservative_clear:
+  reset_distance: 0.2
+
+aggressive_clear:
+  reset_distance: 0.0
+
+
+# conservative_clear:0.3
+# aggressive_clear:0.3

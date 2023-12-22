@@ -1,0 +1,19 @@
+<launch>
+
+	<arg name="map_file" default="delta_8f" />
+
+	<!-- <node pkg="tf" type="static_transform_publisher" name="map_to_odom" args="0.0 0.0 0.0 0 0 0.0 /map /odom 40" /> -->
+	<!-- <node pkg="tf" type="static_transform_publisher" name="odom_to_basefootprint" args="0.0 0.0 0.0 0 0 0.0 /odom /base_footprint 40" /> -->
+
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find map2gazebo)/map/$(arg map_file).yaml"/>
+
+
+	<!--include file="$(find robot_pose_ekf)/robot_pose_ekf.launch" /-->
+
+
+	<include file="$(find slam_navigation)/launch/amcl_test.launch" />
+	<include file="$(find slam_navigation)/launch/move_base_test1.launch" />
+
+
+
+</launch>

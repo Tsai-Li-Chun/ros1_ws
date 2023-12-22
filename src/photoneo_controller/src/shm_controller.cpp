@@ -127,7 +127,7 @@ void* shared_memory_controller::attach_shm(int flg)
  	* @param void* ptr, specify address to this program
  	* @return void*, error code
 **	**/
-int shared_memory_controller::detach_shm(void)
+int8_t shared_memory_controller::detach_shm(void)
 {
 	printf("Recevied detach shared memory command.\n");
 	return_code = shmdt(shm_void_ptr);
@@ -145,7 +145,7 @@ int shared_memory_controller::detach_shm(void)
  	* @param void* ptr, specify address to this program
  	* @return void*, error code
 **	**/
-int shared_memory_controller::remove_shm(void)
+int8_t shared_memory_controller::remove_shm(void)
 {
 	printf("Recevied remove shared memory command.\n");
 	return_code = shmctl(shm_id, IPC_RMID, NULL);

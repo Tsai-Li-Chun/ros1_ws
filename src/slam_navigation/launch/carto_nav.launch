@@ -1,0 +1,76 @@
+<!--
+DESCRITPION
+-->
+
+<launch>
+  <!--
+  - cartographer  load_frozen_state under pure mode insert landmark set to true 
+  - map_server
+  - move_base
+  - static map
+  - rviz view
+  -init_pose_filename init_pose/init_pose.lua
+  -->
+
+  <arg name="gui" default="false"/>
+
+  <node name="cartographer_node" pkg="cartographer_ros" type="cartographer_node" args="
+  -configuration_directory $(find cartographer_ros)/configuration_files
+  -configuration_basename backpack_deltarobot_Navigation_2d.lua
+  -load_frozen_state=false
+  -load_state_filename /home/deltaagv/test2.pbstream" output="screen">
+  <!--front-->
+  <remap from="scan_1" to="/scan_filtered_front" />
+  <!--back -->
+  <remap from="scan_2" to="/scan_filtered_back" />
+  <remap from="odom" to="/odom" />
+  <!---load_state_filename /home/deltaagv/cartographer.pbstream"-->
+  <remap from="imu" to="/imu_data" />
+  <remap from="landmark" to="/apriltag_ros_continuous_node/landmark" />
+  </node>
+
+  <!--node name="cartographer_occupancy_grid_node" pkg="cartographer_ros"
+  type="cartographer_occupancy_grid_node" args="-resolution 0.03" /-->
+
+  <!-- Map server -->
+  <arg name="map_file" default="$(find delta_robot_agv)/maps/test2.yaml"/>
+  <!--<arg name="map_file" default="$(find jackal_navigation)/maps/jackal_race.yaml"/>-->
+  <!--arg name="map_file" default="$(find delta_robot_agv)/maps/delta_robot_agv_small.yaml"/-->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)">
+ 
+  </node>
+
+
+  <!-- for simulation-->
+  <arg name="raw_cmd_vel_topic"     default="raw_cmd_vel"/>
+  <!--  ************** Navigation ***************  -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+
+  <rosparam file="$(find teb_local_planner_tutorials)/cfg/diff_drive/costmap_common_params.yaml" command="load" ns="global_costmap" />
+  <rosparam file="$(find teb_local_planner_tutorials)/cfg/diff_drive/costmap_common_params.yaml" command="load" ns="local_costmap" />
+  <rosparam file="$(find teb_local_planner_tutorials)/cfg/diff_drive/local_costmap_params.yaml" command="load" />
+  <rosparam file="$(find teb_local_planner_tutorials)/cfg/diff_drive/global_costmap_params.yaml" command="load" />
+  <rosparam file="$(find delta_robot_agv)/launch/delta/cfg/diff_drive/global_planner_params.yaml" command="load" />
+  <rosparam file="$(find teb_local_planner_tutorials)/cfg/diff_drive/teb_local_planner_params.yaml" command="load" />
+  <rosparam file="$(find delta_robot_agv)/launch/delta/cfg/diff_drive/recovery_behaviors.yaml" command="load" />
+  <rosparam file="$(find teb_local_planner_tutorials)/cfg/diff_drive/prohibition_areas.yaml" command="load" ns="global_costmap/costmap_prohibition_layer" />
+
+  <param name="base_global_planner" value="global_planner/GlobalPlanner" /> 
+  <param name="planner_frequency" value="0.0" />
+  <param name="planner_patience" value="3.0" /> <!--2-->
+
+  <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+  <param name="controller_frequency" value="30.0" /> <!--25 30 20 15-->
+  <param name="controller_patience" value="5.0" /> <!--3-->
+
+   <param name="recovery_behavior_enabled" value="true"/>
+   <param name="clearing_rotation_allowed" value="false"/>
+   <param name="oscillation_timeout" value="0.0"/> 
+   <remap from="/cmd_vel"    to="$(arg raw_cmd_vel_topic)"/>
+  </node>
+
+
+
+
+</launch>
+

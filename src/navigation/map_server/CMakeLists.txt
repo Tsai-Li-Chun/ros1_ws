@@ -65,6 +65,13 @@ target_link_libraries(map_server
     ${catkin_LIBRARIES}
 )
 
+add_executable(map_server-map_saver_cartographer src/map_saver_cartographer.cpp)
+add_dependencies(map_server-map_saver_cartographer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+set_target_properties(map_server-map_saver_cartographer PROPERTIES OUTPUT_NAME map_saver_cartographer)
+target_link_libraries(map_server-map_saver_cartographer
+    ${catkin_LIBRARIES}
+)
+
 add_executable(map_server-map_saver src/map_saver.cpp)
 add_dependencies(map_server-map_saver ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 set_target_properties(map_server-map_saver PROPERTIES OUTPUT_NAME map_saver)

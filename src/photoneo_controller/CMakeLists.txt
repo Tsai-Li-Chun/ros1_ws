@@ -102,7 +102,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES photoneo_controller
- CATKIN_DEPENDS roscpp std_msgs photoneo_controller_msg_srv
+	CATKIN_DEPENDS roscpp std_msgs photoneo_controller_msg_srv
 #  DEPENDS system_lib
 )
 
@@ -202,7 +202,6 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
 add_executable(pho_ros_node_server
 					src/pho_ros_node_server.cpp 
 					src/shm_controller.cpp

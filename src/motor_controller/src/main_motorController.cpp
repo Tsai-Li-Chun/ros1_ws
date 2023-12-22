@@ -149,10 +149,10 @@ void twist_callback(const geometry_msgs::Twist& twist_msg)
 {
 	twist_last = twist_msg;
 	double velLtmp,velRtmp;
-	if(twist_last.linear.x>1.2) twist_last.linear.x=1.2;
-	else if(twist_last.linear.x<(-1.2)) twist_last.linear.x=(-1.2);
-	if(twist_last.angular.z>1.0) twist_last.angular.z=1.0;
-	else if(twist_last.angular.z<(-1.0)) twist_last.angular.z=(-1.0);
+	//if(twist_last.linear.x>1.2) twist_last.linear.x=1.2;
+	//else if(twist_last.linear.x<(-1.2)) twist_last.linear.x=(-1.2);
+	//if(twist_last.angular.z>1.0) twist_last.angular.z=1.0;
+	//else if(twist_last.angular.z<(-1.0)) twist_last.angular.z=(-1.0);
 	velLtmp = twist_last.linear.x - (twist_last.angular.z/2) ;
 	velRtmp = twist_last.linear.x + (twist_last.angular.z/2) ;
 	// printf("%lf , %lf\n",velLtmp,velRtmp);

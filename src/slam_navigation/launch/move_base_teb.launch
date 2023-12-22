@@ -1,0 +1,48 @@
+<!--
+DESCRITPION
+-->
+
+<launch>
+  <!--
+  - map_server
+  - move_base
+  - static map
+  - rviz view
+  -init_pose_filename init_pose/init_pose.lua
+  -->
+
+  <arg name="gui" default="false"/>
+
+
+  <!-- for simulation-->
+  <arg name="raw_cmd_vel_topic"     default="cmd_vel"/>
+  <arg name="odom_topic" default="odom_filtered" />
+  <!--  ************** Navigation ***************  -->
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+
+    <rosparam file="$(find slam_navigation)/param_teb/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find slam_navigation)/param_teb/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find slam_navigation)/param_teb/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find slam_navigation)/param_teb/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find slam_navigation)/param_teb/global_planner_params.yaml" command="load" />
+    <rosparam file="$(find slam_navigation)/param_teb/teb_local_planner_params2.yaml" command="load" />
+    <rosparam file="$(find slam_navigation)/param_teb/recovery_behaviors.yaml" command="load" />
+
+    <param name="base_global_planner" value="global_planner/GlobalPlanner" /> 
+    <param name="planner_frequency" value="0.0" />
+    <param name="planner_patience" value="3.0" /> <!--2-->
+
+    <param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+    <param name="controller_frequency" value="15.0" /> <!--25 30 20 15-->
+    <param name="controller_patience" value="5.0" /> <!--3-->
+
+    <param name="recovery_behavior_enabled" value="true"/>
+    <param name="clearing_rotation_allowed" value="false"/>
+    <param name="oscillation_timeout" value="0.0"/> 
+    <remap from="/cmd_vel"    to="$(arg raw_cmd_vel_topic)"/>
+    <remap from="odom" to="$(arg odom_topic)"/>
+  </node>
+  <!--node pkg="slam_navigation" type="fix_cmd_vel.py" name="fix_cmd_vel" output="screen"/-->
+
+</launch>
+

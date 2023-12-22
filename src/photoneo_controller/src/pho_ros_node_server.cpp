@@ -12,6 +12,7 @@
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
 #include "ros/ros.h"
+#include "shm_controller.hpp"
 #include "pho_ros_controller.hpp"
 /* User Includes End */
 

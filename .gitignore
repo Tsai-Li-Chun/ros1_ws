@@ -1,6 +1,9 @@
 build/**
 devel/**
-carto_ws/**
+carto_ws/abseil-cpp/**
+carto_ws/build_isolated/**
+carto_ws/devel_isolated/**
+carto_ws/install_isolated/**
 .vscode/**
 .catkin_tools/**
 .catkin_workspace
@@ -9,7 +12,6 @@ src/slam_navigation/map/**
 src/slam_navigation/bag/**
 *.project
 *.cproject
-*.rst
 *.bag
 first_step.sh
 richie_build.sh
