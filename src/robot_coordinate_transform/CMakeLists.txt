@@ -4,7 +4,7 @@ project(robot_coordinate_transform)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
-set(photoneo_controller_path /home/deltaagv/ros1_ws/src/photoneo_controller)
+set(photoneo_controller_path /home/$ENV{USER}/ros1_ws/src/photoneo_controller)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)

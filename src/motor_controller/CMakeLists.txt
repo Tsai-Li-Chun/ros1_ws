@@ -12,7 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
 	std_msgs
 	tf
 	motor_feedback_msgs
-	canalystii_node_msg
+	# canalystii_node
+	# canalystii_node_msg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -107,7 +108,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES motor_controller
- CATKIN_DEPENDS roscpp std_msgs tf motor_feedback_msgs canalystii_node_msg
+#  CATKIN_DEPENDS roscpp std_msgs tf motor_feedback_msgs canalystii_node canalystii_node_msg
+ CATKIN_DEPENDS roscpp std_msgs tf motor_feedback_msgs
 #  DEPENDS system_lib
 )
 
@@ -122,7 +124,7 @@ include_directories(
 	${catkin_INCLUDE_DIRS}
 	./include/${PROJECT_NAME}
 	/usr/local/include/modbus
-	${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/include
+	# ${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/include
 )
 
 ## Declare a C++ library
@@ -221,10 +223,10 @@ add_executable(main_motorController
 add_dependencies(main_motorController ${catkin_EXPORTED_TARGETS} )
 target_link_libraries(main_motorController ${catkin_LIBRARIES} modbus )
 
-add_executable(main_Delta_IMS src/main_Delta_IMS.cpp 
-			include/${PROJECT_NAME}/Delta_IMS_AGVPOC.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/src/canalystii_node.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/src/canalystii.cpp) 
-add_dependencies(main_Delta_IMS ${canalystii_node_msg_EXPORTED_TARGETS})
-target_link_libraries(main_Delta_IMS ${catkin_LIBRARIES}
-		${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/lib/libcontrolcan.so)
+# add_executable(main_Delta_IMS src/main_Delta_IMS.cpp 
+# 			include/${PROJECT_NAME}/Delta_IMS_AGVPOC.cpp
+# 			${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/src/canalystii_node.cpp
+# 			${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/src/canalystii.cpp) 
+# add_dependencies(main_Delta_IMS ${canalystii_node_msg_EXPORTED_TARGETS})
+# target_link_libraries(main_Delta_IMS ${catkin_LIBRARIES}
+# 		${CMAKE_CURRENT_SOURCE_DIR}/../canalyst/canalystii_node/lib/libcontrolcan.so)
