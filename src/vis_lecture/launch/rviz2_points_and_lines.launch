@@ -1,8 +1,0 @@
-<launch>
-    <arg name="rvizconfig"  default="$(find vis_lecture)/rviz/markers.rviz" />
-
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true"/>
-
-    <node name="points_and_lines" pkg="vis_lecture" type="points_and_lines"/>
-
-</launch>

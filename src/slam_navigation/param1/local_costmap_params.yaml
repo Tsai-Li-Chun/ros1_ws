@@ -1,6 +1,0 @@
-local_costmap:
-  global_frame: odom_combined
-  robot_base_frame: base_footprint
-
-  static_map: false  
-  rolling_window: true

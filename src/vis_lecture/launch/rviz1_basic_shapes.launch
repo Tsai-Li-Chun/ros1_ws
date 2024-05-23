@@ -1,8 +1,0 @@
-<launch>
-    <arg name="rvizconfig"  default="$(find vis_lecture)/rviz/markers.rviz" />
-
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true"/>
-
-    <node name="basic_shapes" pkg="vis_lecture" type="basic_shapes"/>
-
-</launch>
