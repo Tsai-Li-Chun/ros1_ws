@@ -10,10 +10,11 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
-#include <ros/ros.h>
-#include <tf/transform_broadcaster.h>
-#include <nav_msgs/Odometry.h>
-#include "motor_feedback_msgs/motor_feedback.h"
+#include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/transform_broadcaster.h>
+#include "tf2/LinearMath/Quaternion.h"
+#include <nav_msgs/msg/odometry.hpp>
+#include "motor_feedback_msgs/msg/motor_feedback.hpp"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -47,7 +48,7 @@ const double enc_to_mm = 0.0005599597921296297;
 const double mm_to_M = 0.001;
 const double AMR_width = 0.5476;
 /* motor feedback message object */
-motor_feedback_msgs::motor_feedback mf_last;
+motor_feedback_msgs::msg::MotorFeedback mf_last;
 /* delta time(s) */
 double dt;
 /* X,Y,th 距離 */
@@ -67,16 +68,17 @@ double AvelocityR_M = 0;
 double AvelocityL_lpf = 0;
 double AvelocityR_lpf = 0;
 /* 建立ROS time物件 */
-ros::Time current_time, last_time;
+rclcpp::Time current_time, last_time, init_time;
 /* 建立計算旋轉勁度物件 */
-geometry_msgs::Quaternion odom_quat;
+geometry_msgs::msg::Quaternion odom_quat;
+tf2::Quaternion q;
 /* 建立tf廣播用變數物件 */
-geometry_msgs::TransformStamped odom_trans;
+geometry_msgs::msg::TransformStamped odom_trans;
 /* 建立odom里程計變數物件 */
-nav_msgs::Odometry odom;
+nav_msgs::msg::Odometry odom;
 // /* 建立odom里程計topic發布物件 */
 // ros::Publisher odom_pub;
-motor_feedback_msgs::motor_feedback encodom;
+motor_feedback_msgs::msg::MotorFeedback encodom;
 
 /* Variables End */
 
@@ -87,7 +89,7 @@ motor_feedback_msgs::motor_feedback encodom;
 /* motor feedback message object init */
 void motor_info_init(void);
 /* topic subscribe interrupt callback */
-void motor_feedback_callback(const motor_feedback_msgs::motor_feedback&);
+void motor_feedback_callback(const motor_feedback_msgs::msg::MotorFeedback&);
 
 /* Function End */
 
@@ -105,26 +107,33 @@ void motor_feedback_callback(const motor_feedback_msgs::motor_feedback&);
 **	**/
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "main_tf_odometry");
-	
-	ros::NodeHandle nh;
-	ros::Publisher odom_pub = nh.advertise<nav_msgs::Odometry>("odom", 100);
-	ros::Publisher encodom_pub = nh.advertise<motor_feedback_msgs::motor_feedback>("encodom", 100);
-	ros::Subscriber sub_enc = nh.subscribe("/motor_feedback", 100, motor_feedback_callback);
+	//ros::init(argc, argv, "main_tf_odometry");
+	//ros::NodeHandle nh;
+	rclcpp::init(argc, argv);
+	auto node = rclcpp::Node::make_shared("main_tf_odometry");
+
+	//ros::Publisher odom_pub = nh.advertise<nav_msgs::msg::Odometry>("odom", 100);
+	auto odom_pub = node->create_publisher<nav_msgs::msg::Odometry>("odom",100);
+
+	//ros::Publisher encodom_pub = nh.advertise<motor_feedback_msgs::msg::MotorFeedback>("encodom", 100);
+	auto encodom_pub = node->create_publisher<motor_feedback_msgs::msg::MotorFeedback>("encodom",100);
+
+	//ros::Subscriber sub_enc = nh.subscribe("/motor_feedback", 100, motor_feedback_callback);
+	auto sub_enc = node->create_subscription<motor_feedback_msgs::msg::MotorFeedback>("/motor_feedback", 100, motor_feedback_callback);
 	
 	/* 建立tf廣播物件 */
-	tf::TransformBroadcaster odom_broadcaster;
-	ros::Rate sleep(100);
+	std::shared_ptr<tf2_ros::TransformBroadcaster> odom_broadcaster;
+	rclcpp::Rate sleep(100);
 
-	
+	init_time = node->now();
 	motor_info_init();
 
- 	while(nh.ok())
+ 	while(rclcpp::ok())
     {
-		ros::spinOnce();
+		rclcpp::spin_some(node);
 		/* compute odometry in a typical way given the velocities of the robot */
-		current_time = ros::Time::now();
-		dt = (current_time - last_time).toSec();
+		current_time = node->now();
+		dt = (current_time - last_time).seconds();
 		// ROS_INFO("%lf\n",dt);
 		delta_x = (vx * cos(th) - vy * sin(th)) * dt;
 		delta_y = (vx * sin(th) + vy * cos(th)) * dt;
@@ -132,7 +141,13 @@ int main(int argc, char **argv)
 		x += delta_x;
 		y += delta_y;
 		th += delta_th;
-		odom_quat = tf::createQuaternionMsgFromYaw(th);
+
+		q.setRPY(0, 0, th);
+		odom_quat.x = q.x();
+		odom_quat.y = q.y();
+		odom_quat.z = q.z();
+		odom_quat.w = q.w();
+
 		odom_trans.header.stamp = current_time;
 		odom_trans.header.frame_id = "odom";
 		odom_trans.child_frame_id = "base_footprint";
@@ -144,7 +159,7 @@ int main(int argc, char **argv)
 		// odom_broadcaster.sendTransform(odom_trans);
 
 		/* publish the odometry message over ROS */
-		nav_msgs::Odometry odom;
+		nav_msgs::msg::Odometry odom;
 		odom.header.stamp = current_time;
 		odom.header.frame_id = "odom";
 		odom.child_frame_id = "base_footprint";
@@ -170,7 +185,7 @@ int main(int argc, char **argv)
                          0, 0, 0, 0, 1e6, 0,
                          0, 0, 0, 0, 0, 1e3};
 		/* publish the message */
-		odom_pub.publish(odom);
+		odom_pub->publish(odom);
 
 		encodom.header.stamp = current_time;
 		encodom.vx = vx;
@@ -182,7 +197,7 @@ int main(int argc, char **argv)
 		encodom.x = x;
 		encodom.y = y;
 		encodom.th = th;
-		encodom_pub.publish(encodom);
+		encodom_pub->publish(encodom);
 
 		/* updata last time */
 		last_time = current_time;
@@ -199,7 +214,7 @@ int main(int argc, char **argv)
 	* @param mf_last(motor_feedback) motor feedback message
  	* @return none.
 **	**/
-void motor_feedback_callback(const motor_feedback_msgs::motor_feedback& motor_info)
+void motor_feedback_callback(const motor_feedback_msgs::msg::MotorFeedback& motor_info)
 {
 	// double Lacctemp,Racctemp;
 
@@ -209,19 +224,19 @@ void motor_feedback_callback(const motor_feedback_msgs::motor_feedback& motor_in
 	// 		AvelocityL_M = motor_info.AvelocityL*enc_to_mm*mm_to_M;
 	// else 	AvelocityL_M = mf_last.AvelocityL*enc_to_mm*mm_to_M;
 
-	encodom.AvelocityL = motor_info.AvelocityL;
-	encodom.AvelocityR = motor_info.AvelocityR;
+	encodom.a_velocity_l = motor_info.a_velocity_l;
+	encodom.a_velocity_r = motor_info.a_velocity_r;
 
-	AvelocityL_M = motor_info.AvelocityL*enc_to_mm*mm_to_M;
-	AvelocityR_M = motor_info.AvelocityR*enc_to_mm*mm_to_M;
+	AvelocityL_M = motor_info.a_velocity_l*enc_to_mm*mm_to_M;
+	AvelocityR_M = motor_info.a_velocity_r*enc_to_mm*mm_to_M;
 
 	AvelocityL_lpf = (low_pass_filter*AvelocityL_M)+((1.0-low_pass_filter)*AvelocityL_lpf);
 	AvelocityR_lpf = (low_pass_filter*AvelocityR_M)+((1.0-low_pass_filter)*AvelocityR_lpf);
 
-	encodom.AvelocityL_M = AvelocityL_M;
-	encodom.AvelocityR_M = AvelocityR_M;
-	encodom.AvelocityL_lpf = AvelocityL_lpf;
-	encodom.AvelocityR_lpf = AvelocityR_lpf;
+	encodom.a_velocity_l_m = AvelocityL_M;
+	encodom.a_velocity_r_m = AvelocityR_M;
+	encodom.a_velocity_l_lpf = AvelocityL_lpf;
+	encodom.a_velocity_r_lpf = AvelocityR_lpf;
 
 	vx = ((AvelocityL_M+AvelocityR_M)/2);
 	vth = ((AvelocityR_M-AvelocityL_M)/AMR_width);
@@ -235,7 +250,7 @@ void motor_feedback_callback(const motor_feedback_msgs::motor_feedback& motor_in
 **	**/
 void motor_info_init(void)
 {
-	current_time = ros::Time::now();
+	current_time = init_time;
 	last_time = current_time;
 	vx = 0;
 	vy = 0;
@@ -250,13 +265,14 @@ void motor_info_init(void)
 	mf_last.header.frame_id = "motor_feedback";
 	// mf_last.header.seq = 0;
 	mf_last.header.stamp = current_time;
-	mf_last.positionL = 0;
-	mf_last.positionR = 0;
-	mf_last.AvelocityL = 0;
-	mf_last.AvelocityR = 0;
-	mf_last.DvelocityL = 0;
-	mf_last.DvelocityR = 0;
+	mf_last.position_l = 0;
+	mf_last.position_r = 0;
+	mf_last.a_velocity_l = 0;
+	mf_last.a_velocity_r = 0;
+	mf_last.d_velocity_l = 0;
+	mf_last.d_velocity_r = 0;
 }
+
 
 /* Program End */
 /* ---------------------------------------------------------*/

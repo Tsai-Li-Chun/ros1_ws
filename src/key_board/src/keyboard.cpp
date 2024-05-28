@@ -4,10 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/poll.h>
+#include <chrono>
+#include <functional>
+#include <memory>
 
 #include <boost/thread/thread.hpp>
-#include <ros/ros.h>
-#include <geometry_msgs/Twist.h>
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 
 #define KEYCODE_W 0x77
 #define KEYCODE_A 0x61
@@ -19,65 +22,92 @@
 #define KEYCODE_S_CAP 0x53
 #define KEYCODE_W_CAP 0x57
 
+using namespace std::chrono_literals;
+
 int kfd = 0;
 struct termios cooked, raw;
 bool done;
 
-class SmartCarKeyboardTeleopNode
+
+class SmartCarKeyboardTeleopNode : public rclcpp::Node
 {
-    private:
+    public:
+        SmartCarKeyboardTeleopNode()
+        : Node("SmartCarKeyboardTeleopNode")
+        {
+            this->declare_parameter<double>("walk_vel", 0.5);
+            this->declare_parameter<double>("run_vel", 1.0);
+            this->declare_parameter<double>("yaw_rate", 0.4);
+            this->declare_parameter<double>("yaw_rate_run", 0.8);
+
+            pub_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 100);
+        
+            timer_ = this->create_wall_timer(1s, std::bind(&SmartCarKeyboardTeleopNode::timer_callback, this));
+        }
+                
         double walk_vel_;
         double run_vel_;
         double yaw_rate_;
         double yaw_rate_run_;
-
-        geometry_msgs::Twist cmdvel_;
-        ros::NodeHandle n_;
-        ros::Publisher pub_;
-
-    public:
-        SmartCarKeyboardTeleopNode()
-        {
-            pub_ = n_.advertise<geometry_msgs::Twist>("cmd_vel", 100);
-
-            ros::NodeHandle n_private("~");
-            n_private.param("walk_vel", walk_vel_, 0.5);
-            n_private.param("run_vel", run_vel_, 1.0);
-            n_private.param("yaw_rate", yaw_rate_, 0.4);
-            n_private.param("yaw_rate_run", yaw_rate_run_, 0.8);
-        }
-
-        ~SmartCarKeyboardTeleopNode() {  }
+        geometry_msgs::msg::Twist cmdvel_;
+        void timer_callback();
+        //~SmartCarKeyboardTeleopNode() {  }
         void keyboardLoop();
-
-        void stopRobot()
-        {
-            cmdvel_.linear.x = 0.0;
-            cmdvel_.angular.z = 0.0;
-            pub_.publish(cmdvel_);
-        }
+        void stopRobot();
+    private:
+        rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_;
+        rclcpp::TimerBase::SharedPtr timer_;
 };
-SmartCarKeyboardTeleopNode* tbk;
+
+//SmartCarKeyboardTeleopNode* tbk;
 
 int main(int argc, char** argv)
 {
-    ros::init(argc,argv,"tbk", ros::init_options::AnonymousName | ros::init_options::NoSigintHandler);
-    SmartCarKeyboardTeleopNode tbk;
+    //rclcpp::init(argc,argv,"tbk", rclcpp::init_options::AnonymousName | rclcpp::init_options::NoSigintHandler);
+    rclcpp::init(argc, argv);
+    //SmartCarKeyboardTeleopNode tbk;
 
-    boost::thread t = boost::thread(boost::bind(&SmartCarKeyboardTeleopNode::keyboardLoop, &tbk));
-
-    ros::spin();
-    t.interrupt();
-    t.join();
-    tbk.stopRobot();
-    tcsetattr(kfd, TCSANOW, &cooked);
-
+    //boost::thread t = boost::thread(boost::bind(&SmartCarKeyboardTeleopNode::keyboardLoop, &tbk));
+    
+    rclcpp::spin(std::make_shared<SmartCarKeyboardTeleopNode>());
+    //t.interrupt();
+    //t.join();
+    //tbk.stopRobot();
+    //tcsetattr(kfd, TCSANOW, &cooked);
+    rclcpp::shutdown();
     return(0);
+}
+
+void SmartCarKeyboardTeleopNode::timer_callback()
+{
+    timer_->cancel();
+    
+    walk_vel_ = this->get_parameter("walk_vel").get_value<double>();
+    run_vel_ = this->get_parameter("run_vel").get_value<double>();
+    yaw_rate_ = this->get_parameter("yaw_rate").get_value<double>();
+    yaw_rate_run_ = this->get_parameter("yaw_rate_run").get_value<double>();
+
+    keyboardLoop();
+    stopRobot();
+    tcsetattr(kfd, TCSANOW, &cooked);
+}
+
+void SmartCarKeyboardTeleopNode::stopRobot()
+{
+    cmdvel_.linear.x = 0.0;
+    cmdvel_.angular.z = 0.0;
+    pub_->publish(cmdvel_);
 }
 
 void SmartCarKeyboardTeleopNode::keyboardLoop()
 {
     char c;
+
+    walk_vel_ = this->get_parameter("walk_vel").get_value<double>();
+    run_vel_ = this->get_parameter("run_vel").get_value<double>();
+    yaw_rate_ = this->get_parameter("yaw_rate").get_value<double>();
+    yaw_rate_run_ = this->get_parameter("yaw_rate_run").get_value<double>();
+
     double max_tv = walk_vel_;
     double max_rv = yaw_rate_;
     bool dirty = false;
@@ -93,9 +123,9 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
     raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
 
-    ROS_INFO("Reading from keyboard");
-    ROS_INFO("Use WASD keys to control the robot");
-    ROS_INFO("Press Shift to move faster");
+    RCLCPP_INFO(this->get_logger(),"Reading from keyboard");
+    RCLCPP_INFO(this->get_logger(),"Use WASD keys to control the robot");
+    RCLCPP_INFO(this->get_logger(),"Press Shift to move faster");
 
     struct pollfd ufd;
     ufd.fd = kfd;
@@ -103,7 +133,7 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
 
     for(;;)
     {
-        boost::this_thread::interruption_point();
+        //boost::this_thread::interruption_point();
 
         // get the next event from the keyboard
         int num;
@@ -192,6 +222,8 @@ void SmartCarKeyboardTeleopNode::keyboardLoop()
         }
         cmdvel_.linear.x = (speed*max_tv);
         cmdvel_.angular.z = (turn*max_rv);
-        pub_.publish(cmdvel_);
+        RCLCPP_INFO(this->get_logger(),"linear_x = %f",cmdvel_.linear.x);
+        RCLCPP_INFO(this->get_logger(),"angular_z = %f",cmdvel_.angular.z);
+        pub_->publish(cmdvel_);        
     }
 }

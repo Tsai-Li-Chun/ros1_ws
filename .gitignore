@@ -1,5 +1,7 @@
 build/**
 devel/**
+install/**
+log/**
 carto_ws/abseil-cpp/**
 carto_ws/build_isolated/**
 carto_ws/devel_isolated/**

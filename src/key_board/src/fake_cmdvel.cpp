@@ -11,8 +11,8 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
-#include "ros/ros.h"
-#include "geometry_msgs/Twist.h"
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
 /* User Includes End */
 
 /* namespace ------------------------------------------------*/
@@ -39,7 +39,7 @@
 /* Variables Begin */
 
 double enlarge=0;
-geometry_msgs::Twist cmd_vel;
+geometry_msgs::msg::Twist cmd_vel;
 
 /* Variables End */
 
@@ -64,17 +64,20 @@ int main(int argc,char **argv)
 {
     bool dir=false;
 
-    ros::init(argc,argv,"fake_cmdvel");
-    ros::NodeHandle n;
+    //ros::init(argc,argv,"fake_cmdvel");
+    //ros::NodeHandle n;
+    rclcpp::init(argc, argv);
+    auto node = rclcpp::Node::make_shared("fake_cmdvel");
 
-    ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>("cmd_vel",1);
+    //ros::Publisher pub_cmd_vel = n.advertise<geometry_msgs::Twist>("cmd_vel",1);
+    auto pub_cmd_vel = node->create_publisher<geometry_msgs::msg::Twist>("cmd_vel",1);
 
-    ros::Rate loop_rate(10);
+    rclcpp::Rate loop_rate(10);
 
     cmd_vel.linear.x = 0;
     cmd_vel.angular.z = 0;
 
-    while( ros::ok() )
+    while( rclcpp::ok() )
     {
         if(!dir)
         {
@@ -87,8 +90,9 @@ int main(int argc,char **argv)
             if(cmd_vel.angular.z <= -1.0) dir=false;           
         }
 
-        pub_cmd_vel.publish(cmd_vel);
-        ros::spinOnce();
+        pub_cmd_vel->publish(cmd_vel);
+        //ros::spinOnce();
+        rclcpp::spin_some(node);
         loop_rate.sleep();
     }
 

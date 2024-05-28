@@ -16,7 +16,7 @@
 /* System Includes End */
 /* User Includes --------------------------------------------*/
 /* User Includes Begin */
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include "modbus/modbus.h"
 #include "register_address_table.hpp"
 /* User Includes End */
