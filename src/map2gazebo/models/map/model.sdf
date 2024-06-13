@@ -17,7 +17,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://map/meshes/map.stl</uri>
+            <uri>model://map/meshes/231128_2_delta_8f.stl</uri>
           </mesh>
         </geometry>
       </collision>
@@ -25,7 +25,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <uri>model://map/meshes/map.stl</uri>
+            <uri>model://map/meshes/231128_2_delta_8f.stl</uri>
           </mesh>
         </geometry>
       </visual>

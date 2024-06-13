@@ -1,7 +1,0 @@
-image: /home/deltaagv/ros1_ws/src/map2gazebo-noetic-devel/map/231128_2_delta_8f.pgm
-resolution: 0.030000
-origin: [-15.968483, -12.733083, 0.000000]
-negate: 0
-occupied_thresh: 0.65
-free_thresh: 0.196
-

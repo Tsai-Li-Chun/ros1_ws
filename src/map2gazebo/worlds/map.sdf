@@ -10,5 +10,8 @@
     <include>
       <uri>model://map</uri>
     </include>
+    <include>
+      <uri>model://delta_amr</uri>
+    </include>
   </world>
 </sdf>
